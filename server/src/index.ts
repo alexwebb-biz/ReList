@@ -109,7 +109,8 @@ app.use('/api/telegram', telegramRoutes);
 
 // Serve static files from Vite build in production
 if (process.env.NODE_ENV === 'production') {
-  const distPath = path.join(__dirname, '../../..', 'dist');
+  // Use process.cwd() since tsx runs from project root
+  const distPath = path.join(process.cwd(), 'dist');
   app.use(express.static(distPath));
 
   // Handle client-side routing - serve index.html for non-API routes
