@@ -113,7 +113,8 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(distPath));
 
   // Handle client-side routing - serve index.html for non-API routes
-  app.get('*', (req, res, next) => {
+  // Express 5 uses {*path} syntax instead of *
+  app.get('{*path}', (req, res, next) => {
     if (req.path.startsWith('/api')) {
       return next();
     }
