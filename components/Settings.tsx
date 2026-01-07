@@ -67,12 +67,14 @@ export const Settings: React.FC = () => {
     }
   }, [user]);
 
-  const loadSubscription = async () => {
+  const loadSubscription = async (refreshAuth = false) => {
     const response = await api.get<SubscriptionInfo>('/stripe/subscription');
     if (response.success && response.data) {
       setSubscription(response.data);
-      // Also refresh user data to update the sidebar plan display
-      checkAuth();
+      // Only refresh auth when explicitly requested (e.g., after checkout)
+      if (refreshAuth) {
+        checkAuth();
+      }
     }
   };
 
@@ -80,10 +82,8 @@ export const Settings: React.FC = () => {
     setIsLoading(true);
     // Sync subscription from Stripe (useful when webhooks aren't working)
     await api.post('/stripe/sync', {});
-    // Reload subscription data
-    await loadSubscription();
-    // Refresh user data to update sidebar
-    await checkAuth();
+    // Reload subscription data and refresh auth
+    await loadSubscription(true);
     setIsLoading(false);
     setMessage({ type: 'success', text: 'Subscription synced successfully!' });
   };

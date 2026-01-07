@@ -60,9 +60,12 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
     sendSuccess(res, alert, 201);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
-      sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
-      return;
+      // Zod v4 uses 'issues'
+      const firstError = error.issues[0];
+      if (firstError) {
+        sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path?.[0] as string);
+        return;
+      }
     }
     sendError(res, 'CREATE_ERROR', error instanceof Error ? error.message : 'Failed to create alert', 500);
   }
@@ -101,9 +104,11 @@ router.patch('/:id', async (req: AuthenticatedRequest, res: Response) => {
     sendSuccess(res, alert);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
-      sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
-      return;
+      const firstError = error.issues[0];
+      if (firstError) {
+        sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path?.[0] as string);
+        return;
+      }
     }
     if (error instanceof Error && error.message === 'Alert not found') {
       sendError(res, 'NOT_FOUND', error.message, 404);
