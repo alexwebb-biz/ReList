@@ -3,6 +3,11 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config({ path: '.env.local' });
@@ -102,13 +107,27 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/telegram', telegramRoutes);
 
-// 404 handler
-app.use((_req, res) => {
+// Serve static files from Vite build in production
+if (process.env.NODE_ENV === 'production') {
+  const distPath = path.join(__dirname, '../../..', 'dist');
+  app.use(express.static(distPath));
+
+  // Handle client-side routing - serve index.html for non-API routes
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+// 404 handler for API routes
+app.use('/api', (_req, res) => {
   res.status(404).json({
     success: false,
     error: {
       code: 'NOT_FOUND',
-      message: 'Endpoint not found',
+      message: 'API endpoint not found',
     },
     meta: {
       timestamp: new Date().toISOString(),
