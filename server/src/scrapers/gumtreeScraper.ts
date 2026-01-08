@@ -19,18 +19,15 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Build Gumtree search URL
 const buildSearchUrl = (config: AlertConfig): string => {
+  // Match exact Gumtree URL format from browser
   const query = encodeURIComponent(config.keywords.join(' '));
-  let url = `${GUMTREE_BASE_URL}?search_query=${query}&sort=date&search_category=all`;
+  let url = `${GUMTREE_BASE_URL}?search_category=all&q=${query}&search_location=United%20Kingdom`;
 
   if (config.price_min) {
     url += `&min_price=${config.price_min}`;
   }
   if (config.price_max) {
     url += `&max_price=${config.price_max}`;
-  }
-  if (config.location_postcode) {
-    url += `&search_location=${encodeURIComponent(config.location_postcode)}`;
-    url += `&distance=${config.radius_miles}`;
   }
 
   return url;
@@ -195,6 +192,7 @@ export const scrapeGumtree = async (config: AlertConfig): Promise<ScrapedItem[]>
 
     const url = buildSearchUrl(config);
     console.log(`Scraping Gumtree: ${config.keywords.join(' ')}`);
+    console.log(`Gumtree URL: ${url}`);
 
     const response = await fetchWithRetry(url);
 
@@ -204,6 +202,13 @@ export const scrapeGumtree = async (config: AlertConfig): Promise<ScrapedItem[]>
     }
 
     const html = await response.text();
+
+    // Debug: log a snippet of the HTML to see what we're getting
+    console.log(`Gumtree HTML length: ${html.length} chars`);
+    if (html.length < 5000) {
+      console.log(`Gumtree HTML (short response - might be blocked):\n${html.substring(0, 1000)}`);
+    }
+
     const items = parseListings(html);
 
     console.log(`Found ${items.length} items on Gumtree`);

@@ -30,8 +30,6 @@ export interface AlertConfig {
   price_min: number | null;
   price_max: number | null;
   condition: string[] | null;
-  radius_miles: number;
-  location_postcode: string | null;
 }
 
 // Main function to process an alert
@@ -61,8 +59,6 @@ export const processAlert = async (alertId: string, userId: string): Promise<Scr
     price_min: alert.price_min,
     price_max: alert.price_max,
     condition: alert.condition,
-    radius_miles: alert.radius_miles,
-    location_postcode: alert.location_postcode,
   };
 
   // Scrape each platform in parallel
@@ -134,34 +130,58 @@ export const processAlert = async (alertId: string, userId: string): Promise<Scr
 
 // Filter items based on alert configuration
 const filterItems = (items: ScrapedItem[], config: AlertConfig): ScrapedItem[] => {
-  return items.filter((item) => {
+  console.log(`Filtering ${items.length} items with config:`, {
+    keywords: config.keywords,
+    price_min: config.price_min,
+    price_max: config.price_max,
+    exclude_keywords: config.exclude_keywords,
+  });
+
+  const filtered = items.filter((item) => {
     const titleLower = item.title.toLowerCase();
     const descLower = (item.description || '').toLowerCase();
     const combinedText = `${titleLower} ${descLower}`;
 
-    // KEYWORD MATCHING - item must contain at least one keyword
-    // This filters out sponsored/recommended items that don't match the search
+    // KEYWORD MATCHING - item must contain ALL keywords
+    // For numeric keywords (like "15"), use word boundary to avoid "15" matching "95"
+    // For text keywords (like "iphone"), use simple contains to match "iPhone15ProMax"
     if (config.keywords && config.keywords.length > 0) {
-      const hasKeywordMatch = config.keywords.some((keyword) => {
-        const keywordLower = keyword.toLowerCase();
-        // Split multi-word keywords and check if all words are present
-        const words = keywordLower.split(/\s+/);
-        return words.every(word => combinedText.includes(word));
+      const allKeywordsMatch = config.keywords.every((keyword) => {
+        const keywordLower = keyword.toLowerCase().trim();
+
+        // Check if keyword is purely numeric
+        if (/^\d+$/.test(keywordLower)) {
+          // For numbers, use word boundary matching
+          // This ensures "15" matches "iphone 15" but not "airmax 95"
+          const pattern = new RegExp(`(^|[^0-9])${keywordLower}([^0-9]|$)`);
+          return pattern.test(combinedText);
+        }
+
+        // For text keywords, use simple contains matching
+        return combinedText.includes(keywordLower);
       });
 
-      if (!hasKeywordMatch) {
+      if (!allKeywordsMatch) {
+        console.log(`FILTERED OUT (keyword mismatch): "${item.title}" - keywords: ${config.keywords.join(', ')}`);
         return false;
       }
     }
 
     // Price filter
-    if (config.price_min && item.price < config.price_min) return false;
-    if (config.price_max && item.price > config.price_max) return false;
+    if (config.price_min && item.price < config.price_min) {
+      console.log(`FILTERED OUT (price too low): "${item.title}" - price: ${item.price}, min: ${config.price_min}`);
+      return false;
+    }
+    if (config.price_max && item.price > config.price_max) {
+      console.log(`FILTERED OUT (price too high): "${item.title}" - price: ${item.price}, max: ${config.price_max}`);
+      return false;
+    }
 
     // Exclude keywords filter
     if (config.exclude_keywords && config.exclude_keywords.length > 0) {
       for (const keyword of config.exclude_keywords) {
         if (titleLower.includes(keyword.toLowerCase()) || descLower.includes(keyword.toLowerCase())) {
+          console.log(`FILTERED OUT (exclude keyword): "${item.title}" - matched: ${keyword}`);
           return false;
         }
       }
@@ -173,11 +193,18 @@ const filterItems = (items: ScrapedItem[], config: AlertConfig): ScrapedItem[] =
       const matchesCondition = config.condition.some((c) =>
         itemCondition.includes(c.toLowerCase())
       );
-      if (!matchesCondition) return false;
+      if (!matchesCondition) {
+        console.log(`FILTERED OUT (condition): "${item.title}" - condition: ${item.condition}`);
+        return false;
+      }
     }
 
+    console.log(`PASSED FILTER: "${item.title}" - price: ${item.price}`);
     return true;
   });
+
+  console.log(`Filter result: ${filtered.length} of ${items.length} items passed`);
+  return filtered;
 };
 
 // Check for duplicates in existing results

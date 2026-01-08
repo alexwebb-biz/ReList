@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAlertsStore } from '../stores/alertsStore';
 import { CreateAlertData } from '../lib/api';
-import { Bell, Trash2, Plus, Filter, Search, Pause, Play, Loader2, Zap, MapPin, X } from 'lucide-react';
+import { Bell, Trash2, Plus, Filter, Search, Pause, Play, Loader2, Zap, X } from 'lucide-react';
 
 const PLATFORMS = ['eBay', 'Depop', 'Vinted', 'Facebook Marketplace', 'Gumtree', 'Shpock'];
-const RADIUS_OPTIONS = [5, 10, 25, 50, 100, 200];
 
 export const AlertsManager: React.FC = () => {
   const {
@@ -28,10 +27,8 @@ export const AlertsManager: React.FC = () => {
     keywords: [],
     exclude_keywords: [],
     price_min: 0,
-    price_max: 100,
+    price_max: 10000,
     platforms: [],
-    location_postcode: '',
-    radius_miles: 25,
   });
   const [keywordInput, setKeywordInput] = useState('');
   const [excludeKeywordInput, setExcludeKeywordInput] = useState('');
@@ -70,8 +67,6 @@ export const AlertsManager: React.FC = () => {
       price_min: newAlert.price_min,
       price_max: newAlert.price_max,
       exclude_keywords: newAlert.exclude_keywords,
-      location_postcode: newAlert.location_postcode || undefined,
-      radius_miles: newAlert.radius_miles,
     };
 
     const result = await createAlert(alertData);
@@ -82,10 +77,8 @@ export const AlertsManager: React.FC = () => {
         keywords: [],
         exclude_keywords: [],
         price_min: 0,
-        price_max: 100,
+        price_max: 10000,
         platforms: [],
-        location_postcode: '',
-        radius_miles: 25,
       });
       setKeywordInput('');
       setExcludeKeywordInput('');
@@ -268,35 +261,6 @@ export const AlertsManager: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    <MapPin size={14} className="inline mr-1" />
-                    Postcode
-                  </label>
-                  <input
-                    type="text"
-                    value={newAlert.location_postcode}
-                    onChange={(e) => setNewAlert({...newAlert, location_postcode: e.target.value})}
-                    className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
-                    placeholder="e.g. SW1A 1AA"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Radius</label>
-                  <select
-                    value={newAlert.radius_miles}
-                    onChange={(e) => setNewAlert({...newAlert, radius_miles: Number(e.target.value)})}
-                    className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm md:text-base"
-                  >
-                    {RADIUS_OPTIONS.map((r) => (
-                      <option key={r} value={r}>{r} mi</option>
-                    ))}
-                    <option value={0}>Nationwide</option>
-                  </select>
-                </div>
-              </div>
-              <p className="text-xs text-slate-400">Location filtering is supported on eBay, Gumtree, and Facebook Marketplace</p>
             </div>
 
             <div>

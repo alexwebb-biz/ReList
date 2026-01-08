@@ -333,8 +333,6 @@ export interface Alert {
   price_min: number | null;
   price_max: number | null;
   condition: string[] | null;
-  radius_miles: number;
-  location_postcode: string | null;
   check_frequency_minutes: number;
   is_active: boolean;
   notification_channels: string[];
@@ -352,8 +350,6 @@ export interface CreateAlertData {
   price_min?: number;
   price_max?: number;
   condition?: string[];
-  radius_miles?: number;
-  location_postcode?: string;
   check_frequency_minutes?: number;
   notification_channels?: string[];
 }

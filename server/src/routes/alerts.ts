@@ -22,8 +22,6 @@ const createAlertSchema = z.object({
   price_min: z.number().min(0).optional(),
   price_max: z.number().min(0).optional(),
   condition: z.array(z.string()).optional(),
-  radius_miles: z.number().min(1).max(100).optional(),
-  location_postcode: z.string().optional(),
   check_frequency_minutes: z.number().min(15).max(1440).optional(),
   notification_channels: z.array(z.string()).optional(),
 });
