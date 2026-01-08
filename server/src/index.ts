@@ -23,6 +23,7 @@ import uploadRoutes from './routes/upload.js';
 import notificationsRoutes from './routes/notifications.js';
 import stripeRoutes from './routes/stripe.js';
 import telegramRoutes from './routes/telegram.js';
+import ebayRoutes from './routes/ebay.js';
 
 // Import services
 import { startScheduler } from './services/schedulerService.js';
@@ -106,6 +107,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/telegram', telegramRoutes);
+app.use('/api/ebay', ebayRoutes);
 
 // Serve static files from Vite build in production
 if (process.env.NODE_ENV === 'production') {

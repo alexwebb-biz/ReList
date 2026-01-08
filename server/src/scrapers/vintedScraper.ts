@@ -59,11 +59,12 @@ const initializeSession = async (): Promise<{ accessToken: string | null; cookie
 };
 
 // Build Vinted API request
-const buildSearchParams = (config: AlertConfig): URLSearchParams => {
+const buildSearchParams = (config: AlertConfig, page: number = 1): URLSearchParams => {
   const params = new URLSearchParams();
   params.set('search_text', config.keywords.join(' '));
   params.set('order', 'newest_first');
-  params.set('per_page', '20'); // Stay under rate limits (~20 requests per 4-5 minutes)
+  params.set('per_page', '96'); // Max allowed per page
+  params.set('page', page.toString());
 
   if (config.price_min) {
     params.set('price_from', config.price_min.toString());
@@ -201,8 +202,42 @@ const fetchWithRetry = async (
   return null;
 };
 
-// Main scrape function
+// Fetch a single page of results
+const fetchPage = async (
+  config: AlertConfig,
+  page: number,
+  session: { accessToken: string | null; cookies: string }
+): Promise<ScrapedItem[]> => {
+  const params = buildSearchParams(config, page);
+  const url = `${VINTED_API_URL}?${params.toString()}`;
+
+  const headers: Record<string, string> = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json',
+    'Accept-Language': 'en-GB,en;q=0.9',
+    'X-Requested-With': 'XMLHttpRequest',
+    'Cookie': session.cookies,
+  };
+
+  if (session.accessToken) {
+    headers['Authorization'] = `Bearer ${session.accessToken}`;
+  }
+
+  const response = await fetchWithRetry(url, headers);
+
+  if (!response || !response.ok) {
+    return [];
+  }
+
+  const data = await response.json();
+  return parseResponse(data);
+};
+
+// Main scrape function - fetches multiple pages
 export const scrapeVinted = async (config: AlertConfig): Promise<ScrapedItem[]> => {
+  const MAX_PAGES = 3; // Fetch up to 3 pages (288 items max)
+  const PAGE_DELAY = 1500; // 1.5s delay between pages to avoid rate limits
+
   try {
     // Initialize session first
     const session = await initializeSession();
@@ -211,41 +246,42 @@ export const scrapeVinted = async (config: AlertConfig): Promise<ScrapedItem[]> 
       return [];
     }
 
-    const params = buildSearchParams(config);
-    const url = `${VINTED_API_URL}?${params.toString()}`;
     console.log(`Scraping Vinted: ${config.keywords.join(' ')}`);
 
-    // Build headers with session cookies
-    const headers: Record<string, string> = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'application/json',
-      'Accept-Language': 'en-GB,en;q=0.9',
-      'X-Requested-With': 'XMLHttpRequest',
-      'Cookie': session.cookies,
-    };
+    const allItems: ScrapedItem[] = [];
+    const seenIds = new Set<string>();
 
-    // Add authorization header if we have a token
-    if (session.accessToken) {
-      headers['Authorization'] = `Bearer ${session.accessToken}`;
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      const items = await fetchPage(config, page, session);
+
+      if (items.length === 0) {
+        // No more results
+        break;
+      }
+
+      // Deduplicate within this scrape
+      for (const item of items) {
+        if (!seenIds.has(item.external_id)) {
+          seenIds.add(item.external_id);
+          allItems.push(item);
+        }
+      }
+
+      console.log(`Vinted page ${page}: ${items.length} items (total: ${allItems.length})`);
+
+      // If we got fewer items than per_page, there's no next page
+      if (items.length < 96) {
+        break;
+      }
+
+      // Delay before next page (if not last page)
+      if (page < MAX_PAGES) {
+        await new Promise(r => setTimeout(r, PAGE_DELAY));
+      }
     }
 
-    const response = await fetchWithRetry(url, headers);
-
-    if (!response) {
-      console.log('Vinted: No response after retries');
-      return [];
-    }
-
-    if (!response.ok) {
-      console.log(`Vinted API returned ${response.status} - may need session cookie refresh`);
-      return [];
-    }
-
-    const data = await response.json();
-    const items = parseResponse(data);
-
-    console.log(`Found ${items.length} items on Vinted`);
-    return items;
+    console.log(`Found ${allItems.length} total items on Vinted`);
+    return allItems;
   } catch (error) {
     console.error('Vinted scraping error:', error);
     return [];

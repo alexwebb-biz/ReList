@@ -2,8 +2,15 @@ import { AlertConfig, ScrapedItem } from '../services/scraperService.js';
 
 // eBay Browse API - 5,000 free calls per day
 // Register at developer.ebay.com to get credentials
-const EBAY_API_URL = 'https://api.ebay.com/buy/browse/v1/item_summary/search';
-const EBAY_AUTH_URL = 'https://api.ebay.com/identity/v1/oauth2/token';
+
+// Determine if using sandbox or production based on environment
+const IS_SANDBOX = process.env.EBAY_ENV === 'SANDBOX';
+const EBAY_API_URL = IS_SANDBOX
+  ? 'https://api.sandbox.ebay.com/buy/browse/v1/item_summary/search'
+  : 'https://api.ebay.com/buy/browse/v1/item_summary/search';
+const EBAY_AUTH_URL = IS_SANDBOX
+  ? 'https://api.sandbox.ebay.com/identity/v1/oauth2/token'
+  : 'https://api.ebay.com/identity/v1/oauth2/token';
 
 // Cache token with expiry
 let cachedToken: { token: string; expiresAt: number } | null = null;
@@ -26,6 +33,8 @@ const getAccessToken = async (): Promise<string | null> => {
   try {
     const credentials = Buffer.from(`${appId}:${certId}`).toString('base64');
 
+    console.log(`Authenticating with eBay ${IS_SANDBOX ? 'Sandbox' : 'Production'} API...`);
+
     const response = await fetch(EBAY_AUTH_URL, {
       method: 'POST',
       headers: {
@@ -36,16 +45,25 @@ const getAccessToken = async (): Promise<string | null> => {
     });
 
     if (!response.ok) {
-      console.error('eBay auth failed:', response.status);
+      const errorText = await response.text();
+      console.error('eBay auth failed:', response.status, errorText);
       return null;
     }
 
     const data = await response.json();
 
+    if (!data.access_token) {
+      console.error('eBay auth response missing access_token:', data);
+      return null;
+    }
+
+    console.log('eBay authentication successful!');
+    console.log('Token expires in:', data.expires_in, 'seconds');
+
     // Cache token (expires in ~2 hours, refresh 5 min early)
     cachedToken = {
       token: data.access_token,
-      expiresAt: Date.now() + (data.expires_in - 300) * 1000,
+      expiresAt: Date.now() + ((data.expires_in || 7200) - 300) * 1000,
     };
 
     return data.access_token;
@@ -56,10 +74,11 @@ const getAccessToken = async (): Promise<string | null> => {
 };
 
 // Build API search parameters
-const buildSearchParams = (config: AlertConfig): URLSearchParams => {
+const buildSearchParams = (config: AlertConfig, offset: number = 0): URLSearchParams => {
   const params = new URLSearchParams();
   params.set('q', config.keywords.join(' '));
-  params.set('limit', '50');
+  params.set('limit', '200'); // Max allowed per request
+  params.set('offset', offset.toString());
   params.set('sort', 'newlyListed');
 
   // Build filter string
@@ -138,8 +157,41 @@ const parseApiResponse = (data: any): ScrapedItem[] => {
   return items;
 };
 
-// Main scrape function using Browse API
+// Fetch a single page of results
+const fetchPage = async (
+  config: AlertConfig,
+  offset: number,
+  token: string
+): Promise<{ items: ScrapedItem[]; total: number }> => {
+  const params = buildSearchParams(config, offset);
+  const url = `${EBAY_API_URL}?${params.toString()}`;
+
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'X-EBAY-C-MARKETPLACE-ID': 'EBAY_GB', // Critical for UK results
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`eBay API returned ${response.status}:`, errorText);
+    return { items: [], total: 0 };
+  }
+
+  const data = await response.json();
+  const items = parseApiResponse(data);
+  const total = data.total || 0;
+
+  return { items, total };
+};
+
+// Main scrape function using Browse API - fetches multiple pages if needed
 export const scrapeEbay = async (config: AlertConfig): Promise<ScrapedItem[]> => {
+  const MAX_ITEMS = 400; // Get up to 400 items (2 API calls)
+  const ITEMS_PER_PAGE = 200;
+
   try {
     const token = await getAccessToken();
 
@@ -148,30 +200,50 @@ export const scrapeEbay = async (config: AlertConfig): Promise<ScrapedItem[]> =>
       return [];
     }
 
-    const params = buildSearchParams(config);
-    const url = `${EBAY_API_URL}?${params.toString()}`;
-
     console.log(`Scraping eBay via API: ${config.keywords.join(' ')}`);
 
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'X-EBAY-C-MARKETPLACE-ID': 'EBAY_GB', // Critical for UK results
-        'Content-Type': 'application/json',
-      },
-    });
+    const allItems: ScrapedItem[] = [];
+    const seenIds = new Set<string>();
+    let offset = 0;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`eBay API returned ${response.status}:`, errorText);
-      return [];
+    // Fetch first page
+    const firstPage = await fetchPage(config, 0, token);
+
+    for (const item of firstPage.items) {
+      if (!seenIds.has(item.external_id)) {
+        seenIds.add(item.external_id);
+        allItems.push(item);
+      }
     }
 
-    const data = await response.json();
-    const items = parseApiResponse(data);
+    console.log(`eBay page 1: ${firstPage.items.length} items (total available: ${firstPage.total})`);
 
-    console.log(`Found ${items.length} items on eBay`);
-    return items;
+    // Fetch more pages if there are more results and we haven't hit our limit
+    if (firstPage.total > ITEMS_PER_PAGE && allItems.length < MAX_ITEMS) {
+      offset = ITEMS_PER_PAGE;
+
+      while (offset < firstPage.total && allItems.length < MAX_ITEMS) {
+        // Small delay between API calls
+        await new Promise(r => setTimeout(r, 500));
+
+        const page = await fetchPage(config, offset, token);
+
+        if (page.items.length === 0) break;
+
+        for (const item of page.items) {
+          if (!seenIds.has(item.external_id) && allItems.length < MAX_ITEMS) {
+            seenIds.add(item.external_id);
+            allItems.push(item);
+          }
+        }
+
+        console.log(`eBay offset ${offset}: ${page.items.length} items (total: ${allItems.length})`);
+        offset += ITEMS_PER_PAGE;
+      }
+    }
+
+    console.log(`Found ${allItems.length} total items on eBay`);
+    return allItems;
   } catch (error) {
     console.error('eBay API error:', error);
     return [];

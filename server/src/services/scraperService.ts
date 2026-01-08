@@ -128,60 +128,97 @@ export const processAlert = async (alertId: string, userId: string): Promise<Scr
   return newItems;
 };
 
+// Normalize text for better keyword matching
+// Handles common variations like "I phone" → "iphone", removes extra spaces/punctuation
+const normalizeText = (text: string): string => {
+  return text
+    .toLowerCase()
+    // Common brand name fixes - handle spaces in brand names
+    .replace(/i\s*-?\s*phone/gi, 'iphone')
+    .replace(/i\s*-?\s*pad/gi, 'ipad')
+    .replace(/i\s*-?\s*watch/gi, 'iwatch')
+    .replace(/air\s*-?\s*pods/gi, 'airpods')
+    .replace(/play\s*-?\s*station/gi, 'playstation')
+    .replace(/x\s*-?\s*box/gi, 'xbox')
+    .replace(/mac\s*-?\s*book/gi, 'macbook')
+    .replace(/game\s*-?\s*boy/gi, 'gameboy')
+    .replace(/north\s*-?\s*face/gi, 'northface')
+    .replace(/air\s*-?\s*max/gi, 'airmax')
+    .replace(/air\s*-?\s*force/gi, 'airforce')
+    .replace(/new\s*-?\s*balance/gi, 'newbalance')
+    // Remove common separators that might break matching
+    .replace(/[-–—_]/g, ' ')
+    // Normalize multiple spaces to single
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+// Check if a keyword matches in the text
+// Uses smarter matching for numbers vs text
+const keywordMatches = (text: string, keyword: string): boolean => {
+  const normalizedText = normalizeText(text);
+  const normalizedKeyword = normalizeText(keyword);
+
+  // For purely numeric keywords, use word boundary matching
+  // This ensures "15" matches "iphone 15" but not "airmax 95" or "150"
+  if (/^\d+$/.test(normalizedKeyword)) {
+    // Match number with word boundaries (spaces, start/end, or non-digit chars)
+    const pattern = new RegExp(`(^|[^0-9])${normalizedKeyword}([^0-9]|$)`);
+    return pattern.test(normalizedText);
+  }
+
+  // For alphanumeric keywords like "15pro", check exact contains
+  if (/\d/.test(normalizedKeyword) && /[a-z]/i.test(normalizedKeyword)) {
+    // For mixed keywords, also try without spaces
+    const noSpaceText = normalizedText.replace(/\s/g, '');
+    const noSpaceKeyword = normalizedKeyword.replace(/\s/g, '');
+    return normalizedText.includes(normalizedKeyword) || noSpaceText.includes(noSpaceKeyword);
+  }
+
+  // For text keywords, check if it exists in the normalized text
+  return normalizedText.includes(normalizedKeyword);
+};
+
 // Filter items based on alert configuration
 const filterItems = (items: ScrapedItem[], config: AlertConfig): ScrapedItem[] => {
   console.log(`Filtering ${items.length} items with config:`, {
     keywords: config.keywords,
     price_min: config.price_min,
     price_max: config.price_max,
-    exclude_keywords: config.exclude_keywords,
+    exclude_keywords: config.exclude_keywords || [],
   });
 
+  let filteredOutCount = 0;
+
   const filtered = items.filter((item) => {
-    const titleLower = item.title.toLowerCase();
-    const descLower = (item.description || '').toLowerCase();
-    const combinedText = `${titleLower} ${descLower}`;
+    const combinedText = `${item.title} ${item.description || ''}`;
 
     // KEYWORD MATCHING - item must contain ALL keywords
-    // For numeric keywords (like "15"), use word boundary to avoid "15" matching "95"
-    // For text keywords (like "iphone"), use simple contains to match "iPhone15ProMax"
     if (config.keywords && config.keywords.length > 0) {
       const allKeywordsMatch = config.keywords.every((keyword) => {
-        const keywordLower = keyword.toLowerCase().trim();
-
-        // Check if keyword is purely numeric
-        if (/^\d+$/.test(keywordLower)) {
-          // For numbers, use word boundary matching
-          // This ensures "15" matches "iphone 15" but not "airmax 95"
-          const pattern = new RegExp(`(^|[^0-9])${keywordLower}([^0-9]|$)`);
-          return pattern.test(combinedText);
-        }
-
-        // For text keywords, use simple contains matching
-        return combinedText.includes(keywordLower);
+        return keywordMatches(combinedText, keyword);
       });
 
       if (!allKeywordsMatch) {
-        console.log(`FILTERED OUT (keyword mismatch): "${item.title}" - keywords: ${config.keywords.join(', ')}`);
+        filteredOutCount++;
         return false;
       }
     }
 
     // Price filter
     if (config.price_min && item.price < config.price_min) {
-      console.log(`FILTERED OUT (price too low): "${item.title}" - price: ${item.price}, min: ${config.price_min}`);
       return false;
     }
     if (config.price_max && item.price > config.price_max) {
-      console.log(`FILTERED OUT (price too high): "${item.title}" - price: ${item.price}, max: ${config.price_max}`);
       return false;
     }
 
-    // Exclude keywords filter
+    // Exclude keywords filter - check against normalized text
     if (config.exclude_keywords && config.exclude_keywords.length > 0) {
+      const normalizedCombined = normalizeText(combinedText);
       for (const keyword of config.exclude_keywords) {
-        if (titleLower.includes(keyword.toLowerCase()) || descLower.includes(keyword.toLowerCase())) {
-          console.log(`FILTERED OUT (exclude keyword): "${item.title}" - matched: ${keyword}`);
+        const normalizedExclude = normalizeText(keyword);
+        if (normalizedCombined.includes(normalizedExclude)) {
           return false;
         }
       }
@@ -194,16 +231,14 @@ const filterItems = (items: ScrapedItem[], config: AlertConfig): ScrapedItem[] =
         itemCondition.includes(c.toLowerCase())
       );
       if (!matchesCondition) {
-        console.log(`FILTERED OUT (condition): "${item.title}" - condition: ${item.condition}`);
         return false;
       }
     }
 
-    console.log(`PASSED FILTER: "${item.title}" - price: ${item.price}`);
     return true;
   });
 
-  console.log(`Filter result: ${filtered.length} of ${items.length} items passed`);
+  console.log(`Filter result: ${filtered.length} of ${items.length} items passed (${filteredOutCount} keyword mismatches)`);
   return filtered;
 };
 

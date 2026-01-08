@@ -18,10 +18,11 @@ const CONFIG = {
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Build Gumtree search URL
-const buildSearchUrl = (config: AlertConfig): string => {
+const buildSearchUrl = (config: AlertConfig, page: number = 1): string => {
   // Match exact Gumtree URL format from browser
   const query = encodeURIComponent(config.keywords.join(' '));
-  let url = `${GUMTREE_BASE_URL}?search_category=all&q=${query}&search_location=United%20Kingdom`;
+  // Sort by date (newest first) and add pagination
+  let url = `${GUMTREE_BASE_URL}?search_category=all&q=${query}&search_location=United%20Kingdom&sort=date&page=${page}`;
 
   if (config.price_min) {
     url += `&min_price=${config.price_min}`;
@@ -184,35 +185,78 @@ const fetchWithRetry = async (url: string, maxRetries = 3): Promise<Response> =>
   throw new Error('Max retries exceeded');
 };
 
-// Main scrape function
-export const scrapeGumtree = async (config: AlertConfig): Promise<ScrapedItem[]> => {
+// Fetch a single page of results
+const fetchPage = async (config: AlertConfig, page: number): Promise<ScrapedItem[]> => {
+  const url = buildSearchUrl(config, page);
+
   try {
-    // Add randomized delay before request (3-5 seconds)
-    await delay(CONFIG.baseDelay + Math.random() * CONFIG.randomDelay);
-
-    const url = buildSearchUrl(config);
-    console.log(`Scraping Gumtree: ${config.keywords.join(' ')}`);
-    console.log(`Gumtree URL: ${url}`);
-
     const response = await fetchWithRetry(url);
 
     if (!response.ok) {
-      console.error(`Gumtree returned ${response.status}`);
+      console.error(`Gumtree page ${page} returned ${response.status}`);
       return [];
     }
 
     const html = await response.text();
 
-    // Debug: log a snippet of the HTML to see what we're getting
-    console.log(`Gumtree HTML length: ${html.length} chars`);
+    // Check for blocked response
     if (html.length < 5000) {
-      console.log(`Gumtree HTML (short response - might be blocked):\n${html.substring(0, 1000)}`);
+      console.log(`Gumtree page ${page}: Short response (${html.length} chars) - may be blocked`);
+      return [];
     }
 
-    const items = parseListings(html);
+    return parseListings(html);
+  } catch (error) {
+    console.error(`Gumtree page ${page} error:`, error);
+    return [];
+  }
+};
 
-    console.log(`Found ${items.length} items on Gumtree`);
-    return items;
+// Main scrape function - fetches multiple pages
+export const scrapeGumtree = async (config: AlertConfig): Promise<ScrapedItem[]> => {
+  const MAX_PAGES = 3; // Fetch up to 3 pages
+  const PAGE_DELAY = 4000; // 4s delay between pages to avoid rate limits
+
+  try {
+    console.log(`Scraping Gumtree: ${config.keywords.join(' ')}`);
+
+    const allItems: ScrapedItem[] = [];
+    const seenIds = new Set<string>();
+
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      // Add randomized delay before each request
+      await delay(CONFIG.baseDelay + Math.random() * CONFIG.randomDelay);
+
+      const items = await fetchPage(config, page);
+
+      if (items.length === 0) {
+        // No more results or blocked
+        break;
+      }
+
+      // Deduplicate within this scrape
+      for (const item of items) {
+        if (!seenIds.has(item.external_id)) {
+          seenIds.add(item.external_id);
+          allItems.push(item);
+        }
+      }
+
+      console.log(`Gumtree page ${page}: ${items.length} items (total: ${allItems.length})`);
+
+      // If we got significantly fewer items, there might be no next page
+      if (items.length < 20) {
+        break;
+      }
+
+      // Delay before next page (if not last page)
+      if (page < MAX_PAGES) {
+        await delay(PAGE_DELAY);
+      }
+    }
+
+    console.log(`Found ${allItems.length} total items on Gumtree`);
+    return allItems;
   } catch (error) {
     console.error('Gumtree scraping error:', error);
     return [];
