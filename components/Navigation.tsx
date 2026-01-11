@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ViewState } from '../types';
-import { LayoutDashboard, ShoppingBag, Bell, Settings, LogOut, LogIn, Search, BarChart3, Menu, X } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Bell, Settings, LogOut, LogIn, Search, BarChart3, Menu, X, FlaskConical } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuthStore } from '../stores/authStore';
 import { NotificationBell } from './NotificationBell';
@@ -119,6 +119,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, on
         <NavItem view="alerts" icon={Bell} label="Smart Alerts" />
         <NavItem view="results" icon={Search} label="Alert Results" />
         <NavItem view="analytics" icon={BarChart3} label="Analytics" />
+        <NavItem view="research" icon={FlaskConical} label="Research" />
         <div className="pt-4 mt-4 border-t border-slate-800">
           <NavItem view="settings" icon={Settings} label="Settings" />
         </div>

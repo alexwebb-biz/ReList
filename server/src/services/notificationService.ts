@@ -379,4 +379,107 @@ export const notifyAlertMatches = async (
   });
 };
 
+// Notify user of price drops on watched items
+export const notifyPriceDrop = async (
+  userId: string,
+  item: {
+    title: string;
+    url: string;
+    image_url?: string;
+    platform: string;
+    previous_price: number;
+    current_price: number;
+    target_price?: number;
+    price_drop_percent: number;
+  }
+): Promise<void> => {
+  const targetReached = item.target_price && item.current_price <= item.target_price;
+  const savings = item.previous_price - item.current_price;
+
+  const title = targetReached
+    ? `🎯 Target price reached! ${item.title.substring(0, 50)}...`
+    : `💰 Price drop! ${item.title.substring(0, 50)}...`;
+
+  const message = targetReached
+    ? `The item you're watching has dropped to your target price of £${item.target_price}! It was £${item.previous_price}, now £${item.current_price} (${item.price_drop_percent.toFixed(1)}% off).`
+    : `Price dropped by £${savings.toFixed(2)} (${item.price_drop_percent.toFixed(1)}% off)! Was £${item.previous_price}, now £${item.current_price}.`;
+
+  const items = [{
+    title: item.title,
+    price: item.current_price,
+    platform: item.platform,
+    url: item.url,
+    image: item.image_url,
+  }];
+
+  await sendNotification({
+    userId,
+    type: 'price_drop',
+    title,
+    message,
+    data: {
+      items,
+      alertName: 'Price Watch Alert',
+      previous_price: item.previous_price,
+      current_price: item.current_price,
+      target_price: item.target_price,
+      target_reached: targetReached,
+    },
+    channels: ['in_app', 'email', 'telegram'],
+  });
+};
+
+// Notify multiple price drops at once (batch)
+export const notifyPriceDropsBatch = async (
+  userId: string,
+  drops: Array<{
+    title: string;
+    url: string;
+    image_url?: string;
+    platform: string;
+    previous_price: number;
+    current_price: number;
+    target_price?: number;
+    price_drop_percent: number;
+  }>
+): Promise<void> => {
+  if (drops.length === 0) return;
+
+  const targetReached = drops.filter(d => d.target_price && d.current_price <= d.target_price);
+  const regularDrops = drops.filter(d => !d.target_price || d.current_price > d.target_price);
+
+  // Send individual notifications for target-reached items (important!)
+  for (const drop of targetReached) {
+    await notifyPriceDrop(userId, drop);
+  }
+
+  // Batch notification for regular price drops
+  if (regularDrops.length > 0) {
+    const items = regularDrops.map(d => ({
+      title: d.title,
+      price: d.current_price,
+      platform: d.platform,
+      url: d.url,
+      image: d.image_url,
+    }));
+
+    const title = regularDrops.length === 1
+      ? `💰 Price drop on ${regularDrops[0].title.substring(0, 40)}...`
+      : `💰 ${regularDrops.length} items dropped in price!`;
+
+    const message = regularDrops.length === 1
+      ? `Price dropped to £${regularDrops[0].current_price} (was £${regularDrops[0].previous_price})`
+      : `${regularDrops.length} items you're watching have dropped in price.`;
+
+    await sendNotification({
+      userId,
+      type: 'price_drop',
+      title,
+      message,
+      data: { items, alertName: 'Price Watch' },
+      channels: ['in_app', 'email', 'telegram'],
+    });
+  }
+};
+
 export default sendNotification;

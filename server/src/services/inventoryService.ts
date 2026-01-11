@@ -1,5 +1,6 @@
 import supabase from '../config/supabase.js';
 import { InventoryItem } from '../types/index.js';
+import { calculateFees } from './feeCalculatorService.js';
 
 export interface CreateInventoryData {
   title: string;
@@ -163,6 +164,18 @@ export const deleteInventoryItem = async (
   }
 };
 
+export interface MarkAsSoldResult extends InventoryItem {
+  fee_breakdown?: {
+    platform_fee: number;
+    payment_processing_fee: number;
+    final_value_fee: number;
+    total_fees: number;
+    net_proceeds: number;
+    fee_percentage: number;
+    was_auto_calculated: boolean;
+  };
+}
+
 export const markAsSold = async (
   itemId: string,
   userId: string,
@@ -172,12 +185,46 @@ export const markAsSold = async (
     sold_date?: string;
     fees_total?: number;
     postage_cost?: number;
+    auto_calculate_fees?: boolean; // If true, calculate fees automatically
   }
-): Promise<InventoryItem> => {
+): Promise<MarkAsSoldResult> => {
   // Verify ownership
   const existing = await getInventoryById(itemId, userId);
   if (!existing) {
     throw new Error('Item not found');
+  }
+
+  let feesToUse = soldData.fees_total;
+  let feeBreakdown = null;
+  const wasAutoCalculated = feesToUse === undefined || soldData.auto_calculate_fees;
+
+  // Auto-calculate fees if not provided or if explicitly requested
+  if (wasAutoCalculated && soldData.sold_platform) {
+    const breakdown = calculateFees(
+      soldData.sold_price,
+      soldData.sold_platform,
+      soldData.postage_cost || 0
+    );
+    feesToUse = breakdown.total_fees;
+    feeBreakdown = {
+      ...breakdown,
+      was_auto_calculated: true,
+    };
+  } else if (feesToUse !== undefined) {
+    // User provided fees - still calculate breakdown for reference
+    if (soldData.sold_platform) {
+      const breakdown = calculateFees(
+        soldData.sold_price,
+        soldData.sold_platform,
+        soldData.postage_cost || 0
+      );
+      feeBreakdown = {
+        ...breakdown,
+        total_fees: feesToUse, // Use user's value
+        net_proceeds: soldData.sold_price - feesToUse,
+        was_auto_calculated: false,
+      };
+    }
   }
 
   const { data, error } = await supabase
@@ -187,7 +234,7 @@ export const markAsSold = async (
       sold_price: soldData.sold_price,
       sold_platform: soldData.sold_platform || null,
       sold_date: soldData.sold_date || new Date().toISOString().split('T')[0],
-      fees_total: soldData.fees_total || 0,
+      fees_total: feesToUse || 0,
       postage_cost: soldData.postage_cost || 0,
       updated_at: new Date().toISOString(),
     })
@@ -200,7 +247,10 @@ export const markAsSold = async (
     throw new Error(error?.message || 'Failed to mark as sold');
   }
 
-  return data;
+  return {
+    ...data,
+    fee_breakdown: feeBreakdown || undefined,
+  };
 };
 
 export const getInventoryStats = async (userId: string): Promise<{

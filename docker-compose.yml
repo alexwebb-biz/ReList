@@ -1,0 +1,125 @@
+version: '3.8'
+
+# =============================================================================
+# RELIST - Docker Desktop Deployment (Redis Only)
+# =============================================================================
+# Using Supabase Cloud for Database + Local Redis for Caching
+#
+# Quick Start:
+#   1. Make sure .env.local has your Supabase credentials
+#   2. Run: docker compose up -d --build
+#   3. Open: http://localhost
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # REDIS - Cache & Job Queue (LOCAL)
+  # ===========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: relist-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - relist-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  # ===========================================================================
+  # SERVER - Backend API (Node.js/Express)
+  # ===========================================================================
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    container_name: relist-server
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # Database - Supabase Cloud (from .env.local)
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+      # Redis (local container)
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # Authentication
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      # Optional services
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_STARTER_PRICE_ID: ${STRIPE_STARTER_PRICE_ID:-}
+      STRIPE_PRO_PRICE_ID: ${STRIPE_PRO_PRICE_ID:-}
+      STRIPE_BUSINESS_PRICE_ID: ${STRIPE_BUSINESS_PRICE_ID:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_REGION: ${AWS_REGION:-eu-west-2}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-noreply@relist.app}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      HUGGINGFACE_API_KEY: ${HUGGINGFACE_API_KEY:-}
+      EBAY_CLIENT_ID: ${EBAY_CLIENT_ID:-}
+      EBAY_CLIENT_SECRET: ${EBAY_CLIENT_SECRET:-}
+      EBAY_REDIRECT_URI: ${EBAY_REDIRECT_URI:-}
+      EBAY_APP_ID: ${EBAY_APP_ID:-}
+      EBAY_CERT_ID: ${EBAY_CERT_ID:-}
+      EBAY_ENV: ${EBAY_ENV:-PRODUCTION}
+      EBAY_VERIFICATION_TOKEN: ${EBAY_VERIFICATION_TOKEN:-}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost}
+    ports:
+      - "3000:3000"
+    networks:
+      - relist-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/app/uploads
+
+  # ===========================================================================
+  # FRONTEND - React App (Nginx)
+  # ===========================================================================
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: relist-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - relist-network
+    depends_on:
+      - server
+
+# =============================================================================
+# VOLUMES - Persistent Data
+# =============================================================================
+volumes:
+  redis_data:
+    name: relist-redis-data
+  uploads_data:
+    name: relist-uploads
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  relist-network:
+    name: relist-network
+    driver: bridge

@@ -1,15 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { api, AlertResult, Alert } from '../lib/api';
-import { ExternalLink, Check, Bookmark, Trash2, Filter, Loader2, ChevronDown, Eye } from 'lucide-react';
+import { ExternalLink, Check, Bookmark, Trash2, Filter, Loader2, ChevronDown, Eye, X, Package, DollarSign, Binoculars } from 'lucide-react';
+
+interface QuickSaveData {
+  result: AlertResult;
+  purchase_price: number;
+  target_price: number;
+  notes: string;
+}
+
+interface WatchData {
+  result: AlertResult;
+  target_price: number;
+}
 
 export const AlertResults: React.FC = () => {
   const [results, setResults] = useState<AlertResult[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAlert, setSelectedAlert] = useState<string>('');
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const PLATFORMS = ['eBay', 'Vinted', 'Depop', 'Gumtree', 'Facebook Marketplace'];
+
+  // Quick save modal state
+  const [quickSaveModal, setQuickSaveModal] = useState<QuickSaveData | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Watch modal state
+  const [watchModal, setWatchModal] = useState<WatchData | null>(null);
+  const [isWatching, setIsWatching] = useState(false);
+  const [watchedIds, setWatchedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadAlerts();
@@ -17,7 +41,7 @@ export const AlertResults: React.FC = () => {
 
   useEffect(() => {
     loadResults();
-  }, [selectedAlert, showUnreadOnly, page]);
+  }, [selectedAlert, selectedPlatform, showUnreadOnly, page]);
 
   const loadAlerts = async () => {
     const response = await api.getAlerts();
@@ -35,6 +59,9 @@ export const AlertResults: React.FC = () => {
     }
     if (showUnreadOnly) {
       url += '&unread=true';
+    }
+    if (selectedPlatform) {
+      url += `&platform=${encodeURIComponent(selectedPlatform)}`;
     }
 
     const response = await api.get<AlertResult[]>(url);
@@ -66,11 +93,78 @@ export const AlertResults: React.FC = () => {
     }
   };
 
+  // Open quick save modal
+  const openQuickSaveModal = (result: AlertResult) => {
+    setQuickSaveModal({
+      result,
+      purchase_price: result.price,
+      target_price: Math.round(result.price * 1.3), // 30% markup default
+      notes: `Sourced from ${result.platform}`
+    });
+  };
+
+  // Quick save with purchase price
+  const handleQuickSave = async () => {
+    if (!quickSaveModal) return;
+
+    setIsSaving(true);
+
+    const response = await api.post(`/results/${quickSaveModal.result.id}/save`, {
+      purchase_price: quickSaveModal.purchase_price,
+      selling_price: quickSaveModal.target_price,
+      notes: quickSaveModal.notes
+    });
+
+    if (response.success) {
+      setResults(results.map(r =>
+        r.id === quickSaveModal.result.id ? { ...r, is_saved: true } : r
+      ));
+      setQuickSaveModal(null);
+    }
+
+    setIsSaving(false);
+  };
+
+  // Simple save (legacy)
   const handleSaveToInventory = async (result: AlertResult) => {
     const response = await api.post(`/results/${result.id}/save`, {});
     if (response.success) {
       setResults(results.map(r => r.id === result.id ? { ...r, is_saved: true } : r));
     }
+  };
+
+  // Open watch modal
+  const openWatchModal = (result: AlertResult) => {
+    setWatchModal({
+      result,
+      target_price: Math.round(result.price * 0.8) // Default target: 20% below current
+    });
+  };
+
+  // Add item to watchlist
+  const handleAddToWatchlist = async () => {
+    if (!watchModal) return;
+
+    setIsWatching(true);
+
+    const response = await api.post('/watchlist', {
+      alert_result_id: watchModal.result.id,
+      external_id: watchModal.result.external_id,
+      platform: watchModal.result.platform,
+      title: watchModal.result.title,
+      url: watchModal.result.url,
+      image_url: watchModal.result.image_urls?.[0],
+      price: watchModal.result.price,
+      target_price: watchModal.target_price || undefined,
+      currency: watchModal.result.currency
+    });
+
+    if (response.success) {
+      setWatchedIds(prev => new Set(prev).add(watchModal.result.id));
+      setWatchModal(null);
+    }
+
+    setIsWatching(false);
   };
 
   const formatPrice = (price: number, currency: string) => {
@@ -106,6 +200,16 @@ export const AlertResults: React.FC = () => {
     return colors[platform] || 'bg-slate-100 text-slate-700';
   };
 
+  // Calculate potential profit
+  const calculateProfit = () => {
+    if (!quickSaveModal) return { profit: 0, margin: 0 };
+    const profit = quickSaveModal.target_price - quickSaveModal.purchase_price;
+    const margin = quickSaveModal.target_price > 0
+      ? (profit / quickSaveModal.target_price) * 100
+      : 0;
+    return { profit, margin };
+  };
+
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
@@ -128,7 +232,7 @@ export const AlertResults: React.FC = () => {
           <span className="text-sm font-medium text-slate-600">Filters:</span>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 flex-wrap">
           <div className="relative flex-1 sm:flex-initial">
             <select
               value={selectedAlert}
@@ -138,6 +242,20 @@ export const AlertResults: React.FC = () => {
               <option value="">All Alerts</option>
               {alerts.map(alert => (
                 <option key={alert.id} value={alert.id}>{alert.name}</option>
+              ))}
+            </select>
+            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          </div>
+
+          <div className="relative flex-1 sm:flex-initial">
+            <select
+              value={selectedPlatform}
+              onChange={(e) => { setSelectedPlatform(e.target.value); setPage(1); }}
+              className="w-full sm:w-auto appearance-none pl-4 pr-10 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+            >
+              <option value="">All Platforms</option>
+              {PLATFORMS.map(platform => (
+                <option key={platform} value={platform}>{platform}</option>
               ))}
             </select>
             <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -242,15 +360,29 @@ export const AlertResults: React.FC = () => {
 
                     {!result.is_saved ? (
                       <button
-                        onClick={() => handleSaveToInventory(result)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Save to inventory"
+                        onClick={() => openQuickSaveModal(result)}
+                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                        title="Quick save to inventory"
                       >
-                        <Bookmark size={18} />
+                        <Package size={18} />
                       </button>
                     ) : (
                       <div className="p-2 text-emerald-500" title="Saved to inventory">
                         <Check size={18} />
+                      </div>
+                    )}
+
+                    {!watchedIds.has(result.id) ? (
+                      <button
+                        onClick={() => openWatchModal(result)}
+                        className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        title="Watch for price drops"
+                      >
+                        <Binoculars size={18} />
+                      </button>
+                    ) : (
+                      <div className="p-2 text-amber-500" title="Watching">
+                        <Binoculars size={18} />
                       </div>
                     )}
 
@@ -292,6 +424,241 @@ export const AlertResults: React.FC = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Quick Save Modal */}
+      {quickSaveModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Package size={20} />
+                Quick Save to Inventory
+              </h3>
+              <button
+                onClick={() => setQuickSaveModal(null)}
+                className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Item Preview */}
+            <div className="flex gap-3 p-3 bg-slate-50 rounded-lg mb-4">
+              {quickSaveModal.result.image_urls?.[0] && (
+                <img
+                  src={quickSaveModal.result.image_urls[0]}
+                  alt=""
+                  className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <h4 className="font-medium text-slate-800 text-sm line-clamp-2">{quickSaveModal.result.title}</h4>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${getPlatformColor(quickSaveModal.result.platform)}`}>
+                    {quickSaveModal.result.platform}
+                  </span>
+                  <span className="text-emerald-600 font-bold text-sm">
+                    {formatPrice(quickSaveModal.result.price, quickSaveModal.result.currency)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Purchase Price (£)
+                </label>
+                <input
+                  type="number"
+                  value={quickSaveModal.purchase_price || ''}
+                  onChange={(e) => setQuickSaveModal({
+                    ...quickSaveModal,
+                    purchase_price: parseFloat(e.target.value) || 0
+                  })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="What you'll pay"
+                />
+                <p className="text-xs text-slate-400 mt-1">Listed price: £{quickSaveModal.result.price}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Target Sell Price (£)
+                </label>
+                <input
+                  type="number"
+                  value={quickSaveModal.target_price || ''}
+                  onChange={(e) => setQuickSaveModal({
+                    ...quickSaveModal,
+                    target_price: parseFloat(e.target.value) || 0
+                  })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="What you'll sell for"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Notes (optional)
+                </label>
+                <input
+                  value={quickSaveModal.notes}
+                  onChange={(e) => setQuickSaveModal({
+                    ...quickSaveModal,
+                    notes: e.target.value
+                  })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="Any notes about this item..."
+                />
+              </div>
+
+              {/* Profit Preview */}
+              <div className="bg-emerald-50 rounded-lg p-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-emerald-700">Potential Profit:</span>
+                  <span className={`font-bold text-lg ${calculateProfit().profit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    £{calculateProfit().profit.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs text-emerald-600">Profit Margin:</span>
+                  <span className={`font-medium text-sm ${calculateProfit().margin >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {calculateProfit().margin.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
+              <button
+                onClick={() => setQuickSaveModal(null)}
+                className="flex-1 px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleQuickSave}
+                disabled={isSaving || !quickSaveModal.purchase_price}
+                className="flex-1 bg-emerald-600 text-white px-4 py-2.5 rounded-lg hover:bg-emerald-700 font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSaving && <Loader2 size={16} className="animate-spin" />}
+                Save to Inventory
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Watch Modal */}
+      {watchModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Binoculars size={20} className="text-amber-600" />
+                Watch for Price Drops
+              </h3>
+              <button
+                onClick={() => setWatchModal(null)}
+                className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Item Preview */}
+            <div className="flex gap-3 p-3 bg-slate-50 rounded-lg mb-4">
+              {watchModal.result.image_urls?.[0] && (
+                <img
+                  src={watchModal.result.image_urls[0]}
+                  alt=""
+                  className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <h4 className="font-medium text-slate-800 text-sm line-clamp-2">{watchModal.result.title}</h4>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${getPlatformColor(watchModal.result.platform)}`}>
+                    {watchModal.result.platform}
+                  </span>
+                  <span className="text-emerald-600 font-bold text-sm">
+                    {formatPrice(watchModal.result.price, watchModal.result.currency)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-sm text-amber-800">
+                  We'll track this item and notify you when the price drops. Set an optional target price to get alerts only when it reaches your desired price.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Current Price
+                </label>
+                <div className="px-3 py-2 bg-slate-100 rounded-lg text-slate-700 font-medium">
+                  {formatPrice(watchModal.result.price, watchModal.result.currency)}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Target Price (optional)
+                </label>
+                <input
+                  type="number"
+                  value={watchModal.target_price || ''}
+                  onChange={(e) => setWatchModal({
+                    ...watchModal,
+                    target_price: parseFloat(e.target.value) || 0
+                  })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                  placeholder="Alert me when price drops to..."
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Leave empty to get notified on any price drop
+                </p>
+              </div>
+
+              {watchModal.target_price > 0 && (
+                <div className="bg-emerald-50 rounded-lg p-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-emerald-700">Target Savings:</span>
+                    <span className="font-bold text-emerald-600">
+                      {formatPrice(watchModal.result.price - watchModal.target_price, watchModal.result.currency)}
+                      <span className="text-xs ml-1">
+                        ({Math.round((1 - watchModal.target_price / watchModal.result.price) * 100)}% off)
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
+              <button
+                onClick={() => setWatchModal(null)}
+                className="flex-1 px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddToWatchlist}
+                disabled={isWatching}
+                className="flex-1 bg-amber-600 text-white px-4 py-2.5 rounded-lg hover:bg-amber-700 font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isWatching && <Loader2 size={16} className="animate-spin" />}
+                <Binoculars size={16} />
+                Start Watching
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

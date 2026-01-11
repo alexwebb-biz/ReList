@@ -21,12 +21,14 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const perPage = parseInt(req.query.per_page as string) || 20;
     const unreadOnly = req.query.unread === 'true';
+    const platform = req.query.platform as string | undefined;
 
     const { results, total } = await resultsService.getAllResults(
       req.user.id,
       page,
       perPage,
-      unreadOnly
+      unreadOnly,
+      platform
     );
 
     sendPaginated(res, results, { page, per_page: perPage, total });
@@ -106,7 +108,7 @@ router.post('/mark-read', async (req: AuthenticatedRequest, res: Response) => {
     sendSuccess(res, { marked_count: count });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      sendError(res, 'VALIDATION_ERROR', error.errors[0].message, 400);
+      sendError(res, 'VALIDATION_ERROR', error.issues[0].message, 400);
       return;
     }
     sendError(res, 'UPDATE_ERROR', error instanceof Error ? error.message : 'Failed to mark as read', 500);
@@ -121,7 +123,14 @@ router.post('/:id/save', async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
 
-    const { inventoryId } = await resultsService.saveToInventory(req.params.id, req.user.id);
+    // Optional parameters for quick save with custom prices
+    const options = {
+      purchase_price: req.body.purchase_price,
+      selling_price: req.body.selling_price,
+      notes: req.body.notes,
+    };
+
+    const { inventoryId } = await resultsService.saveToInventory(req.params.id, req.user.id, options);
     sendSuccess(res, { inventory_id: inventoryId, message: 'Saved to inventory' }, 201);
   } catch (error) {
     if (error instanceof Error && error.message === 'Result not found') {

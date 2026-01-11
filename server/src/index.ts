@@ -24,6 +24,9 @@ import notificationsRoutes from './routes/notifications.js';
 import stripeRoutes from './routes/stripe.js';
 import telegramRoutes from './routes/telegram.js';
 import ebayRoutes from './routes/ebay.js';
+import listingsRoutes from './routes/listings.js';
+import watchlistRoutes from './routes/watchlist.js';
+import researchRoutes from './routes/research.js';
 
 // Import services
 import { startScheduler } from './services/schedulerService.js';
@@ -108,6 +111,9 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/telegram', telegramRoutes);
 app.use('/api/ebay', ebayRoutes);
+app.use('/api/listings', listingsRoutes);
+app.use('/api/watchlist', watchlistRoutes);
+app.use('/api/research', researchRoutes);
 
 // Serve static files from Vite build in production
 if (process.env.NODE_ENV === 'production') {

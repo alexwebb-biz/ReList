@@ -5,7 +5,8 @@ export const getAllResults = async (
   userId: string,
   page: number = 1,
   perPage: number = 20,
-  unreadOnly: boolean = false
+  unreadOnly: boolean = false,
+  platform?: string
 ): Promise<{ results: AlertResult[]; total: number }> => {
   const offset = (page - 1) * perPage;
 
@@ -37,6 +38,11 @@ export const getAllResults = async (
   if (unreadOnly) {
     countQuery = countQuery.eq('is_read', false);
     dataQuery = dataQuery.eq('is_read', false);
+  }
+
+  if (platform) {
+    countQuery = countQuery.eq('platform', platform);
+    dataQuery = dataQuery.eq('platform', platform);
   }
 
   const { count } = await countQuery;
@@ -131,15 +137,28 @@ export const markMultipleAsRead = async (
   return data?.length || 0;
 };
 
+export interface SaveToInventoryOptions {
+  purchase_price?: number;
+  selling_price?: number;
+  notes?: string;
+}
+
 export const saveToInventory = async (
   resultId: string,
-  userId: string
+  userId: string,
+  options?: SaveToInventoryOptions
 ): Promise<{ inventoryId: string }> => {
   // Get the result
   const result = await getResultById(resultId, userId);
   if (!result) {
     throw new Error('Result not found');
   }
+
+  // Build notes - combine custom notes with source URL
+  const sourceNote = `Sourced from alert. Original URL: ${result.url}`;
+  const finalNotes = options?.notes
+    ? `${options.notes}\n\n${sourceNote}`
+    : sourceNote;
 
   // Create inventory item from result
   const { data: inventoryItem, error } = await supabase
@@ -148,13 +167,14 @@ export const saveToInventory = async (
       user_id: userId,
       title: result.title,
       description: result.description,
-      purchase_price: result.price,
+      purchase_price: options?.purchase_price ?? result.price,
+      selling_price: options?.selling_price,
       purchase_platform: result.platform,
       purchase_location: result.location,
       condition: result.condition,
       images: result.image_urls,
-      status: 'purchased',
-      notes: `Sourced from alert. Original URL: ${result.url}`,
+      status: 'draft',
+      notes: finalNotes,
     })
     .select('id')
     .single();

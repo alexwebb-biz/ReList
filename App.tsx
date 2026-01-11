@@ -6,6 +6,7 @@ import { AlertsManager } from './components/AlertsManager';
 import { AlertResults } from './components/AlertResults';
 import { Settings } from './components/Settings';
 import { Analytics } from './components/Analytics';
+import { Research } from './components/Research';
 import { AuthModal } from './components/AuthModal';
 import { ViewState } from './types';
 import { useAuthStore } from './stores/authStore';
@@ -45,6 +46,8 @@ const App: React.FC = () => {
         return <Settings />;
       case 'analytics':
         return <Analytics />;
+      case 'research':
+        return <Research />;
       default:
         return <Dashboard />;
     }

@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { z } from 'zod';
 import * as inventoryService from '../services/inventoryService.js';
+import { calculateFees, getSupportedPlatforms } from '../services/feeCalculatorService.js';
 import { sendSuccess, sendError, sendPaginated } from '../utils/response.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { AuthenticatedRequest } from '../types/index.js';
@@ -80,6 +81,38 @@ router.get('/stats', async (req: AuthenticatedRequest, res: Response) => {
     sendSuccess(res, stats);
   } catch (error) {
     sendError(res, 'FETCH_ERROR', error instanceof Error ? error.message : 'Failed to fetch stats', 500);
+  }
+});
+
+// GET /api/inventory/fees/platforms - Get supported platforms and their fee info
+router.get('/fees/platforms', async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const platforms = getSupportedPlatforms();
+    sendSuccess(res, platforms);
+  } catch (error) {
+    sendError(res, 'FETCH_ERROR', error instanceof Error ? error.message : 'Failed to fetch platforms', 500);
+  }
+});
+
+// POST /api/inventory/fees/calculate - Calculate fees for a sale
+router.post('/fees/calculate', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const schema = z.object({
+      price: z.number().min(0),
+      platform: z.string().min(1),
+      postage: z.number().min(0).optional(),
+    });
+
+    const { price, platform, postage } = schema.parse(req.body);
+    const breakdown = calculateFees(price, platform, postage || 0);
+    sendSuccess(res, breakdown);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.issues[0];
+      sendError(res, 'VALIDATION_ERROR', firstError.message, 400);
+      return;
+    }
+    sendError(res, 'CALCULATION_ERROR', error instanceof Error ? error.message : 'Failed to calculate fees', 500);
   }
 });
 
