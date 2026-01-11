@@ -27,6 +27,7 @@ import ebayRoutes from './routes/ebay.js';
 import listingsRoutes from './routes/listings.js';
 import watchlistRoutes from './routes/watchlist.js';
 import researchRoutes from './routes/research.js';
+import adminRoutes from './routes/admin.js';
 
 // Import services
 import { startScheduler } from './services/schedulerService.js';
@@ -114,6 +115,7 @@ app.use('/api/ebay', ebayRoutes);
 app.use('/api/listings', listingsRoutes);
 app.use('/api/watchlist', watchlistRoutes);
 app.use('/api/research', researchRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Serve static files from Vite build in production
 if (process.env.NODE_ENV === 'production') {

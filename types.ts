@@ -38,4 +38,4 @@ export interface Alert {
   lastChecked: string;
 }
 
-export type ViewState = 'dashboard' | 'inventory' | 'alerts' | 'results' | 'settings' | 'analytics' | 'research';
+export type ViewState = 'dashboard' | 'inventory' | 'alerts' | 'results' | 'settings' | 'analytics' | 'research' | 'admin';
