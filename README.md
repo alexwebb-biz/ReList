@@ -66,7 +66,7 @@ Deploy to production in under 10 minutes with our automated script.
 ssh -i your-key.pem ec2-user@YOUR_EC2_IP
 
 # Run automated deployment
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/relist/main/docs/deploy-ec2.sh -o deploy-ec2.sh
+curl -fsSL https://raw.githubusercontent.com/alexwebb-biz/relist/main/docs/deploy-ec2.sh -o deploy-ec2.sh
 chmod +x deploy-ec2.sh
 ./deploy-ec2.sh
 ```
@@ -273,7 +273,7 @@ MIT License
 
 ## 💬 Support
 
-- **Issues**: https://github.com/YOUR_USERNAME/relist/issues
+- **Issues**: https://github.com/alexwebb-biz/relist/issues
 - **Email**: support@relist.app
 - **Documentation**: [./docs/](./docs/)
 

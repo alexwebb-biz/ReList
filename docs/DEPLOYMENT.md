@@ -67,7 +67,7 @@ SSH into your EC2 instance and run:
 
 ```bash
 # Download and run deployment script
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/relist/main/deploy-ec2.sh -o deploy-ec2.sh
+curl -fsSL https://raw.githubusercontent.com/alexwebb-biz/relist/main/deploy-ec2.sh -o deploy-ec2.sh
 chmod +x deploy-ec2.sh
 ./deploy-ec2.sh
 ```
@@ -154,7 +154,7 @@ exit
 ssh -i your-key.pem ec2-user@YOUR_EC2_IP
 
 # Clone the repo
-git clone https://github.com/YOUR_USERNAME/relist.git
+git clone https://github.com/alexwebb-biz/relist.git
 cd relist
 ```
 
@@ -602,7 +602,7 @@ server:
 ## Support
 
 - **Documentation**: See README.md
-- **Issues**: https://github.com/YOUR_USERNAME/relist/issues
+- **Issues**: https://github.com/alexwebb-biz/relist/issues
 - **Email**: support@relist.app
 
 ---

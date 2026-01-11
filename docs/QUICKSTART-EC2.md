@@ -28,7 +28,7 @@ ssh -i your-key.pem ec2-user@YOUR_EC2_IP
 
 ```bash
 # Download script
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/relist/main/docs/deploy-ec2.sh -o deploy-ec2.sh
+curl -fsSL https://raw.githubusercontent.com/alexwebb-biz/relist/main/docs/deploy-ec2.sh -o deploy-ec2.sh
 
 # Make executable
 chmod +x deploy-ec2.sh
@@ -104,7 +104,7 @@ git pull && docker-compose up -d --build
 
 **Need help?**
 - See full guide: [DEPLOYMENT.md](./DEPLOYMENT.md)
-- Open issue: https://github.com/YOUR_USERNAME/relist/issues
+- Open issue: https://github.com/alexwebb-biz/relist/issues
 
 ## What Gets Installed
 

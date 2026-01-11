@@ -7,7 +7,7 @@
 #
 # Usage:
 #   1. SSH into your EC2 instance
-#   2. Run: curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/relist/main/deploy-ec2.sh | bash
+#   2. Run: curl -fsSL https://raw.githubusercontent.com/alexwebb-biz/relist/main/deploy-ec2.sh | bash
 #   Or:
 #   1. Copy this script to EC2: scp deploy-ec2.sh ec2-user@YOUR_IP:~
 #   2. SSH and run: chmod +x deploy-ec2.sh && ./deploy-ec2.sh
@@ -23,7 +23,7 @@ echo ""
 # -----------------------------------------------------------------------------
 # Configuration
 # -----------------------------------------------------------------------------
-REPO_URL="${REPO_URL:-https://github.com/YOUR_USERNAME/relist.git}"
+REPO_URL="${REPO_URL:-https://github.com/alexwebb-biz/relist.git}"
 BRANCH="${BRANCH:-main}"
 APP_DIR="/home/$USER/relist"
 

@@ -25,7 +25,7 @@ This directory contains everything needed to deploy ReList to AWS EC2.
 SSH into your EC2 instance and run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/relist/main/deploy-ec2.sh -o deploy-ec2.sh
+curl -fsSL https://raw.githubusercontent.com/alexwebb-biz/relist/main/deploy-ec2.sh -o deploy-ec2.sh
 chmod +x deploy-ec2.sh
 ./deploy-ec2.sh
 ```
@@ -34,7 +34,7 @@ chmod +x deploy-ec2.sh
 
 ```bash
 # Clone repo
-git clone https://github.com/YOUR_USERNAME/relist.git
+git clone https://github.com/alexwebb-biz/relist.git
 cd relist
 
 # Copy and configure environment
@@ -293,14 +293,14 @@ docker-compose exec server sh
 
 ## 🔗 Links
 
-- **Repository**: https://github.com/YOUR_USERNAME/relist
+- **Repository**: https://github.com/alexwebb-biz/relist
 - **Supabase Dashboard**: https://app.supabase.com
 - **Let's Encrypt**: https://letsencrypt.org
 - **Docker Docs**: https://docs.docker.com
 
 ## 📞 Support
 
-- Issues: https://github.com/YOUR_USERNAME/relist/issues
+- Issues: https://github.com/alexwebb-biz/relist/issues
 - Email: support@relist.app
 
 ---
