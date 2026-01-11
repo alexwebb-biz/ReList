@@ -1,12 +1,12 @@
 import express from 'express';
-import { authenticate } from '../middleware/auth.js';
+import { authenticateToken } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/admin.js';
 import supabase from '../config/supabase.js';
 
 const router = express.Router();
 
 // Get all users with their subscription and alert counts
-router.get('/users', authenticate, requireAdmin, async (req, res) => {
+router.get('/users', authenticateToken, requireAdmin, async (req, res) => {
   try {
     // Get all users with their subscription info
     const { data: users, error: usersError } = await supabase
@@ -61,7 +61,7 @@ router.get('/users', authenticate, requireAdmin, async (req, res) => {
 });
 
 // Get detailed alerts for a specific user
-router.get('/users/:userId/alerts', authenticate, requireAdmin, async (req, res) => {
+router.get('/users/:userId/alerts', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -107,7 +107,7 @@ router.get('/users/:userId/alerts', authenticate, requireAdmin, async (req, res)
 });
 
 // Get admin stats (overview)
-router.get('/stats', authenticate, requireAdmin, async (req, res) => {
+router.get('/stats', authenticateToken, requireAdmin, async (req, res) => {
   try {
     // Total users
     const { count: totalUsers } = await supabase
