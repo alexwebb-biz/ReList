@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../lib/config';
+
+const API_URL = import.meta.env.DEV ? 'http://localhost:3001/api' : '/api';
 
 interface User {
   id: string;
