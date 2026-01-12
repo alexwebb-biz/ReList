@@ -67,12 +67,28 @@ const scrapePage = async (page: Page, config: AlertConfig): Promise<ScrapedItem[
 
     // Navigate to search page with extended timeout
     await page.goto(searchUrl, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
 
-    // Wait for products to load
-    await page.waitForSelector('article[data-testid*="product"]', { timeout: 10000 });
+    // Wait a bit for JavaScript to render
+    await new Promise(r => setTimeout(r, 3000));
+
+    // Try to wait for products to load, but don't fail if selector not found
+    try {
+      await page.waitForSelector('article[data-testid*="product"]', { timeout: 10000 });
+    } catch (e) {
+      console.log('Depop: Product selector not found, page might be empty or layout changed');
+      // Check if there's a "no results" message or different layout
+      const pageContent = await page.content();
+      if (pageContent.includes('No results') || pageContent.includes('no products')) {
+        console.log('Depop: No results found for this search');
+        return items;
+      }
+      // If no "no results" message, layout might have changed - log and return empty
+      console.warn('Depop: Page layout may have changed, unable to find products');
+      return items;
+    }
 
     // Scroll to load more items
     await page.evaluate(() => {

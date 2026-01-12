@@ -294,12 +294,30 @@ const sendTelegramTextMessage = async (
   message: string,
   items: any[]
 ): Promise<void> => {
-  let text = `*${title}*\n\n${message}`;
+  // Escape special characters in title
+  const escapedTitle = escapeMarkdown(title);
+  let text = `🔔 *${escapedTitle}*\n\n${message}`;
 
   if (items.length > 0) {
-    text += '\n\n';
-    for (const item of items) {
-      text += `• *${escapeMarkdown(item.title)}*\n  £${item.price} on ${item.platform}\n  [View listing](${item.url})\n\n`;
+    text += '\n\n📋 *First 10 items:*\n\n';
+    // Limit to first 10 items to avoid Telegram message length limits
+    const displayItems = items.slice(0, 10);
+    for (const item of displayItems) {
+      // Create a safe title by limiting length and escaping
+      const safeTitle = (item.title || 'Unknown Item').substring(0, 100);
+      const escapedItemTitle = escapeMarkdown(safeTitle);
+      const platform = escapeMarkdown(item.platform || 'Unknown');
+
+      text += `• ${escapedItemTitle}\n`;
+      text += `  💰 £${item.price} on ${platform}\n`;
+      if (item.url) {
+        text += `  [View listing](${item.url})\n`;
+      }
+      text += '\n';
+    }
+
+    if (items.length > 10) {
+      text += `\n_...and ${items.length - 10} more items_`;
     }
   }
 
