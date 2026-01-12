@@ -47,6 +47,7 @@
     "socket.io": "^4.8.3",
     "stripe": "^20.1.1",
     "supabase": "^2.72.4",
+    "tough-cookie": "^6.0.0",
     "uuid": "^13.0.0",
     "zod": "^4.3.5",
     "zustand": "^5.0.9"
