@@ -1,86 +1,155 @@
 import * as cheerio from 'cheerio';
 import { AlertConfig, ScrapedItem } from '../services/scraperService.js';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import { getRandomProxy, getProxyUrl } from '../config/proxies.js';
+import { gotScraping } from 'got-scraping';
+import { getRandomProxy, ProxyConfig } from '../config/proxies.js';
+import { CookieJar } from 'tough-cookie';
 
-const GUMTREE_BASE_URL = 'https://www.gumtree.com/search';
+const GUMTREE_BASE_URL = 'https://www.gumtree.com';
 
-// Rate limiting configuration
+// Enhanced configuration
 const CONFIG = {
-  baseDelay: 3000,      // 3 seconds base delay
-  randomDelay: 2000,    // Up to 2 seconds additional random delay
-  headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Language': 'en-GB,en;q=0.9',
+  initialDelay: { min: 2000, max: 4000 },
+  pageDelay: { min: 3000, max: 7000 },
+  retryDelay: { min: 1000, max: 3000 },
+  maxRetries: 3,
+  maxPages: 3,
+};
+
+let sessionCache: {
+  cookies: string;
+  expiresAt: number;
+  userAgent: string;
+} | null = null;
+
+const cookieJar = new CookieJar();
+
+const buildProxyUrl = (proxy: ProxyConfig): string => {
+  return `http://${proxy.username}:${proxy.password}@${proxy.host}:${proxy.port}`;
+};
+
+const humanDelay = (min: number, max: number) =>
+  new Promise(r => setTimeout(r, min + Math.random() * (max - min)));
+
+// Initialize session
+const initializeSession = async () => {
+  if (sessionCache?.expiresAt > Date.now()) {
+    return sessionCache;
+  }
+
+  try {
+    const proxy = getRandomProxy();
+    console.log(`Initializing Gumtree session${proxy ? ' with proxy' : ''}...`);
+
+    const response = await gotScraping.get(GUMTREE_BASE_URL, {
+      headerGeneratorOptions: {
+        browsers: [{ name: 'chrome', minVersion: 120 }],
+        operatingSystems: ['windows'],
+        locales: ['en-GB'],
+      },
+      proxyUrl: proxy ? buildProxyUrl(proxy) : undefined,
+      cookieJar,
+      timeout: { request: 30000 },
+      throwHttpErrors: false,
+    });
+
+    if (response.statusCode !== 200) {
+      console.error(`❌ Gumtree session init failed: ${response.statusCode}`);
+      if (response.statusCode === 403) {
+        console.error('Cloudflare blocked session init');
+      }
+      return null;
+    }
+
+    await humanDelay(CONFIG.initialDelay.min, CONFIG.initialDelay.max);
+
+    const cookies = await cookieJar.getCookieString(GUMTREE_BASE_URL);
+    const userAgent = response.request.options.headers['user-agent'] as string;
+
+    sessionCache = {
+      cookies,
+      expiresAt: Date.now() + 60 * 60 * 1000,
+      userAgent,
+    };
+
+    console.log('✅ Gumtree session initialized');
+    return sessionCache;
+  } catch (error) {
+    console.error('Session init error:', error);
+    return null;
   }
 };
 
-// Rate limiting delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Build Gumtree search URL
+// Build search URL
 const buildSearchUrl = (config: AlertConfig, page: number = 1): string => {
-  // Match exact Gumtree URL format from browser
-  const query = encodeURIComponent(config.keywords.join(' '));
-  // Sort by date (newest first) and add pagination
-  let url = `${GUMTREE_BASE_URL}?search_category=all&q=${query}&search_location=United%20Kingdom&sort=date&page=${page}`;
+  const query = config.keywords.join(' ').trim();
+  if (!query) {
+    throw new Error('No search keywords provided');
+  }
+
+  const params = new URLSearchParams({
+    search_category: 'all',
+    q: query,
+    search_location: 'United Kingdom',
+    sort: 'date',
+    page: page.toString(),
+  });
 
   if (config.price_min) {
-    url += `&min_price=${config.price_min}`;
+    params.set('min_price', config.price_min.toString());
   }
   if (config.price_max) {
-    url += `&max_price=${config.price_max}`;
+    params.set('max_price', config.price_max.toString());
   }
 
-  return url;
+  return `${GUMTREE_BASE_URL}/search?${params.toString()}`;
 };
 
-// Parse Gumtree listing from HTML using updated selectors (late 2024)
+// Parse listings with multiple fallback selectors
 const parseListings = (html: string): ScrapedItem[] => {
   const $ = cheerio.load(html);
   const items: ScrapedItem[] = [];
 
-  // Updated selectors based on docs
+  // Main selector (current Gumtree structure)
   $('article[data-q="search-result"]').each((_, element) => {
     try {
       const $item = $(element);
 
-      // Title - updated selector
       const titleEl = $item.find('div[data-q="tile-title"]');
       const title = titleEl.text().trim();
       if (!title) return;
 
-      // Link - updated selector
       const linkEl = $item.find('a[data-q="search-result-anchor"]');
       let url = linkEl.attr('href') || '';
       if (url && !url.startsWith('http')) {
         url = `https://www.gumtree.com${url}`;
       }
 
-      // Extract item ID from URL
       const itemIdMatch = url.match(/\/(\d+)$/);
       const external_id = itemIdMatch ? `gumtree-${itemIdMatch[1]}` : `gumtree-${Date.now()}-${Math.random()}`;
 
-      // Price - updated selector
       const priceEl = $item.find('div[data-testid="price"]');
       const priceText = priceEl.text().replace(/[£$,]/g, '').trim();
       const price = parseFloat(priceText);
 
-      // Skip items without valid prices
       if (!price || isNaN(price) || price <= 0) {
         return;
       }
 
-      // Image
+      const imageUrls: string[] = [];
       const imageEl = $item.find('img');
-      const imageUrl = imageEl.attr('src') || imageEl.attr('data-src') || '';
+      const mainImage = imageEl.attr('src') || imageEl.attr('data-src');
+      if (mainImage) {
+        imageUrls.push(mainImage);
+        // Try higher res version
+        const highRes = mainImage.replace(/\/\d+x\d+\//, '/800x600/');
+        if (highRes !== mainImage) {
+          imageUrls.push(highRes);
+        }
+      }
 
-      // Location - updated selector
       const locationEl = $item.find('div[data-q="tile-location"]');
       const location = locationEl.text().trim() || null;
 
-      // Description
       const descEl = $item.find('div[data-q="tile-description"], p[data-q="tile-description"]');
       const description = descEl.text().trim() || null;
 
@@ -93,7 +162,7 @@ const parseListings = (html: string): ScrapedItem[] => {
         currency: 'GBP',
         location,
         condition: null,
-        image_urls: imageUrl ? [imageUrl] : [],
+        image_urls: imageUrls,
         url,
         seller_name: null,
         posted_at: null,
@@ -103,13 +172,15 @@ const parseListings = (html: string): ScrapedItem[] => {
     }
   });
 
-  // Fallback to older selectors if new ones don't work
+  // Fallback selectors
   if (items.length === 0) {
-    $('article.listing-maxi, .natural-listing').each((_, element) => {
+    console.log('No items found with main selectors, trying fallback...');
+    
+    $('article.listing-maxi, .natural-listing, [data-listing-id]').each((_, element) => {
       try {
         const $item = $(element);
 
-        const titleEl = $item.find('.listing-title, h2 a');
+        const titleEl = $item.find('h2 a, .listing-title, [data-q="title"]');
         const title = titleEl.text().trim();
         if (!title) return;
 
@@ -122,22 +193,25 @@ const parseListings = (html: string): ScrapedItem[] => {
         const itemIdMatch = url.match(/\/(\d+)$/);
         const external_id = itemIdMatch ? `gumtree-${itemIdMatch[1]}` : `gumtree-${Date.now()}-${Math.random()}`;
 
-        const priceEl = $item.find('.listing-price, .ad-price');
+        const priceEl = $item.find('.listing-price, .ad-price, [data-testid="price"]');
         const priceText = priceEl.text().replace(/[£$,]/g, '').trim();
         const price = parseFloat(priceText);
 
-        // Skip items without valid prices
         if (!price || isNaN(price) || price <= 0) {
           return;
         }
 
+        const imageUrls: string[] = [];
         const imageEl = $item.find('img.listing-thumbnail, img');
-        const imageUrl = imageEl.attr('src') || imageEl.attr('data-src') || '';
+        const mainImage = imageEl.attr('src') || imageEl.attr('data-src');
+        if (mainImage) {
+          imageUrls.push(mainImage);
+        }
 
-        const locationEl = $item.find('.listing-location, .ad-location');
+        const locationEl = $item.find('.listing-location, .ad-location, [data-q="location"]');
         const location = locationEl.text().trim() || null;
 
-        const descEl = $item.find('.listing-description, .ad-description');
+        const descEl = $item.find('.listing-description, .ad-description, [data-q="description"]');
         const description = descEl.text().trim() || null;
 
         items.push({
@@ -149,7 +223,7 @@ const parseListings = (html: string): ScrapedItem[] => {
           currency: 'GBP',
           location,
           condition: null,
-          image_urls: imageUrl ? [imageUrl] : [],
+          image_urls: imageUrls,
           url,
           seller_name: null,
           posted_at: null,
@@ -163,75 +237,85 @@ const parseListings = (html: string): ScrapedItem[] => {
   return items;
 };
 
-// Fetch with exponential backoff retry
-const fetchWithRetry = async (url: string, proxyAgent: HttpsProxyAgent<string> | null, maxRetries = 3): Promise<Response> => {
+// Enhanced fetch with retry
+const fetchWithRetry = async (url: string, session: any, maxRetries = CONFIG.maxRetries): Promise<cheerio.Root | null> => {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const fetchOptions: any = { headers: CONFIG.headers };
-      if (proxyAgent) {
-        fetchOptions.agent = proxyAgent;
-      }
-      const response = await fetch(url, fetchOptions);
+      const proxy = getRandomProxy();
+      
+      const response = await gotScraping.get(url, {
+        headerGeneratorOptions: {
+          browsers: [{ name: 'chrome', minVersion: 120 }],
+          operatingSystems: ['windows'],
+          locales: ['en-GB'],
+        },
+        headers: {
+          'referer': `${GUMTREE_BASE_URL}/`,
+          // Cookie jar handles cookies automatically
+        },
+        proxyUrl: proxy ? buildProxyUrl(proxy) : undefined,
+        cookieJar,
+        timeout: { request: 30000 },
+        throwHttpErrors: false,
+      });
 
-      if (response.status === 429) {
-        // Rate limited - exponential backoff with jitter
-        const backoffDelay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
-        console.log(`Gumtree rate limited, waiting ${Math.round(backoffDelay)}ms...`);
-        await delay(backoffDelay);
+      // ENHANCED ERROR HANDLING
+      if (response.statusCode === 403) {
+        console.error('❌ Gumtree 403 - Cloudflare block detected');
+        if (attempt < maxRetries - 1) {
+          await humanDelay(CONFIG.retryDelay.min, CONFIG.retryDelay.max);
+          continue;
+        }
+        return null;
+      }
+
+      if (response.statusCode === 429) {
+        console.warn(`⚠️ Gumtree rate limited (429) - attempt ${attempt + 1}`);
+        const delay = Math.pow(2, attempt) * 2000 + Math.random() * 1000;
+        await humanDelay(delay, delay + 1000);
         continue;
       }
 
-      return response;
+      if (response.statusCode !== 200) {
+        console.error(`❌ HTTP ${response.statusCode}: ${response.body.substring(0, 200)}`);
+        if (attempt < maxRetries - 1) {
+          await humanDelay(CONFIG.retryDelay.min, CONFIG.retryDelay.max);
+          continue;
+        }
+        return null;
+      }
+
+      // Check for Cloudflare challenge
+      const body = response.body;
+      if (body.includes('Enable JavaScript and cookies to continue') || 
+          body.includes('Checking your browser') ||
+          body.length < 5000) {
+        console.warn('⚠️ Likely blocked by Cloudflare challenge');
+        if (attempt < maxRetries - 1) {
+          // Rotate proxy and retry
+          await humanDelay(CONFIG.retryDelay.min * 2, CONFIG.retryDelay.max * 2);
+          continue;
+        }
+        return null;
+      }
+
+      return cheerio.load(body);
     } catch (error) {
-      if (attempt === maxRetries - 1) throw error;
-      await delay(1000 * (attempt + 1));
+      console.error(`Attempt ${attempt + 1} failed:`, error);
+      if (attempt === maxRetries - 1) return null;
+      await humanDelay(CONFIG.retryDelay.min, CONFIG.retryDelay.max);
     }
   }
-
-  throw new Error('Max retries exceeded');
+  return null;
 };
 
-// Fetch a single page of results
-const fetchPage = async (config: AlertConfig, page: number, proxyAgent: HttpsProxyAgent<string> | null): Promise<ScrapedItem[]> => {
-  const url = buildSearchUrl(config, page);
-
-  try {
-    const response = await fetchWithRetry(url, proxyAgent);
-
-    if (!response.ok) {
-      console.error(`Gumtree page ${page} returned ${response.status}`);
-      return [];
-    }
-
-    const html = await response.text();
-
-    // Check for blocked response
-    if (html.length < 5000) {
-      console.log(`Gumtree page ${page}: Short response (${html.length} chars) - may be blocked`);
-      return [];
-    }
-
-    return parseListings(html);
-  } catch (error) {
-    console.error(`Gumtree page ${page} error:`, error);
-    return [];
-  }
-};
-
-// Main scrape function - fetches multiple pages
+// Main scrape function
 export const scrapeGumtree = async (config: AlertConfig): Promise<ScrapedItem[]> => {
-  const MAX_PAGES = 3; // Fetch up to 3 pages
-  const PAGE_DELAY = 4000; // 4s delay between pages to avoid rate limits
-
   try {
-    // Get proxy for this scraping session
-    const proxy = getRandomProxy();
-    const proxyAgent = proxy ? new HttpsProxyAgent(getProxyUrl(proxy)) : null;
-
-    if (proxy) {
-      console.log(`Gumtree using proxy: ${proxy.host}:${proxy.port}`);
-    } else {
-      console.warn('Gumtree: No proxies available, making direct request');
+    const session = await initializeSession();
+    if (!session) {
+      console.error('Gumtree: Failed to initialize session');
+      return [];
     }
 
     console.log(`Scraping Gumtree: ${config.keywords.join(' ')}`);
@@ -239,18 +323,30 @@ export const scrapeGumtree = async (config: AlertConfig): Promise<ScrapedItem[]>
     const allItems: ScrapedItem[] = [];
     const seenIds = new Set<string>();
 
-    for (let page = 1; page <= MAX_PAGES; page++) {
-      // Add randomized delay before each request
-      await delay(CONFIG.baseDelay + Math.random() * CONFIG.randomDelay);
+    for (let page = 1; page <= CONFIG.maxPages; page++) {
+      const url = buildSearchUrl(config, page);
+      
+      // Human-like delay between page requests
+      if (page > 1) {
+        await humanDelay(CONFIG.pageDelay.min, CONFIG.pageDelay.max);
+      }
 
-      const items = await fetchPage(config, page, proxyAgent);
+      console.log(`Fetching page ${page}: ${url}`);
 
-      if (items.length === 0) {
-        // No more results or blocked
+      const $ = await fetchWithRetry(url, session);
+      if (!$) {
+        console.error(`Failed to fetch page ${page}`);
         break;
       }
 
-      // Deduplicate within this scrape
+      const items = parseListings($.html());
+      
+      if (items.length === 0) {
+        console.log(`No items found on page ${page}, stopping`);
+        break;
+      }
+
+      // Deduplicate and collect
       for (const item of items) {
         if (!seenIds.has(item.external_id)) {
           seenIds.add(item.external_id);
@@ -258,16 +354,11 @@ export const scrapeGumtree = async (config: AlertConfig): Promise<ScrapedItem[]>
         }
       }
 
-      console.log(`Gumtree page ${page}: ${items.length} items (total: ${allItems.length})`);
+      console.log(`Page ${page}: ${items.length} items (total: ${allItems.length})`);
 
-      // If we got significantly fewer items, there might be no next page
+      // Stop if low item count (likely last page)
       if (items.length < 20) {
         break;
-      }
-
-      // Delay before next page (if not last page)
-      if (page < MAX_PAGES) {
-        await delay(PAGE_DELAY);
       }
     }
 
