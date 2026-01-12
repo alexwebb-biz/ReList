@@ -73,7 +73,7 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({
   ...props
 }) => (
   <input
-    className={`px-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none w-full text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 transition-all shadow-sm ${className}`}
+    className={`px-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none w-full text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 transition-all shadow-sm ${className}`}
     {...props}
   />
 );
@@ -84,7 +84,7 @@ export const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (
   ...props
 }) => (
   <select
-    className={`px-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none w-full text-sm text-slate-900 dark:text-white transition-all shadow-sm ${className}`}
+    className={`px-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none w-full text-base text-slate-900 dark:text-white transition-all shadow-sm ${className}`}
     {...props}
   />
 );
@@ -95,7 +95,7 @@ export const Textarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement
   ...props
 }) => (
   <textarea
-    className={`px-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none w-full text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 transition-all shadow-sm resize-none ${className}`}
+    className={`px-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none w-full text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 transition-all shadow-sm resize-none ${className}`}
     {...props}
   />
 );
