@@ -1,6 +1,6 @@
 import { AlertConfig, ScrapedItem } from '../services/scraperService.js';
-import { gotScraping } from 'got-scraping'; // Replaces node-fetch
-import { getRandomProxy } from '../config/proxies.js';
+import { gotScraping } from 'got-scraping';
+import { getRandomProxy, ProxyConfig } from '../config/proxies.js'; // Import the type
 
 const VINTED_BASE_URL = 'https://www.vinted.co.uk';
 const VINTED_API_URL = `${VINTED_BASE_URL}/api/v2/catalog/items`;
@@ -25,6 +25,12 @@ const parseCookies = (cookieHeader: string[]): Map<string, string> => {
   return map;
 };
 
+// CORRECTED: Build proxy URL from ProxyConfig interface
+const buildProxyUrl = (proxy: ProxyConfig): string => {
+  // Format: http://username:password@host:port
+  return `http://${proxy.username}:${proxy.password}@${proxy.host}:${proxy.port}`;
+};
+
 const initializeSession = async () => {
   if (sessionCache?.expiresAt > Date.now()) {
     return sessionCache;
@@ -39,9 +45,10 @@ const initializeSession = async () => {
         operatingSystems: ['windows'],
         locales: ['en-GB'],
       },
-      proxyUrl: proxy ? `http://${proxy.user}:${proxy.pass}@${proxy.host}:${proxy.port}` : undefined,
+      // CORRECTED: Pass proxy URL properly
+      proxyUrl: proxy ? buildProxyUrl(proxy) : undefined,
       timeout: { request: 30000 },
-      throwHttpErrors: false, // Don't throw on 403
+      throwHttpErrors: false,
     });
 
     if (response.statusCode !== 200) {
@@ -55,7 +62,6 @@ const initializeSession = async () => {
 
     await new Promise(r => setTimeout(r, 2000 + Math.random() * 2000));
 
-    // got-scraping automatically handles cookies, but we can extract them
     const cookieMap = parseCookies(response.headers['set-cookie'] || []);
     
     if (!cookieMap.has('_vinted_fr_session')) {
@@ -84,7 +90,7 @@ const initializeSession = async () => {
   }
 };
 
-const generateSessionId = () => {
+const generateSessionId = (): string => {
   const rand = () => Math.random().toString(36).substring(2, 15);
   return `${rand()}${rand()}`.substring(0, 43);
 };
@@ -119,7 +125,8 @@ const fetchWithRetry = async (url: string, session: any, maxRetries = 3) => {
           'x-csrf-token': session.csrfToken || '',
           ...(session.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
         },
-        proxyUrl: proxy ? `http://${proxy.user}:${proxy.pass}@${proxy.host}:${proxy.port}` : undefined,
+        // CORRECTED: Proxy URL here too
+        proxyUrl: proxy ? buildProxyUrl(proxy) : undefined,
         headerGeneratorOptions: {
           browsers: [{ name: 'chrome', minVersion: 131 }],
           operatingSystems: ['windows'],
