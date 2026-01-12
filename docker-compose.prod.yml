@@ -84,6 +84,7 @@ services:
       EBAY_CERT_ID: ${EBAY_CERT_ID:-}
       EBAY_ENV: ${EBAY_ENV:-PRODUCTION}
       EBAY_VERIFICATION_TOKEN: ${EBAY_VERIFICATION_TOKEN:-}
+      RESIDENTIAL_PROXIES: ${RESIDENTIAL_PROXIES:-}
     networks:
       - relist-network
     depends_on:
