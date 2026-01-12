@@ -79,7 +79,7 @@ router.patch('/profile', async (req: AuthenticatedRequest, res: Response) => {
     sendSuccess(res, user);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
       return;
     }
@@ -180,7 +180,7 @@ router.patch('/notification-settings', async (req: AuthenticatedRequest, res: Re
     sendSuccess(res, user);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
       return;
     }

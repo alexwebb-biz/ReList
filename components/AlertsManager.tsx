@@ -6,6 +6,16 @@ import { Card, Button, Badge, Input, Select } from './ui/UIComponents';
 
 const PLATFORMS = ['eBay', 'Depop', 'Vinted', 'Facebook Marketplace', 'Gumtree', 'Shpock'];
 
+const formatFrequency = (minutes: number): string => {
+  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 1440) {
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h`;
+  }
+  const days = Math.floor(minutes / 1440);
+  return `${days}d`;
+};
+
 export const AlertsManager: React.FC = () => {
   const {
     alerts,
@@ -69,6 +79,7 @@ export const AlertsManager: React.FC = () => {
       price_min: newAlert.price_min,
       price_max: newAlert.price_max,
       exclude_keywords: newAlert.exclude_keywords,
+      check_frequency_minutes: newAlert.check_frequency_minutes || 5,
     };
 
     const result = await createAlert(alertData);
@@ -374,6 +385,7 @@ export const AlertsManager: React.FC = () => {
                   <th className="px-6 py-4">Keywords</th>
                   <th className="px-6 py-4">Price Range</th>
                   <th className="px-6 py-4">Platforms</th>
+                  <th className="px-6 py-4">Frequency</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
@@ -408,6 +420,12 @@ export const AlertsManager: React.FC = () => {
                           </div>
                         )}
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded-md text-xs font-medium">
+                        <Radar size={12} />
+                        Every {formatFrequency(alertItem.check_frequency_minutes)}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`flex items-center gap-1.5 font-medium ${alertItem.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-neutral-500'}`}>
@@ -505,6 +523,12 @@ export const AlertsManager: React.FC = () => {
                     {alertItem.keywords.length > 3 && (
                       <span className="text-slate-400 dark:text-neutral-500 text-xs">+{alertItem.keywords.length - 3}</span>
                     )}
+                  </div>
+                  <div className="mb-2">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded-md text-xs font-medium">
+                      <Radar size={10} />
+                      Every {formatFrequency(alertItem.check_frequency_minutes)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-xs text-slate-600 dark:text-neutral-400 font-medium">
                     <span>£{alertItem.price_min || 0} - £{alertItem.price_max || '∞'}</span>
