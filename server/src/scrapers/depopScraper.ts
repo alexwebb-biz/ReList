@@ -1,20 +1,29 @@
 import { randomUUID } from 'crypto';
 import { AlertConfig, ScrapedItem } from '../services/scraperService.js';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { getRandomProxy, getProxyUrl } from '../config/proxies.js';
 
 const DEPOP_API_URL = 'https://webapi.depop.com/api/v2/search/products';
 
-// Depop requires specific UUID headers to bypass Cloudflare
-// ~10% success rate with raw HTTP, may need scraping service for production
+// Depop requires specific UUID headers + uses Cloudflare protection
+// Updated to match latest Chrome and include full browser fingerprinting
 const generateDepopHeaders = () => ({
-  'accept': '*/*',
+  'accept': 'application/json, text/plain, */*',
+  'accept-encoding': 'gzip, deflate, br',
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
   'content-type': 'application/json',
   'depop-device-id': randomUUID(),     // Required UUID
   'depop-search-id': randomUUID(),     // Required UUID
   'depop-session-id': randomUUID(),    // Required UUID
   'origin': 'https://www.depop.com',
   'referer': 'https://www.depop.com/',
-  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'accept-language': 'en-GB,en;q=0.9',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+  'sec-ch-ua-mobile': '?0',
+  'sec-ch-ua-platform': '"Windows"',
+  'sec-fetch-dest': 'empty',
+  'sec-fetch-mode': 'cors',
+  'sec-fetch-site': 'same-site',
 });
 
 // Build Depop API request
@@ -88,14 +97,23 @@ const parseResponse = (data: any): ScrapedItem[] => {
   return items;
 };
 
-// Fetch with exponential backoff retry
-const fetchWithRetry = async (url: string, maxRetries = 3): Promise<Response | null> => {
+// Fetch with exponential backoff retry (with proxy support)
+const fetchWithRetry = async (
+  url: string,
+  proxyAgent: HttpsProxyAgent<string> | null,
+  maxRetries = 3
+): Promise<Response | null> => {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       // Generate fresh headers for each attempt (new UUIDs)
       const headers = generateDepopHeaders();
 
-      const response = await fetch(url, { headers });
+      const fetchOptions: any = { headers };
+      if (proxyAgent) {
+        fetchOptions.agent = proxyAgent;
+      }
+
+      const response = await fetch(url, fetchOptions);
 
       if (response.status === 403 || response.status === 503) {
         // Cloudflare blocked - exponential backoff with jitter
@@ -128,11 +146,21 @@ const fetchWithRetry = async (url: string, maxRetries = 3): Promise<Response | n
 // Main scrape function
 export const scrapeDepop = async (config: AlertConfig): Promise<ScrapedItem[]> => {
   try {
+    // Get a random proxy for this scrape
+    const proxy = getRandomProxy();
+    const proxyAgent = proxy ? new HttpsProxyAgent(getProxyUrl(proxy)) : null;
+
+    if (proxy) {
+      console.log(`Depop using proxy: ${proxy.host}:${proxy.port}`);
+    } else {
+      console.warn('Depop: No proxies available, making direct request');
+    }
+
     const params = buildSearchParams(config);
     const url = `${DEPOP_API_URL}?${params.toString()}`;
     console.log(`Scraping Depop: ${config.keywords.join(' ')}`);
 
-    const response = await fetchWithRetry(url);
+    const response = await fetchWithRetry(url, proxyAgent);
 
     if (!response) {
       console.log('Depop: No response after retries');

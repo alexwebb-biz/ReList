@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAlertsStore } from '../stores/alertsStore';
 import { CreateAlertData } from '../lib/api';
 import { Bell, Trash2, Plus, Filter, Search, Pause, Play, Loader2, Zap, X, Radar } from 'lucide-react';
-import { Card, Button, Badge, Input } from './ui/UIComponents';
+import { Card, Button, Badge, Input, Select } from './ui/UIComponents';
 
 const PLATFORMS = ['eBay', 'Depop', 'Vinted', 'Facebook Marketplace', 'Gumtree', 'Shpock'];
 
@@ -30,6 +30,7 @@ export const AlertsManager: React.FC = () => {
     price_min: 0,
     price_max: 10000,
     platforms: [],
+    check_frequency_minutes: 5,
   });
   const [keywordInput, setKeywordInput] = useState('');
   const [excludeKeywordInput, setExcludeKeywordInput] = useState('');
@@ -276,6 +277,25 @@ export const AlertsManager: React.FC = () => {
                     />
                   </div>
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-2">Check Frequency</label>
+                <Select
+                  value={newAlert.check_frequency_minutes || 5}
+                  onChange={(e) => setNewAlert({...newAlert, check_frequency_minutes: Number(e.target.value)})}
+                >
+                  <option value="5">Every 5 minutes</option>
+                  <option value="10">Every 10 minutes</option>
+                  <option value="15">Every 15 minutes</option>
+                  <option value="30">Every 30 minutes</option>
+                  <option value="60">Every hour</option>
+                  <option value="120">Every 2 hours</option>
+                  <option value="180">Every 3 hours</option>
+                  <option value="360">Every 6 hours</option>
+                  <option value="720">Every 12 hours</option>
+                  <option value="1440">Once a day</option>
+                </Select>
+                <p className="text-xs text-slate-500 dark:text-neutral-500 mt-2">How often this alert checks for new items</p>
               </div>
             </div>
 
