@@ -5,29 +5,82 @@ import { getRandomProxy, getProxyUrl } from '../config/proxies.js';
 const VINTED_BASE_URL = 'https://www.vinted.co.uk';
 const VINTED_API_URL = `${VINTED_BASE_URL}/api/v2/catalog/items`;
 
-// Session token cache (tokens expire in ~2 hours)
+// Enhanced session cache with CSRF token
 let sessionCache: {
   accessToken: string | null;
+  csrfToken: string | null;
   cookies: string;
   expiresAt: number;
-  proxyAgent: HttpsProxyAgent<string> | null;
 } | null = null;
 
-// Initialize session to get access token and cookies
-const initializeSession = async (): Promise<{ accessToken: string | null; cookies: string; proxyAgent: HttpsProxyAgent<string> | null } | null> => {
-  // Check if we have a valid cached session
+// Robust cookie parser
+const parseSetCookies = (header: string): Map<string, string> => {
+  const cookieMap = new Map<string, string>();
+  if (!header) return cookieMap;
+
+  // Split by comma, but ignore commas inside dates
+  const parts = header.split(/,(?=\s*\w+=)/);
+  for (const part of parts) {
+    const [cookie] = part.split(';');
+    const [key, ...valueParts] = cookie.trim().split('=');
+    if (key && valueParts.length > 0) {
+      cookieMap.set(key, valueParts.join('='));
+    }
+  }
+  return cookieMap;
+};
+
+// Extract CSRF token from multiple sources
+const extractCsrfToken = async (response: Response, cookieMap: Map<string, string>): Promise<string | null> => {
+  // 1. Check response headers first
+  const headerToken = response.headers.get('x-csrf-token');
+  if (headerToken) return headerToken;
+
+  // 2. Check cookies
+  const cookieToken = cookieMap.get('_csrf_token');
+  if (cookieToken) return cookieToken;
+
+  // 3. Extract from HTML meta tag
+  try {
+    const html = await response.text();
+    const match = html.match(/<meta[^>]*name=["']csrf-token["'][^>]*content=["']([^"']+)["']/i);
+    return match?.[1] || null;
+  } catch {
+    return null;
+  }
+};
+
+// Rotate proxy for each request
+const getProxyAgent = (): HttpsProxyAgent<string> | null => {
+  const proxy = getRandomProxy();
+  if (!proxy) {
+    console.warn('No proxies available');
+    return null;
+  }
+  return new HttpsProxyAgent(getProxyUrl(proxy));
+};
+
+// Initialize session with CSRF token
+const initializeSession = async (): Promise<{
+  accessToken: string | null;
+  csrfToken: string | null;
+  cookies: string;
+} | null> => {
   if (sessionCache && sessionCache.expiresAt > Date.now()) {
-    return { accessToken: sessionCache.accessToken, cookies: sessionCache.cookies, proxyAgent: sessionCache.proxyAgent };
+    return {
+      accessToken: sessionCache.accessToken,
+      csrfToken: sessionCache.csrfToken,
+      cookies: sessionCache.cookies,
+    };
   }
 
   try {
-    // Get a random proxy for this session
-    const proxy = getRandomProxy();
-    const fetchOptions: any = {
+    const agent = getProxyAgent();
+    const fetchOptions: RequestInit & { agent?: any } = {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-GB,en;q=0.9',
         'Accept-Encoding': 'gzip, deflate, br',
         'Referer': 'https://www.google.com/',
         'Sec-Fetch-Dest': 'document',
@@ -38,109 +91,192 @@ const initializeSession = async (): Promise<{ accessToken: string | null; cookie
         'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"Windows"',
+        'sec-ch-ua-arch': '"x86"',
+        'sec-ch-ua-bitness': '"64"',
+        'sec-ch-ua-full-version': '"131.0.0.0"',
+        'sec-ch-ua-full-version-list': '"Google Chrome";v="131.0.0.0", "Chromium";v="131.0.0.0"',
       },
     };
 
-    // Add proxy if available
-    if (proxy) {
-      const proxyUrl = getProxyUrl(proxy);
-      fetchOptions.agent = new HttpsProxyAgent(proxyUrl);
-      console.log(`Using proxy: ${proxy.host}:${proxy.port}`);
-    } else {
-      console.warn('No proxies available, making direct request');
+    if (agent) {
+      fetchOptions.agent = agent;
+      console.log(`Initializing session with proxy`);
     }
 
-    // First, hit the main page to get session cookies
     const response = await fetch(VINTED_BASE_URL, fetchOptions);
 
     if (!response.ok) {
-      console.log('Vinted session init failed:', response.status);
+      console.error(`Vinted session init failed: ${response.status}`);
       if (response.status === 403) {
-        console.warn('⚠️  Vinted 403 - Proxy may be blocked or fingerprint detected');
+        const body = await response.text();
+        console.error('403 details:', body.substring(0, 200));
       }
       return null;
     }
 
-    // Add delay to simulate human behavior
-    await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000));
+    // More realistic initial delay
+    await new Promise(r => setTimeout(r, 2000 + Math.random() * 2000));
 
-    // Extract cookies from response - improved parsing
-    // Note: Standard fetch Headers don't support getSetCookie() in Node.js yet
-    // So we'll use a workaround by getting all set-cookie headers
+    // Parse cookies properly
     const setCookieHeader = response.headers.get('set-cookie') || '';
-    const cookieMap = new Map<string, string>();
+    const cookieMap = parseSetCookies(setCookieHeader);
 
-    // Split by comma but be careful of expires dates which also contain commas
-    const cookieParts = setCookieHeader.split(/,(?=\s*\w+=)/);
-
-    for (const cookieStr of cookieParts) {
-      const parts = cookieStr.split(';')[0].trim();
-      const equalsIndex = parts.indexOf('=');
-      if (equalsIndex > 0) {
-        const key = parts.substring(0, equalsIndex);
-        const value = parts.substring(equalsIndex + 1);
-        if (key && value) {
-          cookieMap.set(key, value);
-        }
-      }
-    }
-
-    // Add essential cookies if missing (Vinted requires these)
+    // Ensure session cookie exists
     if (!cookieMap.has('_vinted_fr_session')) {
-      // Generate a session-like value
-      const sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      cookieMap.set('_vinted_fr_session', sessionId);
+      cookieMap.set('_vinted_fr_session', generateSessionId());
     }
 
     const cookies = Array.from(cookieMap.entries())
       .map(([k, v]) => `${k}=${v}`)
       .join('; ');
 
-    // Try to extract access token from cookies
+    // Extract tokens
     const accessToken = cookieMap.get('access_token_web') || null;
+    const csrfToken = await extractCsrfToken(response, cookieMap);
 
-    // Get the proxy agent to reuse for subsequent requests
-    const proxyAgent = proxy ? new HttpsProxyAgent(getProxyUrl(proxy)) : null;
-
-    // Cache session for 1.5 hours (tokens expire in 2 hours)
+    // Cache session
     sessionCache = {
       accessToken,
+      csrfToken,
       cookies,
-      expiresAt: Date.now() + 90 * 60 * 1000,
-      proxyAgent,
+      expiresAt: Date.now() + 90 * 60 * 1000, // 1.5 hours
     };
 
-    return { accessToken, cookies, proxyAgent };
+    console.log('Vinted session initialized successfully');
+    return { accessToken, csrfToken, cookies };
   } catch (error) {
     console.error('Vinted session init error:', error);
     return null;
   }
 };
 
-// Build Vinted API request
-const buildSearchParams = (config: AlertConfig, page: number = 1): URLSearchParams => {
-  const params = new URLSearchParams();
-  params.set('search_text', config.keywords.join(' '));
-  params.set('order', 'newest_first');
-  params.set('per_page', '96'); // Max allowed per page
-  params.set('page', page.toString());
+// Generate realistic session ID
+const generateSessionId = (): string => {
+  const rand = () => Math.random().toString(36).substring(2, 15);
+  return `${rand()}${rand()}${rand()}`.substring(0, 43);
+};
 
-  if (config.price_min) {
-    params.set('price_from', config.price_min.toString());
+// Enhanced API headers with full fingerprint
+const buildApiHeaders = (session: {
+  accessToken: string | null;
+  csrfToken: string | null;
+  cookies: string;
+}): Record<string, string> => ({
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  'Accept': 'application/json, text/plain, */*',
+  'Accept-Language': 'en-GB,en;q=0.9',
+  'Accept-Encoding': 'gzip, deflate, br, zstd',
+  'Referer': 'https://www.vinted.co.uk/catalog',
+  'Origin': 'https://www.vinted.co.uk',
+  'Sec-Fetch-Dest': 'empty',
+  'Sec-Fetch-Mode': 'cors',
+  'Sec-Fetch-Site': 'same-origin',
+  'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+  'sec-ch-ua-mobile': '?0',
+  'sec-ch-ua-platform': '"Windows"',
+  'sec-ch-ua-arch': '"x86"',
+  'sec-ch-ua-bitness': '"64"',
+  'sec-ch-ua-full-version': '"131.0.0.0"',
+  'sec-ch-ua-full-version-list': '"Google Chrome";v="131.0.0.0", "Chromium";v="131.0.0.0"',
+  'DNT': '1',
+  'Connection': 'keep-alive',
+  'Priority': 'u=1, i',
+  'Cache-Control': 'no-cache',
+  'Pragma': 'no-cache',
+  'Cookie': session.cookies,
+  'x-csrf-token': session.csrfToken || '',
+  ...(session.accessToken ? { 'Authorization': `Bearer ${session.accessToken}` } : {}),
+});
+
+// Human-like delay with jitter
+const humanDelay = (minMs: number, maxMs: number): Promise<void> =>
+  new Promise(r => setTimeout(r, minMs + Math.random() * (maxMs - minMs)));
+
+// Enhanced retry with session refresh and proper backoff
+const fetchWithRetry = async (
+  url: string,
+  session: {
+    accessToken: string | null;
+    csrfToken: string | null;
+    cookies: string;
+  },
+  maxRetries = 3
+): Promise<Response | null> => {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const agent = getProxyAgent();
+      const headers = buildApiHeaders(session);
+      const fetchOptions: RequestInit & { agent?: any } = { headers };
+      if (agent) fetchOptions.agent = agent;
+
+      const response = await fetch(url, fetchOptions);
+
+      // Log detailed errors
+      if (response.status === 403 || response.status === 401) {
+        const body = await response.text();
+        console.error(`Vinted auth error (${response.status}):`, {
+          attempt: attempt + 1,
+          hasCloudflare: body.includes('cloudflare'),
+          hasChallenge: body.includes('challenge'),
+          bodyPreview: body.substring(0, 300),
+        });
+      }
+
+      if (response.status === 401 || response.status === 403) {
+        // Clear cache and refresh session
+        sessionCache = null;
+        const newSession = await initializeSession();
+        if (newSession && attempt < maxRetries - 1) {
+          console.log('Session refreshed, retrying...');
+          session = newSession; // Use new session for next attempt
+          await humanDelay(1000, 2000);
+          continue;
+        }
+        return null;
+      }
+
+      if (response.status === 429) {
+        const backoffDelay = Math.pow(2, attempt) * 3000 + Math.random() * 2000;
+        console.log(`Rate limited, waiting ${Math.round(backoffDelay)}ms...`);
+        await humanDelay(backoffDelay, backoffDelay + 1000);
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return response;
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1} failed:`, error);
+      if (attempt === maxRetries - 1) return null;
+      await humanDelay(1000 * (attempt + 1), 2000 * (attempt + 1));
+    }
   }
-  if (config.price_max) {
-    params.set('price_to', config.price_max.toString());
-  }
+  return null;
+};
+
+// Build search params with cache busting
+const buildSearchParams = (config: AlertConfig, page: number = 1): URLSearchParams => {
+  const params = new URLSearchParams({
+    search_text: config.keywords.join(' '),
+    order: 'newest_first',
+    per_page: '96',
+    page: page.toString(),
+    currency: 'GBP',
+    time: Date.now().toString(), // Cache buster
+    ab_tests: 'catalog_cards:v3,catalog_inline_filters:true',
+  });
+
+  if (config.price_min) params.set('price_from', config.price_min.toString());
+  if (config.price_max) params.set('price_to', config.price_max.toString());
 
   return params;
 };
 
-// Extract price from various Vinted API response formats
+// Unchanged helper functions
 const extractPrice = (item: any): number => {
-  // Try different price field formats
-  if (typeof item.price === 'number') {
-    return item.price;
-  }
+  if (typeof item.price === 'number') return item.price;
   if (typeof item.price === 'string') {
     const parsed = parseFloat(item.price);
     if (!isNaN(parsed)) return parsed;
@@ -154,28 +290,17 @@ const extractPrice = (item: any): number => {
     const parsed = parseFloat(item.total_item_price);
     if (!isNaN(parsed)) return parsed;
   }
-  if (item.total_item_price?.amount) {
-    const parsed = parseFloat(item.total_item_price.amount);
-    if (!isNaN(parsed)) return parsed;
-  }
-  // Return 0 as fallback (will be filtered out)
   return 0;
 };
 
-// Parse Vinted API response
 const parseResponse = (data: any): ScrapedItem[] => {
   const items: ScrapedItem[] = [];
-
-  if (!data.items || !Array.isArray(data.items)) {
-    return items;
-  }
+  if (!data?.items?.length) return items;
 
   for (const item of data.items) {
     try {
       const imageUrls: string[] = [];
-      if (item.photo?.url) {
-        imageUrls.push(item.photo.url);
-      }
+      if (item.photo?.url) imageUrls.push(item.photo.url);
       if (item.photos) {
         for (const photo of item.photos.slice(0, 5)) {
           if (photo.url && !imageUrls.includes(photo.url)) {
@@ -185,11 +310,7 @@ const parseResponse = (data: any): ScrapedItem[] => {
       }
 
       const price = extractPrice(item);
-
-      // Skip items without valid prices
-      if (price <= 0 || isNaN(price)) {
-        continue;
-      }
+      if (price <= 0) continue;
 
       items.push({
         external_id: `vinted-${item.id}`,
@@ -209,115 +330,39 @@ const parseResponse = (data: any): ScrapedItem[] => {
       console.error('Error parsing Vinted item:', err);
     }
   }
-
   return items;
 };
 
-// Fetch with exponential backoff retry
-const fetchWithRetry = async (
-  url: string,
-  headers: Record<string, string>,
-  proxyAgent: HttpsProxyAgent<string> | null,
-  maxRetries = 3
-): Promise<Response | null> => {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const fetchOptions: any = { headers };
-      if (proxyAgent) {
-        fetchOptions.agent = proxyAgent;
-      }
-      const response = await fetch(url, fetchOptions);
-
-      if (response.status === 401 || response.status === 403) {
-        // Session expired or blocked - clear cache and retry with new session
-        console.log(`Vinted auth failed (${response.status}), refreshing session...`);
-        sessionCache = null;
-        const session = await initializeSession();
-        if (session) {
-          // Retry with new session
-          const newHeaders = { ...headers };
-          if (session.accessToken) {
-            newHeaders['Authorization'] = `Bearer ${session.accessToken}`;
-          }
-          newHeaders['Cookie'] = session.cookies;
-          continue;
-        }
-        return null;
-      }
-
-      if (response.status === 429) {
-        // Rate limited - exponential backoff with jitter
-        const backoffDelay = Math.pow(2, attempt) * 2000 + Math.random() * 1000;
-        console.log(`Vinted rate limited, waiting ${Math.round(backoffDelay)}ms...`);
-        await new Promise(r => setTimeout(r, backoffDelay));
-        continue;
-      }
-
-      return response;
-    } catch (error) {
-      if (attempt === maxRetries - 1) {
-        console.error('Vinted fetch failed after retries:', error);
-        return null;
-      }
-      await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
-    }
-  }
-
-  return null;
-};
-
-// Fetch a single page of results
+// Fetch a single page
 const fetchPage = async (
   config: AlertConfig,
   page: number,
-  session: { accessToken: string | null; cookies: string; proxyAgent: HttpsProxyAgent<string> | null }
+  session: {
+    accessToken: string | null;
+    csrfToken: string | null;
+    cookies: string;
+  }
 ): Promise<ScrapedItem[]> => {
   const params = buildSearchParams(config, page);
   const url = `${VINTED_API_URL}?${params.toString()}`;
 
-  const headers: Record<string, string> = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    'Accept': 'application/json, text/plain, */*',
-    'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-    'Accept-Encoding': 'gzip, deflate, br, zstd',
-    'Referer': 'https://www.vinted.co.uk/catalog',
-    'Origin': 'https://www.vinted.co.uk',
-    'Sec-Fetch-Dest': 'empty',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'same-origin',
-    'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'DNT': '1',
-    'Connection': 'keep-alive',
-    'Priority': 'u=1, i',
-    'Cookie': session.cookies,
-  };
-
-  if (session.accessToken) {
-    headers['Authorization'] = `Bearer ${session.accessToken}`;
-  }
-
-  const response = await fetchWithRetry(url, headers, session.proxyAgent);
-
-  if (!response || !response.ok) {
-    return [];
-  }
+  const response = await fetchWithRetry(url, session);
+  if (!response) return [];
 
   const data = await response.json();
   return parseResponse(data);
 };
 
-// Main scrape function - fetches multiple pages
+// Main scrape function
 export const scrapeVinted = async (config: AlertConfig): Promise<ScrapedItem[]> => {
-  const MAX_PAGES = 3; // Fetch up to 3 pages (288 items max)
-  const PAGE_DELAY = 2000 + Math.random() * 1000; // 2-3s randomized delay between pages
+  const MAX_PAGES = 3;
+  const PAGE_DELAY_MIN = 3000;
+  const PAGE_DELAY_MAX = 7000;
 
   try {
-    // Initialize session first
     const session = await initializeSession();
     if (!session) {
-      console.log('Vinted: Failed to initialize session');
+      console.error('Vinted: Failed to initialize session');
       return [];
     }
 
@@ -329,12 +374,8 @@ export const scrapeVinted = async (config: AlertConfig): Promise<ScrapedItem[]> 
     for (let page = 1; page <= MAX_PAGES; page++) {
       const items = await fetchPage(config, page, session);
 
-      if (items.length === 0) {
-        // No more results
-        break;
-      }
+      if (!items.length) break;
 
-      // Deduplicate within this scrape
       for (const item of items) {
         if (!seenIds.has(item.external_id)) {
           seenIds.add(item.external_id);
@@ -344,14 +385,10 @@ export const scrapeVinted = async (config: AlertConfig): Promise<ScrapedItem[]> 
 
       console.log(`Vinted page ${page}: ${items.length} items (total: ${allItems.length})`);
 
-      // If we got fewer items than per_page, there's no next page
-      if (items.length < 96) {
-        break;
-      }
+      if (items.length < 96) break;
 
-      // Delay before next page (if not last page)
       if (page < MAX_PAGES) {
-        await new Promise(r => setTimeout(r, PAGE_DELAY));
+        await humanDelay(PAGE_DELAY_MIN, PAGE_DELAY_MAX);
       }
     }
 
