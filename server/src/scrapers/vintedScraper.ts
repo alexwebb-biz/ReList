@@ -1,6 +1,7 @@
 import { AlertConfig, ScrapedItem } from '../services/scraperService.js';
 import { gotScraping } from 'got-scraping';
-import { getRandomProxy, ProxyConfig } from '../config/proxies.js'; // Import the type
+import { getRandomProxy, ProxyConfig } from '../config/proxies.js';
+import { CookieJar } from 'tough-cookie'; // Add this
 
 const VINTED_BASE_URL = 'https://www.vinted.co.uk';
 const VINTED_API_URL = `${VINTED_BASE_URL}/api/v2/catalog/items`;
@@ -12,23 +13,27 @@ let sessionCache: {
   expiresAt: number;
 } | null = null;
 
-// Parse cookies from got-scraping response
-const parseCookies = (cookieHeader: string[]): Map<string, string> => {
-  const map = new Map<string, string>();
-  for (const cookie of cookieHeader) {
-    const [keyValue] = cookie.split(';');
-    const [key, ...valueParts] = keyValue.trim().split('=');
-    if (key && valueParts.length) {
-      map.set(key, valueParts.join('='));
-    }
-  }
-  return map;
+// Use a cookie jar for automatic cookie handling
+const cookieJar = new CookieJar();
+
+const buildProxyUrl = (proxy: ProxyConfig): string => {
+  return `http://${proxy.username}:${proxy.password}@${proxy.host}:${proxy.port}`;
 };
 
-// CORRECTED: Build proxy URL from ProxyConfig interface
-const buildProxyUrl = (proxy: ProxyConfig): string => {
-  // Format: http://username:password@host:port
-  return `http://${proxy.username}:${proxy.password}@${proxy.host}:${proxy.port}`;
+// Enhanced CSRF token extraction from HTML
+const extractCsrfTokenFromHtml = (html: string): string | null => {
+  // Try multiple patterns
+  const patterns = [
+    /<meta[^>]*name=["']csrf-token["'][^>]*content=["']([^"']+)["']/i,
+    /"_csrf_token"\s*:\s*"([^"]+)"/i,
+    /csrfToken\s*:\s*"([^"]+)"/i,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) return match[1];
+  }
+  return null;
 };
 
 const initializeSession = async () => {
@@ -38,6 +43,7 @@ const initializeSession = async () => {
 
   try {
     const proxy = getRandomProxy();
+    console.log(`Initializing Vinted session${proxy ? ' with proxy' : ''}...`);
     
     const response = await gotScraping.get(VINTED_BASE_URL, {
       headerGeneratorOptions: {
@@ -45,35 +51,36 @@ const initializeSession = async () => {
         operatingSystems: ['windows'],
         locales: ['en-GB'],
       },
-      // CORRECTED: Pass proxy URL properly
       proxyUrl: proxy ? buildProxyUrl(proxy) : undefined,
+      cookieJar, // Use cookie jar
       timeout: { request: 30000 },
       throwHttpErrors: false,
     });
 
     if (response.statusCode !== 200) {
-      console.error(`Vinted session init failed: ${response.statusCode}`);
+      console.error(`❌ Vinted session init failed: ${response.statusCode}`);
       if (response.statusCode === 403) {
-        console.error('Cloudflare blocked session init');
-        console.error('Body preview:', response.body.substring(0, 300));
+        console.error('Cloudflare block detected');
+        console.error('Response body:', response.body.substring(0, 300));
       }
       return null;
     }
 
-    await new Promise(r => setTimeout(r, 2000 + Math.random() * 2000));
+    // Wait longer for page load
+    await new Promise(r => setTimeout(r, 3000 + Math.random() * 2000));
 
-    const cookieMap = parseCookies(response.headers['set-cookie'] || []);
+    // Extract cookies from jar
+    const cookies = await cookieJar.getCookieString(VINTED_BASE_URL);
     
-    if (!cookieMap.has('_vinted_fr_session')) {
-      cookieMap.set('_vinted_fr_session', generateSessionId());
+    // Extract CSRF token from HTML (most reliable method)
+    const csrfToken = extractCsrfTokenFromHtml(response.body);
+    const accessToken = null; // Usually not needed for search
+
+    if (!csrfToken) {
+      console.warn('⚠️ Could not extract CSRF token - requests may fail');
+    } else {
+      console.log('✅ CSRF token extracted:', csrfToken.substring(0, 10) + '...');
     }
-
-    const cookies = Array.from(cookieMap.entries())
-      .map(([k, v]) => `${k}=${v}`)
-      .join('; ');
-
-    const accessToken = cookieMap.get('access_token_web') || null;
-    const csrfToken = cookieMap.get('_csrf_token') || null;
 
     sessionCache = {
       accessToken,
@@ -82,7 +89,6 @@ const initializeSession = async () => {
       expiresAt: Date.now() + 90 * 60 * 1000,
     };
 
-    console.log('Vinted session initialized');
     return sessionCache;
   } catch (error) {
     console.error('Session init error:', error);
@@ -96,8 +102,14 @@ const generateSessionId = (): string => {
 };
 
 const buildSearchParams = (config: AlertConfig, page: number = 1) => {
+  // Validate keywords
+  const searchText = config.keywords.join(' ').trim();
+  if (!searchText) {
+    throw new Error('No search keywords provided');
+  }
+
   const params = new URLSearchParams({
-    search_text: config.keywords.join(' '),
+    search_text: searchText,
     order: 'newest_first',
     per_page: '96',
     page: page.toString(),
@@ -119,14 +131,19 @@ const fetchWithRetry = async (url: string, session: any, maxRetries = 3) => {
     try {
       const proxy = getRandomProxy();
       
+      // Build dynamic Referer that matches the search page
+      const refererUrl = `${VINTED_BASE_URL}/catalog?${buildSearchParams(session.config, 1).toString()}`;
+      
       const response = await gotScraping.get(url, {
         headers: {
-          Cookie: session.cookies,
+          // Use lowercase headers for consistency
+          'referer': refererUrl,
           'x-csrf-token': session.csrfToken || '',
-          ...(session.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+          // Don't pass Cookie header - cookieJar handles it automatically
+          ...(session.accessToken ? { 'authorization': `Bearer ${session.accessToken}` } : {}),
         },
-        // CORRECTED: Proxy URL here too
         proxyUrl: proxy ? buildProxyUrl(proxy) : undefined,
+        cookieJar, // Use the same cookie jar
         headerGeneratorOptions: {
           browsers: [{ name: 'chrome', minVersion: 131 }],
           operatingSystems: ['windows'],
@@ -135,6 +152,25 @@ const fetchWithRetry = async (url: string, session: any, maxRetries = 3) => {
         timeout: { request: 30000 },
         throwHttpErrors: false,
       });
+
+      // ENHANCED ERROR LOGGING
+      if (response.statusCode === 400) {
+        console.error('❌ Vinted 400 Bad Request - DEBUG INFO:');
+        console.error('URL:', url);
+        console.error('Request headers:', response.request.options.headers);
+        console.error('Response body:', response.body.substring(0, 500));
+        console.error('Cookies:', await cookieJar.getCookieString(VINTED_BASE_URL));
+        
+        // Try to extract any error message from response
+        try {
+          const errorData = JSON.parse(response.body);
+          console.error('API Error details:', errorData);
+        } catch {
+          // Not JSON
+        }
+        
+        throw new Error(`HTTP 400 - Bad Request: ${response.body.substring(0, 200)}`);
+      }
 
       if (response.statusCode === 403) {
         console.error('Cloudflare block detected on API request');
@@ -158,7 +194,7 @@ const fetchWithRetry = async (url: string, session: any, maxRetries = 3) => {
       }
 
       if (response.statusCode !== 200) {
-        throw new Error(`HTTP ${response.statusCode}`);
+        throw new Error(`HTTP ${response.statusCode}: ${response.body.substring(0, 200)}`);
       }
 
       return response;
@@ -234,6 +270,9 @@ export const scrapeVinted = async (config: AlertConfig): Promise<ScrapedItem[]> 
   const MAX_PAGES = 3;
   const session = await initializeSession();
   if (!session) return [];
+
+  // Store config in session for Referer building
+  (session as any).config = config;
 
   console.log(`Scraping Vinted: ${config.keywords.join(' ')}`);
 
