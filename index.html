@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
@@ -25,7 +26,16 @@
               slate: {
                 850: '#1e293b', // Custom dark for sidebar
               }
-            }
+            },
+            animation: {
+              'in': 'in 0.5s ease-out',
+            },
+            keyframes: {
+              in: {
+                '0%': { opacity: '0', transform: 'translateY(8px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+            },
           }
         }
       }
@@ -33,7 +43,41 @@
     <style>
       body {
         font-family: 'Inter', sans-serif;
+      }
+
+      /* Light mode */
+      html.light body {
         background-color: #f8fafc;
+        color: #0f172a;
+      }
+
+      /* Dark mode */
+      html.dark body {
+        background-color: #0a0a0a;
+        color: #e5e5e5;
+      }
+
+      /* Smooth transitions */
+      html {
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      /* Custom scrollbar for dark mode */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
       }
     </style>
   <script type="importmap">

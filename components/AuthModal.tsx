@@ -89,9 +89,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto animate-in fade-in slide-in-from-bottom sm:zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-neutral-900/80 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto animate-in fade-in slide-in-from-bottom sm:zoom-in-95 duration-200">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 sm:px-6 py-6 sm:py-8 text-white relative">
+        <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-4 sm:px-6 py-6 sm:py-8 text-white relative">
           <button
             onClick={() => { onClose(); resetForm(); }}
             className="absolute top-3 sm:top-4 right-3 sm:right-4 p-1.5 sm:p-1 hover:bg-white/20 rounded-full transition-colors"
@@ -129,14 +129,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
           {/* Full Name (signup only) */}
           {view === 'signup' && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Full Name</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-neutral-500" />
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="John Doe"
                 />
               </div>
@@ -146,14 +146,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
           {/* Email (login, signup, forgot) */}
           {(view === 'login' || view === 'signup' || view === 'forgot') && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-neutral-500" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="you@example.com"
                   required
                 />
@@ -164,12 +164,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
           {/* Reset Token (reset view only) */}
           {view === 'reset' && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Reset Token</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Reset Token</label>
               <input
                 type="text"
                 value={resetToken}
                 onChange={(e) => setResetToken(e.target.value)}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-mono text-sm"
+                className="w-full px-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none transition-all font-mono text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                 placeholder="Paste your reset token"
                 required
               />
@@ -179,16 +179,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
           {/* Password (login, signup, reset) */}
           {(view === 'login' || view === 'signup' || view === 'reset') && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
                 {view === 'reset' ? 'New Password' : 'Password'}
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-neutral-500" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="••••••••"
                   required
                   minLength={8}
@@ -200,14 +200,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
           {/* Confirm Password (signup, reset) */}
           {(view === 'signup' || view === 'reset') && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Confirm Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-neutral-500" />
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="••••••••"
                   required
                   minLength={8}
@@ -222,7 +222,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
               <button
                 type="button"
                 onClick={() => switchView('forgot')}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
               >
                 Forgot password?
               </button>
@@ -233,7 +233,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 sm:py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
+            className="w-full bg-violet-600 hover:bg-violet-500 text-white py-3 sm:py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             {isLoading ? (
               <>
@@ -251,14 +251,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
           </button>
 
           {/* Switch View Links */}
-          <div className="text-center text-xs sm:text-sm text-slate-600 pt-2 pb-2 sm:pb-0">
+          <div className="text-center text-xs sm:text-sm text-slate-600 dark:text-neutral-400 pt-2 pb-2 sm:pb-0">
             {view === 'login' && (
               <>
                 Don't have an account?{' '}
                 <button
                   type="button"
                   onClick={() => switchView('signup')}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
                 >
                   Sign up
                 </button>
@@ -270,7 +270,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 <button
                   type="button"
                   onClick={() => switchView('login')}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
                 >
                   Sign in
                 </button>
@@ -280,7 +280,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
               <button
                 type="button"
                 onClick={() => switchView('login')}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
               >
                 Back to sign in
               </button>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAlertsStore } from '../stores/alertsStore';
 import { CreateAlertData } from '../lib/api';
-import { Bell, Trash2, Plus, Filter, Search, Pause, Play, Loader2, Zap, X } from 'lucide-react';
+import { Bell, Trash2, Plus, Filter, Search, Pause, Play, Loader2, Zap, X, Radar } from 'lucide-react';
+import { Card, Button, Badge, Input } from './ui/UIComponents';
 
 const PLATFORMS = ['eBay', 'Depop', 'Vinted', 'Facebook Marketplace', 'Gumtree', 'Shpock'];
 
@@ -139,124 +140,139 @@ export const AlertsManager: React.FC = () => {
   );
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6 md:space-y-8">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-3 md:px-4 py-3 rounded-lg flex justify-between items-center text-sm">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl flex justify-between items-center text-sm shadow-sm">
           <span className="truncate">{error}</span>
-          <button onClick={clearError} className="text-red-500 hover:text-red-700 ml-2 flex-shrink-0">&times;</button>
+          <button onClick={clearError} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 ml-2 flex-shrink-0 text-xl">&times;</button>
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold text-slate-800">Alerts Manager</h2>
-          <p className="text-sm text-slate-500">Monitor marketplaces for deals in real-time.</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Smart Alerts</h2>
+          <p className="text-sm text-slate-600 dark:text-neutral-400 mt-1">Monitor marketplaces for deals in real-time.</p>
         </div>
-        <button
+        <Button
           onClick={() => setIsCreating(!isCreating)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors text-sm md:text-base w-full sm:w-auto justify-center"
+          variant={isCreating ? "secondary" : "primary"}
+          className="w-full sm:w-auto"
         >
-          {isCreating ? 'Cancel' : <><Plus size={18} /> Create Alert</>}
-        </button>
+          {isCreating ? (
+            <>
+              <X size={18} /> Cancel
+            </>
+          ) : (
+            <>
+              <Plus size={18} /> Create Alert
+            </>
+          )}
+        </Button>
       </div>
 
       {isCreating && (
-        <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-blue-100 animate-in fade-in slide-in-from-top-4 duration-300">
-          <h3 className="font-semibold text-base md:text-lg mb-4 text-slate-800">New Search Monitor</h3>
+        <Card className="border-l-4 border-l-violet-500 dark:border-l-violet-400 shadow-lg animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
+              <Radar className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            </div>
+            <h3 className="font-bold text-lg md:text-xl text-slate-900 dark:text-white">New Search Monitor</h3>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-3 md:space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Alert Name</label>
-                <input
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-2">Alert Name</label>
+                <Input
                   type="text"
                   value={newAlert.name}
                   onChange={(e) => setNewAlert({...newAlert, name: e.target.value})}
-                  className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
                   placeholder="e.g. Vintage Nike Deals"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Keywords (include)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-2">Keywords (include)</label>
                 <div className="flex gap-2">
-                  <input
+                  <Input
                     type="text"
                     value={keywordInput}
                     onChange={(e) => setKeywordInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddKeyword())}
-                    className="flex-1 px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
                     placeholder="Add a keyword"
+                    className="flex-1"
                   />
-                  <button
+                  <Button
                     onClick={handleAddKeyword}
-                    className="px-3 md:px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 text-sm"
+                    variant="secondary"
+                    className="px-4"
                   >
                     Add
-                  </button>
+                  </Button>
                 </div>
                 {(newAlert.keywords?.length || 0) > 0 && (
-                  <div className="flex flex-wrap gap-1.5 md:gap-2 mt-2">
+                  <div className="flex flex-wrap gap-2 mt-2">
                     {newAlert.keywords?.map((keyword, i) => (
-                      <span key={i} className="bg-blue-100 text-blue-700 px-2 py-0.5 md:py-1 rounded-full text-xs md:text-sm flex items-center gap-1">
+                      <Badge key={i} variant="violet" className="flex items-center gap-1.5">
                         {keyword}
-                        <button onClick={() => handleRemoveKeyword(keyword)} className="hover:text-blue-900">&times;</button>
-                      </span>
+                        <button onClick={() => handleRemoveKeyword(keyword)} className="hover:text-violet-900 dark:hover:text-violet-200 ml-1">&times;</button>
+                      </Badge>
                     ))}
                   </div>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Exclude Keywords</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-2">Exclude Keywords</label>
                 <div className="flex gap-2">
-                  <input
+                  <Input
                     type="text"
                     value={excludeKeywordInput}
                     onChange={(e) => setExcludeKeywordInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddExcludeKeyword())}
-                    className="flex-1 px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none text-sm md:text-base"
                     placeholder="e.g. damaged, broken"
+                    className="flex-1"
                   />
-                  <button
+                  <Button
                     onClick={handleAddExcludeKeyword}
-                    className="px-3 md:px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 text-sm"
+                    variant="secondary"
+                    className="px-4"
                   >
                     Add
-                  </button>
+                  </Button>
                 </div>
                 {(newAlert.exclude_keywords?.length || 0) > 0 && (
-                  <div className="flex flex-wrap gap-1.5 md:gap-2 mt-2">
+                  <div className="flex flex-wrap gap-2 mt-2">
                     {newAlert.exclude_keywords?.map((keyword, i) => (
-                      <span key={i} className="bg-red-100 text-red-700 px-2 py-0.5 md:py-1 rounded-full text-xs md:text-sm flex items-center gap-1">
+                      <Badge key={i} variant="error" className="flex items-center gap-1.5">
                         <X size={12} />
                         {keyword}
-                        <button onClick={() => handleRemoveExcludeKeyword(keyword)} className="hover:text-red-900">&times;</button>
-                      </span>
+                        <button onClick={() => handleRemoveExcludeKeyword(keyword)} className="hover:text-red-900 dark:hover:text-red-200 ml-1">&times;</button>
+                      </Badge>
                     ))}
                   </div>
                 )}
-                <p className="text-xs text-slate-400 mt-1">Items containing these words will be filtered out</p>
+                <p className="text-xs text-slate-500 dark:text-neutral-500 mt-2">Items containing these words will be filtered out</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Min Price</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-2">Min Price</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2 text-slate-400 text-sm">£</span>
-                    <input
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500 text-sm">£</span>
+                    <Input
                       type="number"
                       value={newAlert.price_min}
                       onChange={(e) => setNewAlert({...newAlert, price_min: Number(e.target.value)})}
-                      className="w-full pl-7 md:pl-8 pr-3 md:pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
+                      className="pl-7"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Max Price</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-2">Max Price</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2 text-slate-400 text-sm">£</span>
-                    <input
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500 text-sm">£</span>
+                    <Input
                       type="number"
                       value={newAlert.price_max}
                       onChange={(e) => setNewAlert({...newAlert, price_max: Number(e.target.value)})}
-                      className="w-full pl-7 md:pl-8 pr-3 md:pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
+                      className="pl-7"
                     />
                   </div>
                 </div>
@@ -264,74 +280,75 @@ export const AlertsManager: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Platforms</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-3">Platforms</label>
               <div className="grid grid-cols-2 gap-2">
                 {PLATFORMS.map((p) => (
                   <button
                     key={p}
                     onClick={() => handlePlatformToggle(p)}
-                    className={`px-2 md:px-3 py-2 rounded-lg text-xs md:text-sm text-left transition-colors flex items-center gap-2
+                    className={`px-3 py-2.5 rounded-xl text-sm text-left transition-all duration-200 flex items-center gap-2
                       ${newAlert.platforms?.includes(p)
-                        ? 'bg-blue-50 border border-blue-200 text-blue-700 font-medium'
-                        : 'bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100'}`}
+                        ? 'bg-violet-50 dark:bg-violet-500/20 border-2 border-violet-500 dark:border-violet-400 text-violet-700 dark:text-violet-300 font-semibold shadow-sm'
+                        : 'bg-slate-50 dark:bg-neutral-800 border-2 border-slate-200 dark:border-neutral-700 text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-700'}`}
                   >
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${newAlert.platforms?.includes(p) ? 'bg-blue-500' : 'bg-slate-300'}`} />
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${newAlert.platforms?.includes(p) ? 'bg-violet-500 dark:bg-violet-400' : 'bg-slate-300 dark:bg-neutral-600'}`} />
                     <span className="truncate">{p}</span>
                   </button>
                 ))}
               </div>
             </div>
           </div>
-          <div className="mt-4 md:mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
-            <button
+          <div className="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
+            <Button
               onClick={() => setIsCreating(false)}
-              className="px-6 py-2 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm md:text-base"
+              variant="ghost"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleCreateAlert}
               disabled={isLoading}
-              className="bg-slate-800 text-white px-6 py-2 rounded-lg hover:bg-slate-900 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2 text-sm md:text-base"
+              variant="primary"
+              isLoading={isLoading}
             >
-              {isLoading && <Loader2 size={16} className="animate-spin" />}
+              <Radar className="w-4 h-4" />
               Start Monitoring
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-3 md:p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-2 sm:gap-4">
+      <Card className="p-0 overflow-hidden">
+        <div className="p-4 border-b border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-neutral-900/50 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500 w-4 h-4" />
             <input
               type="text"
               placeholder="Search your alerts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400"
+              className="w-full pl-10 pr-4 py-2 text-sm bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/50 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500"
             />
           </div>
-          <button className="hidden sm:flex px-4 py-2 border border-slate-200 rounded-lg bg-white text-slate-600 text-sm hover:bg-slate-50 items-center gap-2">
+          <button className="hidden sm:flex px-4 py-2 border border-slate-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 text-sm hover:bg-slate-50 dark:hover:bg-neutral-700 items-center gap-2 transition-colors">
             <Filter className="w-4 h-4" /> Filter
           </button>
         </div>
 
         {isLoading && alerts.length === 0 ? (
-          <div className="p-6 md:p-8 text-center text-slate-500">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+          <div className="p-8 text-center text-slate-500 dark:text-neutral-500">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-violet-600 dark:text-violet-400" />
             Loading alerts...
           </div>
         ) : filteredAlerts.length === 0 ? (
-          <div className="p-6 md:p-8 text-center text-slate-500 text-sm">
+          <div className="p-8 text-center text-slate-500 dark:text-neutral-500 text-sm">
             {alerts.length === 0 ? 'No alerts yet. Create your first alert to start monitoring!' : 'No alerts match your search.'}
           </div>
         ) : (
           <>
             {/* Desktop Table */}
             <table className="hidden lg:table w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-100">
+              <thead className="bg-slate-50 dark:bg-neutral-900/50 text-slate-600 dark:text-neutral-400 font-medium border-b border-slate-200 dark:border-white/5">
                 <tr>
                   <th className="px-6 py-4">Name</th>
                   <th className="px-6 py-4">Keywords</th>
@@ -341,40 +358,40 @@ export const AlertsManager: React.FC = () => {
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {filteredAlerts.map(alertItem => (
-                  <tr key={alertItem.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-slate-800">{alertItem.name}</td>
-                    <td className="px-6 py-4 text-slate-600">
-                      <div className="flex flex-wrap gap-1">
+                  <tr key={alertItem.id} className={`hover:bg-slate-50 dark:hover:bg-white/5 transition-colors ${alertItem.is_active ? 'border-l-4 border-l-violet-500 dark:border-l-violet-400' : ''}`}>
+                    <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">{alertItem.name}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-neutral-400">
+                      <div className="flex flex-wrap gap-1.5">
                         {alertItem.keywords.slice(0, 3).map((k, i) => (
-                          <span key={i} className="bg-slate-100 px-2 py-0.5 rounded text-xs">{k}</span>
+                          <Badge key={i} variant="neutral" className="text-xs">{k}</Badge>
                         ))}
                         {alertItem.keywords.length > 3 && (
-                          <span className="text-slate-400 text-xs">+{alertItem.keywords.length - 3}</span>
+                          <span className="text-slate-400 dark:text-neutral-500 text-xs">+{alertItem.keywords.length - 3}</span>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    <td className="px-6 py-4 text-slate-600 dark:text-neutral-400 font-medium">
                       £{alertItem.price_min || 0} - £{alertItem.price_max || '∞'}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex -space-x-2">
                         {alertItem.platforms.slice(0, 3).map((p, i) => (
-                          <div key={i} title={p} className="w-6 h-6 rounded-full bg-blue-100 border border-white flex items-center justify-center text-[10px] text-blue-700 font-bold uppercase">
+                          <div key={i} title={p} className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-500/20 border-2 border-white dark:border-neutral-900 flex items-center justify-center text-[10px] text-violet-700 dark:text-violet-400 font-bold uppercase">
                             {p[0]}
                           </div>
                         ))}
                         {alertItem.platforms.length > 3 && (
-                          <div className="w-6 h-6 rounded-full bg-slate-100 border border-white flex items-center justify-center text-[10px] text-slate-600 font-bold">
+                          <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-neutral-800 border-2 border-white dark:border-neutral-900 flex items-center justify-center text-[10px] text-slate-600 dark:text-neutral-400 font-bold">
                             +{alertItem.platforms.length - 3}
                           </div>
                         )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`flex items-center gap-1.5 ${alertItem.is_active ? 'text-green-600' : 'text-slate-400'}`}>
-                        <span className={`w-2 h-2 rounded-full ${alertItem.is_active ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`} />
+                      <span className={`flex items-center gap-1.5 font-medium ${alertItem.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-neutral-500'}`}>
+                        <span className={`w-2 h-2 rounded-full ${alertItem.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-neutral-600'}`} />
                         {alertItem.is_active ? 'Active' : 'Paused'}
                       </span>
                     </td>
@@ -388,25 +405,25 @@ export const AlertsManager: React.FC = () => {
                             }
                           }}
                           disabled={runningAlertId === alertItem.id}
-                          className="text-slate-400 hover:text-yellow-500 transition-colors disabled:opacity-50"
+                          className="p-2 text-slate-400 dark:text-neutral-500 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-lg transition-all disabled:opacity-50"
                           title="Run scraper now"
                         >
                           {runningAlertId === alertItem.id ? (
                             <Loader2 size={18} className="animate-spin" />
                           ) : (
-                            <Zap size={18} />
+                            <Zap size={18} className="fill-current" />
                           )}
                         </button>
                         <button
                           onClick={() => handleToggleActive(alertItem.id, alertItem.is_active)}
-                          className="text-slate-400 hover:text-blue-500 transition-colors"
+                          className="p-2 text-slate-400 dark:text-neutral-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all"
                           title={alertItem.is_active ? 'Pause alert' : 'Resume alert'}
                         >
                           {alertItem.is_active ? <Pause size={18} /> : <Play size={18} />}
                         </button>
                         <button
                           onClick={() => handleDeleteAlert(alertItem.id)}
-                          className="text-slate-400 hover:text-red-500 transition-colors"
+                          className="p-2 text-slate-400 dark:text-neutral-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
                           title="Delete alert"
                         >
                           <Trash2 size={18} />
@@ -419,14 +436,14 @@ export const AlertsManager: React.FC = () => {
             </table>
 
             {/* Mobile Card List */}
-            <div className="lg:hidden divide-y divide-slate-100">
+            <div className="lg:hidden divide-y divide-slate-100 dark:divide-white/5">
               {filteredAlerts.map(alertItem => (
-                <div key={alertItem.id} className="p-4 hover:bg-slate-50 transition-colors">
+                <div key={alertItem.id} className={`p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors ${alertItem.is_active ? 'border-l-4 border-l-violet-500 dark:border-l-violet-400' : ''}`}>
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="min-w-0 flex-1">
-                      <h4 className="font-semibold text-slate-800 text-sm truncate">{alertItem.name}</h4>
-                      <span className={`inline-flex items-center gap-1 text-xs mt-1 ${alertItem.is_active ? 'text-green-600' : 'text-slate-400'}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${alertItem.is_active ? 'bg-green-500' : 'bg-slate-300'}`} />
+                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm truncate">{alertItem.name}</h4>
+                      <span className={`inline-flex items-center gap-1 text-xs mt-1 font-medium ${alertItem.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-neutral-500'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${alertItem.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-neutral-600'}`} />
                         {alertItem.is_active ? 'Active' : 'Paused'}
                       </span>
                     </div>
@@ -439,46 +456,46 @@ export const AlertsManager: React.FC = () => {
                           }
                         }}
                         disabled={runningAlertId === alertItem.id}
-                        className="p-1.5 text-slate-400 hover:text-yellow-500 transition-colors disabled:opacity-50"
+                        className="p-1.5 text-slate-400 dark:text-neutral-500 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-lg transition-all disabled:opacity-50"
                       >
                         {runningAlertId === alertItem.id ? (
                           <Loader2 size={16} className="animate-spin" />
                         ) : (
-                          <Zap size={16} />
+                          <Zap size={16} className="fill-current" />
                         )}
                       </button>
                       <button
                         onClick={() => handleToggleActive(alertItem.id, alertItem.is_active)}
-                        className="p-1.5 text-slate-400 hover:text-blue-500 transition-colors"
+                        className="p-1.5 text-slate-400 dark:text-neutral-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all"
                       >
                         {alertItem.is_active ? <Pause size={16} /> : <Play size={16} />}
                       </button>
                       <button
                         onClick={() => handleDeleteAlert(alertItem.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                        className="p-1.5 text-slate-400 dark:text-neutral-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
                       >
                         <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1 mb-2">
+                  <div className="flex flex-wrap gap-1.5 mb-2">
                     {alertItem.keywords.slice(0, 3).map((k, i) => (
-                      <span key={i} className="bg-slate-100 px-2 py-0.5 rounded text-xs text-slate-600">{k}</span>
+                      <Badge key={i} variant="neutral" className="text-xs">{k}</Badge>
                     ))}
                     {alertItem.keywords.length > 3 && (
-                      <span className="text-slate-400 text-xs">+{alertItem.keywords.length - 3}</span>
+                      <span className="text-slate-400 dark:text-neutral-500 text-xs">+{alertItem.keywords.length - 3}</span>
                     )}
                   </div>
-                  <div className="flex items-center justify-between text-xs text-slate-500">
+                  <div className="flex items-center justify-between text-xs text-slate-600 dark:text-neutral-400 font-medium">
                     <span>£{alertItem.price_min || 0} - £{alertItem.price_max || '∞'}</span>
                     <div className="flex -space-x-1.5">
                       {alertItem.platforms.slice(0, 3).map((p, i) => (
-                        <div key={i} className="w-5 h-5 rounded-full bg-blue-100 border border-white flex items-center justify-center text-[9px] text-blue-700 font-bold uppercase">
+                        <div key={i} className="w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-500/20 border border-white dark:border-neutral-900 flex items-center justify-center text-[9px] text-violet-700 dark:text-violet-400 font-bold uppercase">
                           {p[0]}
                         </div>
                       ))}
                       {alertItem.platforms.length > 3 && (
-                        <div className="w-5 h-5 rounded-full bg-slate-100 border border-white flex items-center justify-center text-[9px] text-slate-600 font-bold">
+                        <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-neutral-800 border border-white dark:border-neutral-900 flex items-center justify-center text-[9px] text-slate-600 dark:text-neutral-400 font-bold">
                           +{alertItem.platforms.length - 3}
                         </div>
                       )}
@@ -489,7 +506,7 @@ export const AlertsManager: React.FC = () => {
             </div>
           </>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

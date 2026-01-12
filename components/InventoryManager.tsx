@@ -7,6 +7,7 @@ import {
   MoreHorizontal, CheckSquare, Square, Calculator, Image as ImageIcon
 } from 'lucide-react';
 import { generateItemDescription, estimatePrice } from '../services/geminiService';
+import { Card, Button, Badge, Input } from './ui/UIComponents';
 
 const PLATFORMS = ['eBay', 'Depop', 'Vinted', 'Facebook Marketplace', 'Gumtree', 'Shpock'];
 const CONDITIONS = ['New with tags', 'Like New', 'Good', 'Fair', 'Poor'];
@@ -321,10 +322,18 @@ export const InventoryManager: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'bg-slate-100 text-slate-600';
-      case 'listed': return 'bg-blue-100 text-blue-700';
-      case 'sold': return 'bg-emerald-100 text-emerald-700';
-      default: return 'bg-slate-100 text-slate-600';
+      case 'draft': return 'bg-slate-100 dark:bg-neutral-800 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 dark:text-neutral-400';
+      case 'listed': return 'bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400';
+      case 'sold': return 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 dark:text-emerald-400';
+      default: return 'bg-slate-100 dark:bg-neutral-800 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 dark:text-neutral-400';
+    }
+  };
+
+  const getStatusBadgeVariant = (status: string): 'neutral' | 'violet' | 'success' => {
+    switch (status) {
+      case 'listed': return 'violet';
+      case 'sold': return 'success';
+      default: return 'neutral';
     }
   };
 
@@ -334,8 +343,8 @@ export const InventoryManager: React.FC = () => {
 
     if (!images || images.length === 0) {
       return (
-        <div className="aspect-square bg-slate-100 rounded-xl flex flex-col items-center justify-center text-slate-400">
-          <Tag size={48} />
+        <div className="aspect-square bg-slate-100 dark:bg-neutral-800 dark:bg-neutral-800 rounded-xl flex flex-col items-center justify-center text-slate-400 dark:text-neutral-500 dark:text-neutral-500">
+          <ImageIcon size={48} />
           <span className="mt-2 text-sm">No images</span>
         </div>
       );
@@ -343,7 +352,7 @@ export const InventoryManager: React.FC = () => {
 
     return (
       <div className="space-y-2">
-        <div className="relative aspect-square bg-slate-100 rounded-xl overflow-hidden">
+        <div className="relative aspect-square bg-slate-100 dark:bg-neutral-800 dark:bg-neutral-800 rounded-xl overflow-hidden">
           <img
             src={images[currentIndex]}
             alt="Product"
@@ -353,13 +362,13 @@ export const InventoryManager: React.FC = () => {
             <>
               <button
                 onClick={() => setCurrentIndex(i => (i - 1 + images.length) % images.length)}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow"
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-neutral-900/90 hover:bg-white dark:hover:bg-neutral-900 p-2 rounded-full shadow-lg transition-colors text-slate-900 dark:text-white"
               >
                 <ChevronLeft size={20} />
               </button>
               <button
                 onClick={() => setCurrentIndex(i => (i + 1) % images.length)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow"
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-neutral-900/90 hover:bg-white dark:hover:bg-neutral-900 p-2 rounded-full shadow-lg transition-colors text-slate-900 dark:text-white"
               >
                 <ChevronRight size={20} />
               </button>
@@ -377,7 +386,7 @@ export const InventoryManager: React.FC = () => {
           {isEdit && (
             <button
               onClick={() => removeImage(currentIndex, true)}
-              className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600"
+              className="absolute top-2 right-2 bg-red-500 dark:bg-red-600 text-white p-1.5 rounded-full hover:bg-red-600 dark:hover:bg-red-700 transition-colors"
             >
               <X size={16} />
             </button>
@@ -391,7 +400,7 @@ export const InventoryManager: React.FC = () => {
                 key={i}
                 onClick={() => setCurrentIndex(i)}
                 className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                  i === currentIndex ? 'border-blue-500' : 'border-transparent'
+                  i === currentIndex ? 'border-violet-500 dark:border-violet-400' : 'border-transparent'
                 }`}
               >
                 <img src={img} alt="" className="w-full h-full object-cover" />
@@ -404,55 +413,65 @@ export const InventoryManager: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:space-y-8">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex justify-between items-center">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl flex justify-between items-center shadow-sm">
           <span>{error}</span>
-          <button onClick={clearError} className="text-red-500 hover:text-red-700">&times;</button>
+          <button onClick={clearError} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xl">&times;</button>
         </div>
       )}
 
       {/* Stats Row */}
       {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          <div className="bg-white p-3 md:p-4 rounded-xl border border-slate-200">
-            <p className="text-xs md:text-sm text-slate-500">Total Items</p>
-            <p className="text-xl md:text-2xl font-bold text-slate-800">{stats.total_items}</p>
-          </div>
-          <div className="bg-white p-3 md:p-4 rounded-xl border border-slate-200">
-            <p className="text-xs md:text-sm text-slate-500">Listed</p>
-            <p className="text-xl md:text-2xl font-bold text-blue-600">{stats.listed_count}</p>
-          </div>
-          <div className="bg-white p-3 md:p-4 rounded-xl border border-slate-200">
-            <p className="text-xs md:text-sm text-slate-500">Sold</p>
-            <p className="text-xl md:text-2xl font-bold text-emerald-600">{stats.sold_count}</p>
-          </div>
-          <div className="bg-white p-3 md:p-4 rounded-xl border border-slate-200">
-            <p className="text-xs md:text-sm text-slate-500">Total Profit</p>
-            <p className="text-xl md:text-2xl font-bold text-emerald-600">£{stats.total_profit.toFixed(2)}</p>
-          </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="hover:border-violet-500/30 dark:hover:border-violet-500/30 transition-colors">
+            <p className="text-sm text-slate-500 dark:text-neutral-500 dark:text-neutral-500 font-medium">Total Items</p>
+            <p className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mt-1">{stats.total_items}</p>
+          </Card>
+          <Card className="hover:border-violet-500/30 dark:hover:border-violet-500/30 transition-colors">
+            <p className="text-sm text-slate-500 dark:text-neutral-500 dark:text-neutral-500 font-medium">Listed</p>
+            <p className="text-2xl md:text-3xl font-bold text-violet-600 dark:text-violet-400 mt-1">{stats.listed_count}</p>
+          </Card>
+          <Card className="hover:border-violet-500/30 dark:hover:border-violet-500/30 transition-colors">
+            <p className="text-sm text-slate-500 dark:text-neutral-500 dark:text-neutral-500 font-medium">Sold</p>
+            <p className="text-2xl md:text-3xl font-bold text-emerald-600 dark:text-emerald-400 dark:text-emerald-400 mt-1">{stats.sold_count}</p>
+          </Card>
+          <Card className="hover:border-violet-500/30 dark:hover:border-violet-500/30 transition-colors">
+            <p className="text-sm text-slate-500 dark:text-neutral-500 dark:text-neutral-500 font-medium">Total Profit</p>
+            <p className="text-2xl md:text-3xl font-bold text-emerald-600 dark:text-emerald-400 dark:text-emerald-400 mt-1">£{stats.total_profit.toFixed(2)}</p>
+          </Card>
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold text-slate-800">Inventory</h2>
-          <p className="text-sm text-slate-500">Track listings, costs, and profit margins.</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Inventory</h2>
+          <p className="text-sm text-slate-600 dark:text-neutral-400 dark:text-neutral-400 mt-1">Track listings, costs, and profit margins.</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <button
+          <Button
             onClick={() => setShowProfitCalculator(true)}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors text-sm"
+            variant="secondary"
+            className="flex-shrink-0"
           >
             <Calculator size={18} />
             <span className="hidden sm:inline">Calculator</span>
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setIsAdding(!isAdding)}
-            className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors text-sm md:text-base justify-center"
+            variant={isAdding ? "secondary" : "primary"}
+            className="flex-1 sm:flex-none"
           >
-            {isAdding ? 'Cancel' : <><Plus size={18} /> Add Item</>}
-          </button>
+            {isAdding ? (
+              <>
+                <X size={18} /> Cancel
+              </>
+            ) : (
+              <>
+                <Plus size={18} /> Add Item
+              </>
+            )}
+          </Button>
         </div>
       </div>
 
@@ -460,7 +479,7 @@ export const InventoryManager: React.FC = () => {
       <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={() => setStatusFilter('')}
-          className={`px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${!statusFilter ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${!statusFilter ? 'bg-violet-600 dark:bg-violet-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-neutral-800 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700 dark:hover:bg-neutral-700'}`}
         >
           All
         </button>
@@ -468,7 +487,7 @@ export const InventoryManager: React.FC = () => {
           <button
             key={status}
             onClick={() => setStatusFilter(status)}
-            className={`px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium capitalize transition-colors whitespace-nowrap ${statusFilter === status ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition-all whitespace-nowrap ${statusFilter === status ? 'bg-violet-600 dark:bg-violet-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-neutral-800 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700 dark:hover:bg-neutral-700'}`}
           >
             {status}
           </button>
@@ -477,7 +496,7 @@ export const InventoryManager: React.FC = () => {
         {items.length > 0 && (
           <button
             onClick={toggleSelectAll}
-            className="px-3 py-2 rounded-lg text-xs md:text-sm font-medium text-slate-600 hover:bg-slate-100 flex items-center gap-2"
+            className="px-3 py-2 rounded-lg text-xs md:text-sm font-medium text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-700 dark:bg-neutral-800 flex items-center gap-2"
           >
             {selectedItems.size === items.length ? <CheckSquare size={16} /> : <Square size={16} />}
             Select All
@@ -499,7 +518,7 @@ export const InventoryManager: React.FC = () => {
           </button>
           <button
             onClick={() => setSelectedItems(new Set())}
-            className="text-slate-400 hover:text-white p-1"
+            className="text-slate-400 dark:text-neutral-500 hover:text-white p-1"
           >
             <X size={18} />
           </button>
@@ -508,15 +527,15 @@ export const InventoryManager: React.FC = () => {
 
       {/* Add Item Form */}
       {isAdding && (
-        <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-blue-100 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
+        <div className="bg-white dark:bg-neutral-900/80 p-4 md:p-6 rounded-xl shadow-lg border border-violet-100 dark:border-violet-500/20 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
           <div className="lg:col-span-1 space-y-4 order-2 lg:order-1">
             {/* Image Upload Area */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="aspect-square bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 cursor-pointer transition-colors group overflow-hidden"
+              className="aspect-square bg-slate-50 dark:bg-neutral-800 border-2 border-dashed border-slate-300 dark:border-neutral-700 rounded-xl flex flex-col items-center justify-center text-slate-400 dark:text-neutral-500 hover:bg-slate-100 dark:hover:bg-neutral-700 dark:bg-neutral-800 cursor-pointer transition-colors group overflow-hidden"
             >
               {uploadingImages ? (
-                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-violet-500 dark:text-violet-400" />
               ) : newItem.images && newItem.images.length > 0 ? (
                 <div className="w-full h-full relative">
                   <img src={newItem.images[0]} alt="" className="w-full h-full object-cover" />
@@ -529,9 +548,9 @@ export const InventoryManager: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <Upload className="w-8 md:w-10 h-8 md:h-10 mb-2 group-hover:text-blue-500" />
+                  <Upload className="w-8 md:w-10 h-8 md:h-10 mb-2 group-hover:text-violet-500 dark:text-violet-400" />
                   <span className="text-sm font-medium">Upload Photos</span>
-                  <span className="text-xs text-slate-400">Click or drag & drop</span>
+                  <span className="text-xs text-slate-400 dark:text-neutral-500">Click or drag & drop</span>
                 </>
               )}
               <input
@@ -564,20 +583,20 @@ export const InventoryManager: React.FC = () => {
           <div className="lg:col-span-2 space-y-4 order-1 lg:order-2">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Item Title</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Item Title</label>
                 <input
                   value={newItem.title}
                   onChange={e => setNewItem({...newItem, title: e.target.value})}
-                  className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
+                  className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="e.g. Sony PlayStation 5 Console"
                 />
               </div>
               <div className="sm:w-1/3">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Source Platform</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Source Platform</label>
                 <select
                   value={newItem.purchase_platform}
                   onChange={e => setNewItem({...newItem, purchase_platform: e.target.value})}
-                  className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm md:text-base"
+                  className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-sm md:text-base text-slate-900 dark:text-white"
                 >
                   <option value="">Select...</option>
                   {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
@@ -587,21 +606,21 @@ export const InventoryManager: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3 md:gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Condition</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Condition</label>
                 <select
                   value={newItem.condition}
                   onChange={e => setNewItem({...newItem, condition: e.target.value})}
-                  className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm md:text-base"
+                  className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-sm md:text-base text-slate-900 dark:text-white"
                 >
                   {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Tags</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Tags</label>
                 <input
                   value={newItem.tags}
                   onChange={e => setNewItem({...newItem, tags: e.target.value})}
-                  className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
+                  className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="gaming, console"
                 />
               </div>
@@ -609,11 +628,11 @@ export const InventoryManager: React.FC = () => {
 
             <div>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 mb-1">
-                <label className="block text-sm font-medium text-slate-700">Description</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300">Description</label>
                 <button
                   onClick={() => handleAIHelp(false)}
                   disabled={loadingAI}
-                  className={`text-xs flex items-center gap-1 px-2 py-1 rounded-md transition-colors ${loadingAI ? 'bg-slate-100 text-slate-400' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
+                  className={`text-xs flex items-center gap-1 px-2 py-1 rounded-md transition-colors ${loadingAI ? 'bg-slate-100 dark:bg-neutral-800 text-slate-400 dark:text-neutral-500' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
                 >
                   <Wand2 size={12} />
                   {loadingAI ? 'Generating...' : 'Auto-Generate with AI'}
@@ -622,28 +641,28 @@ export const InventoryManager: React.FC = () => {
               <textarea
                 value={newItem.description}
                 onChange={e => setNewItem({...newItem, description: e.target.value})}
-                className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none min-h-[80px] md:min-h-[100px] text-sm md:text-base"
+                className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none min-h-[80px] md:min-h-[100px] text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                 placeholder="Detailed item description..."
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3 md:gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Cost Price (£)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Cost Price (£)</label>
                 <input
                   type="number"
                   value={newItem.purchase_price || ''}
                   onChange={e => setNewItem({...newItem, purchase_price: parseFloat(e.target.value) || undefined})}
-                  className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
+                  className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Listing Price (£)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Listing Price (£)</label>
                 <input
                   type="number"
                   value={newItem.selling_price || ''}
                   onChange={e => setNewItem({...newItem, selling_price: parseFloat(e.target.value) || undefined})}
-                  className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
+                  className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                 />
               </div>
             </div>
@@ -651,7 +670,7 @@ export const InventoryManager: React.FC = () => {
             <div className="pt-4 flex flex-col-reverse sm:flex-row justify-end gap-3">
               <button
                 onClick={() => setIsAdding(false)}
-                className="px-6 py-2 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm md:text-base"
+                className="px-6 py-2 rounded-lg text-slate-600 dark:text-neutral-400 hover:bg-slate-50 dark:bg-neutral-800 font-medium text-sm md:text-base"
               >
                 Cancel
               </button>
@@ -670,12 +689,12 @@ export const InventoryManager: React.FC = () => {
 
       {/* Inventory Grid */}
       {isLoading && items.length === 0 ? (
-        <div className="p-8 text-center text-slate-500">
+        <div className="p-8 text-center text-slate-500 dark:text-neutral-500">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
           Loading inventory...
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-white rounded-xl p-6 md:p-8 text-center text-slate-500 border border-slate-200 text-sm md:text-base">
+        <div className="bg-white rounded-xl p-6 md:p-8 text-center text-slate-500 dark:text-neutral-500 border border-slate-200 dark:border-white/5 text-sm md:text-base">
           No items in your inventory yet. Add your first item to get started!
         </div>
       ) : (
@@ -684,11 +703,11 @@ export const InventoryManager: React.FC = () => {
             <div
               key={item.id}
               className={`bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-all group cursor-pointer ${
-                selectedItems.has(item.id) ? 'border-blue-500 ring-2 ring-blue-200' : 'border-slate-200'
+                selectedItems.has(item.id) ? 'border-violet-500 dark:border-violet-400 ring-2 ring-blue-200' : 'border-slate-200 dark:border-white/5'
               }`}
               onClick={() => openDetailModal(item)}
             >
-              <div className="relative aspect-square bg-slate-100">
+              <div className="relative aspect-square bg-slate-100 dark:bg-neutral-800">
                 {item.images && item.images.length > 0 ? (
                   <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
                 ) : (
@@ -705,8 +724,8 @@ export const InventoryManager: React.FC = () => {
                   onClick={(e) => { e.stopPropagation(); toggleSelectItem(item.id); }}
                   className={`absolute top-1.5 left-1.5 md:top-2 md:left-2 w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
                     selectedItems.has(item.id)
-                      ? 'bg-blue-500 border-blue-500 text-white'
-                      : 'bg-white/80 border-slate-300 opacity-0 group-hover:opacity-100'
+                      ? 'bg-violet-50 dark:bg-violet-500/200 border-violet-500 dark:border-violet-400 text-white'
+                      : 'bg-white/80 border-slate-300 dark:border-neutral-700 opacity-0 group-hover:opacity-100'
                   }`}
                 >
                   {selectedItems.has(item.id) && <Check size={14} />}
@@ -727,7 +746,7 @@ export const InventoryManager: React.FC = () => {
                             postage_cost: 0
                           });
                         }}
-                        className="bg-white p-1.5 md:p-2 rounded-full text-slate-800 hover:bg-emerald-50 hover:text-emerald-600"
+                        className="bg-white dark:bg-neutral-900/80 p-1.5 md:p-2 rounded-full text-slate-900 dark:text-white hover:bg-emerald-50 hover:text-emerald-600 dark:text-emerald-400"
                         title="Mark as Sold"
                       >
                         <DollarSign size={14} className="md:w-4 md:h-4" />
@@ -735,7 +754,7 @@ export const InventoryManager: React.FC = () => {
                     )}
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                      className="bg-white p-1.5 md:p-2 rounded-full text-slate-800 hover:bg-red-50 hover:text-red-600"
+                      className="bg-white dark:bg-neutral-900/80 p-1.5 md:p-2 rounded-full text-slate-900 dark:text-white hover:bg-red-50 hover:text-red-600"
                       title="Delete"
                     >
                       <Trash2 size={14} className="md:w-4 md:h-4" />
@@ -745,32 +764,32 @@ export const InventoryManager: React.FC = () => {
               </div>
               <div className="p-2.5 md:p-4">
                 <div className="flex justify-between items-start mb-1.5 md:mb-2">
-                  <span className="text-[10px] md:text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 md:px-2 py-0.5 rounded truncate max-w-[60%]">
+                  <span className="text-[10px] md:text-xs font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/20 px-1.5 md:px-2 py-0.5 rounded truncate max-w-[60%]">
                     {item.purchase_platform || 'No platform'}
                   </span>
-                  <span className="text-[10px] md:text-xs text-slate-400 hidden sm:block">
+                  <span className="text-[10px] md:text-xs text-slate-400 dark:text-neutral-500 hidden sm:block">
                     {new Date(item.created_at).toLocaleDateString()}
                   </span>
                 </div>
-                <h3 className="font-semibold text-slate-800 truncate mb-1 text-xs md:text-base" title={item.title}>{item.title}</h3>
-                <p className="text-[10px] md:text-sm text-slate-500 truncate mb-2 md:mb-3 hidden sm:block">{item.description || 'No description'}</p>
+                <h3 className="font-semibold text-slate-900 dark:text-white truncate mb-1 text-xs md:text-base" title={item.title}>{item.title}</h3>
+                <p className="text-[10px] md:text-sm text-slate-500 dark:text-neutral-500 truncate mb-2 md:mb-3 hidden sm:block">{item.description || 'No description'}</p>
 
                 <div className="flex justify-between items-center pt-2 md:pt-3 border-t border-slate-100">
                   <div>
-                    <span className="block text-[10px] md:text-xs text-slate-400">
+                    <span className="block text-[10px] md:text-xs text-slate-400 dark:text-neutral-500">
                       {item.status === 'sold' ? 'Sold' : 'Price'}
                     </span>
-                    <span className="font-bold text-slate-800 text-xs md:text-base">
+                    <span className="font-bold text-slate-900 dark:text-white text-xs md:text-base">
                       £{item.status === 'sold' ? item.sold_price : item.selling_price || 0}
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="block text-[10px] md:text-xs text-slate-400">
+                    <span className="block text-[10px] md:text-xs text-slate-400 dark:text-neutral-500">
                       Profit
                     </span>
                     <span className={`font-bold text-xs md:text-base ${
                       ((item.status === 'sold' ? item.sold_price : item.selling_price) || 0) - (item.purchase_price || 0) - (item.fees_total || 0) - (item.postage_cost || 0) >= 0
-                        ? 'text-emerald-600'
+                        ? 'text-emerald-600 dark:text-emerald-400'
                         : 'text-red-600'
                     }`}>
                       £{(
@@ -793,20 +812,20 @@ export const InventoryManager: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
             {/* Header */}
-            <div className="px-4 md:px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-800 truncate">{detailModalItem.title}</h3>
+            <div className="px-4 md:px-6 py-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate">{detailModalItem.title}</h3>
               <div className="flex items-center gap-2">
                 {!isEditMode && (
                   <button
                     onClick={() => setIsEditMode(true)}
-                    className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                    className="p-2 text-slate-500 dark:text-neutral-500 hover:text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:bg-violet-500/20 rounded-lg"
                   >
                     <Edit2 size={18} />
                   </button>
                 )}
                 <button
                   onClick={() => { setDetailModalItem(null); setIsEditMode(false); }}
-                  className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg"
+                  className="p-2 text-slate-500 dark:text-neutral-500 hover:text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-700 dark:bg-neutral-800 rounded-lg"
                 >
                   <X size={18} />
                 </button>
@@ -823,7 +842,7 @@ export const InventoryManager: React.FC = () => {
                       <ImageGallery images={editItem.images || []} isEdit={true} />
                       <button
                         onClick={() => editFileInputRef.current?.click()}
-                        className="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:border-blue-400 hover:text-blue-500 flex items-center justify-center gap-2"
+                        className="w-full py-2 border-2 border-dashed border-slate-300 dark:border-neutral-700 rounded-lg text-slate-500 dark:text-neutral-500 hover:border-blue-400 hover:text-violet-500 dark:text-violet-400 flex items-center justify-center gap-2"
                       >
                         <ImageIcon size={18} />
                         Add More Photos
@@ -847,58 +866,58 @@ export const InventoryManager: React.FC = () => {
                   {isEditMode ? (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Title</label>
                         <input
                           value={editItem.title}
                           onChange={e => setEditItem({...editItem, title: e.target.value})}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                          className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Description</label>
                         <textarea
                           value={editItem.description}
                           onChange={e => setEditItem({...editItem, description: e.target.value})}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none min-h-[100px]"
+                          className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none min-h-[100px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Cost Price (£)</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Cost Price (£)</label>
                           <input
                             type="number"
                             value={editItem.purchase_price || ''}
                             onChange={e => setEditItem({...editItem, purchase_price: parseFloat(e.target.value) || undefined})}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Selling Price (£)</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Selling Price (£)</label>
                           <input
                             type="number"
                             value={editItem.selling_price || ''}
                             onChange={e => setEditItem({...editItem, selling_price: parseFloat(e.target.value) || undefined})}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
                           />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Condition</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Condition</label>
                           <select
                             value={editItem.condition}
                             onChange={e => setEditItem({...editItem, condition: e.target.value})}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                            className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
                           >
                             {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Source</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Source</label>
                           <select
                             value={editItem.purchase_platform}
                             onChange={e => setEditItem({...editItem, purchase_platform: e.target.value})}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                            className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
                           >
                             <option value="">Select...</option>
                             {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
@@ -906,11 +925,11 @@ export const InventoryManager: React.FC = () => {
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Notes</label>
                         <input
                           value={editItem.tags}
                           onChange={e => setEditItem({...editItem, tags: e.target.value})}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                          className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
                           placeholder="Any notes..."
                         />
                       </div>
@@ -923,7 +942,7 @@ export const InventoryManager: React.FC = () => {
                           {detailModalItem.status}
                         </span>
                         {detailModalItem.condition && (
-                          <span className="px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-600">
+                          <span className="px-3 py-1 rounded-full text-sm font-medium bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400">
                             {detailModalItem.condition}
                           </span>
                         )}
@@ -932,52 +951,52 @@ export const InventoryManager: React.FC = () => {
                       {/* Description */}
                       {detailModalItem.description && (
                         <div>
-                          <h4 className="text-sm font-medium text-slate-500 mb-1">Description</h4>
-                          <p className="text-slate-700">{detailModalItem.description}</p>
+                          <h4 className="text-sm font-medium text-slate-500 dark:text-neutral-500 mb-1">Description</h4>
+                          <p className="text-slate-700 dark:text-neutral-300">{detailModalItem.description}</p>
                         </div>
                       )}
 
                       {/* Purchase Details */}
-                      <div className="bg-slate-50 rounded-lg p-4 space-y-2">
-                        <h4 className="text-sm font-medium text-slate-700">Purchase Details</h4>
+                      <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-4 space-y-2">
+                        <h4 className="text-sm font-medium text-slate-700 dark:text-neutral-300">Purchase Details</h4>
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
-                            <span className="text-slate-500">Cost:</span>
+                            <span className="text-slate-500 dark:text-neutral-500">Cost:</span>
                             <span className="ml-2 font-medium">£{detailModalItem.purchase_price?.toFixed(2) || '0.00'}</span>
                           </div>
                           <div>
-                            <span className="text-slate-500">Source:</span>
+                            <span className="text-slate-500 dark:text-neutral-500">Source:</span>
                             <span className="ml-2 font-medium">{detailModalItem.purchase_platform || '-'}</span>
                           </div>
                           <div>
-                            <span className="text-slate-500">Added:</span>
+                            <span className="text-slate-500 dark:text-neutral-500">Added:</span>
                             <span className="ml-2 font-medium">{new Date(detailModalItem.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Pricing */}
-                      <div className="bg-blue-50 rounded-lg p-4 space-y-2">
-                        <h4 className="text-sm font-medium text-blue-700">Pricing</h4>
+                      <div className="bg-violet-50 dark:bg-violet-500/20 rounded-lg p-4 space-y-2">
+                        <h4 className="text-sm font-medium text-violet-700 dark:text-violet-400">Pricing</h4>
                         <div className="space-y-1 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-blue-600">Listing Price:</span>
+                            <span className="text-violet-600 dark:text-violet-400">Listing Price:</span>
                             <span className="font-medium">£{detailModalItem.selling_price?.toFixed(2) || '0.00'}</span>
                           </div>
                           {detailModalItem.status === 'sold' && (
                             <>
                               <div className="flex justify-between">
-                                <span className="text-blue-600">Sold For:</span>
+                                <span className="text-violet-600 dark:text-violet-400">Sold For:</span>
                                 <span className="font-medium">£{detailModalItem.sold_price?.toFixed(2) || '0.00'}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-blue-600">Fees:</span>
+                                <span className="text-violet-600 dark:text-violet-400">Fees:</span>
                                 <span className="font-medium">-£{(detailModalItem.fees_total + detailModalItem.postage_cost).toFixed(2)}</span>
                               </div>
                             </>
                           )}
-                          <div className="flex justify-between pt-2 border-t border-blue-200">
-                            <span className="font-medium text-blue-700">
+                          <div className="flex justify-between pt-2 border-t border-violet-200 dark:border-violet-500/30">
+                            <span className="font-medium text-violet-700 dark:text-violet-400">
                               {detailModalItem.status === 'sold' ? 'Net Profit:' : 'Est. Profit:'}
                             </span>
                             <span className={`font-bold ${
@@ -985,7 +1004,7 @@ export const InventoryManager: React.FC = () => {
                               (detailModalItem.purchase_price || 0) -
                               (detailModalItem.fees_total || 0) -
                               (detailModalItem.postage_cost || 0) >= 0
-                                ? 'text-emerald-600'
+                                ? 'text-emerald-600 dark:text-emerald-400'
                                 : 'text-red-600'
                             }`}>
                               £{(
@@ -1002,8 +1021,8 @@ export const InventoryManager: React.FC = () => {
                       {/* Notes */}
                       {detailModalItem.notes && (
                         <div>
-                          <h4 className="text-sm font-medium text-slate-500 mb-1">Notes</h4>
-                          <p className="text-slate-700 text-sm">{detailModalItem.notes}</p>
+                          <h4 className="text-sm font-medium text-slate-500 dark:text-neutral-500 mb-1">Notes</h4>
+                          <p className="text-slate-700 dark:text-neutral-300 text-sm">{detailModalItem.notes}</p>
                         </div>
                       )}
                     </>
@@ -1013,7 +1032,7 @@ export const InventoryManager: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="px-4 md:px-6 py-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row gap-3 justify-between">
+            <div className="px-4 md:px-6 py-4 border-t border-slate-200 dark:border-white/5 flex flex-col-reverse sm:flex-row gap-3 justify-between">
               {isEditMode ? (
                 <>
                   <button
@@ -1030,7 +1049,7 @@ export const InventoryManager: React.FC = () => {
                         images: detailModalItem.images || []
                       });
                     }}
-                    className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium"
+                    className="px-4 py-2 text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-700 dark:bg-neutral-800 rounded-lg font-medium"
                   >
                     Cancel
                   </button>
@@ -1080,25 +1099,25 @@ export const InventoryManager: React.FC = () => {
       {sellModalItem && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
           <div className="bg-white rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base md:text-lg font-bold text-slate-800 mb-2 md:mb-4">Mark as Sold</h3>
-            <p className="text-slate-500 mb-4 text-sm truncate">Recording sale for: <strong>{sellModalItem.title}</strong></p>
+            <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-white mb-2 md:mb-4">Mark as Sold</h3>
+            <p className="text-slate-500 dark:text-neutral-500 mb-4 text-sm truncate">Recording sale for: <strong>{sellModalItem.title}</strong></p>
 
             <div className="space-y-3 md:space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Sold Price (£)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Sold Price (£)</label>
                 <input
                   type="number"
                   value={sellData.sold_price}
                   onChange={e => setSellData({...sellData, sold_price: parseFloat(e.target.value) || 0})}
-                  className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
+                  className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Platform</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Platform</label>
                 <select
                   value={sellData.sold_platform}
                   onChange={e => setSellData({...sellData, sold_platform: e.target.value})}
-                  className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm md:text-base"
+                  className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-sm md:text-base text-slate-900 dark:text-white"
                 >
                   <option value="">Select...</option>
                   {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
@@ -1106,44 +1125,44 @@ export const InventoryManager: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Fees (£)</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Fees (£)</label>
                   <input
                     type="number"
                     value={sellData.fees_total}
                     onChange={e => setSellData({...sellData, fees_total: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
+                    className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Postage (£)</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Postage (£)</label>
                   <input
                     type="number"
                     value={sellData.postage_cost}
                     onChange={e => setSellData({...sellData, postage_cost: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base"
+                    className="w-full px-3 md:px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   />
                 </div>
               </div>
 
               {/* Profit Preview */}
-              <div className="bg-slate-50 p-3 md:p-4 rounded-lg">
+              <div className="bg-slate-50 dark:bg-neutral-800 p-3 md:p-4 rounded-lg">
                 <div className="flex justify-between text-xs md:text-sm">
-                  <span className="text-slate-500">Sale Price:</span>
+                  <span className="text-slate-500 dark:text-neutral-500">Sale Price:</span>
                   <span className="font-medium">£{sellData.sold_price.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-xs md:text-sm">
-                  <span className="text-slate-500">Cost:</span>
+                  <span className="text-slate-500 dark:text-neutral-500">Cost:</span>
                   <span className="font-medium">-£{(sellModalItem.purchase_price || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-xs md:text-sm">
-                  <span className="text-slate-500">Fees & Postage:</span>
+                  <span className="text-slate-500 dark:text-neutral-500">Fees & Postage:</span>
                   <span className="font-medium">-£{(sellData.fees_total + sellData.postage_cost).toFixed(2)}</span>
                 </div>
-                <div className="border-t border-slate-200 mt-2 pt-2 flex justify-between">
-                  <span className="font-medium text-slate-700 text-xs md:text-sm">Net Profit:</span>
+                <div className="border-t border-slate-200 dark:border-white/5 mt-2 pt-2 flex justify-between">
+                  <span className="font-medium text-slate-700 dark:text-neutral-300 text-xs md:text-sm">Net Profit:</span>
                   <span className={`font-bold text-sm md:text-base ${
                     sellData.sold_price - (sellModalItem.purchase_price || 0) - sellData.fees_total - sellData.postage_cost >= 0
-                      ? 'text-emerald-600'
+                      ? 'text-emerald-600 dark:text-emerald-400'
                       : 'text-red-600'
                   }`}>
                     £{(sellData.sold_price - (sellModalItem.purchase_price || 0) - sellData.fees_total - sellData.postage_cost).toFixed(2)}
@@ -1155,7 +1174,7 @@ export const InventoryManager: React.FC = () => {
             <div className="flex flex-col-reverse sm:flex-row gap-3 mt-4 md:mt-6">
               <button
                 onClick={() => setSellModalItem(null)}
-                className="flex-1 px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm md:text-base"
+                className="flex-1 px-4 py-2.5 rounded-lg text-slate-600 dark:text-neutral-400 hover:bg-slate-50 dark:bg-neutral-800 font-medium text-sm md:text-base"
               >
                 Cancel
               </button>
@@ -1177,13 +1196,13 @@ export const InventoryManager: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
           <div className="bg-white rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Calculator size={20} />
                 Profit Calculator
               </h3>
               <button
                 onClick={() => setShowProfitCalculator(false)}
-                className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg"
+                className="p-2 text-slate-500 dark:text-neutral-500 hover:text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-700 dark:bg-neutral-800 rounded-lg"
               >
                 <X size={18} />
               </button>
@@ -1191,31 +1210,31 @@ export const InventoryManager: React.FC = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Purchase Price (£)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Purchase Price (£)</label>
                 <input
                   type="number"
                   value={calcData.purchase_price || ''}
                   onChange={e => setCalcData({...calcData, purchase_price: parseFloat(e.target.value) || 0})}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
                   placeholder="What you paid"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Selling Price (£)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Selling Price (£)</label>
                 <input
                   type="number"
                   value={calcData.selling_price || ''}
                   onChange={e => setCalcData({...calcData, selling_price: parseFloat(e.target.value) || 0})}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
                   placeholder="What you'll sell for"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Platform</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Platform</label>
                 <select
                   value={calcData.platform}
                   onChange={e => setCalcData({...calcData, platform: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
                 >
                   {PLATFORMS.map(p => (
                     <option key={p} value={p}>
@@ -1226,53 +1245,53 @@ export const InventoryManager: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Postage (£)</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Postage (£)</label>
                   <input
                     type="number"
                     value={calcData.postage_cost || ''}
                     onChange={e => setCalcData({...calcData, postage_cost: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Other Fees (£)</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Other Fees (£)</label>
                   <input
                     type="number"
                     value={calcData.custom_fees || ''}
                     onChange={e => setCalcData({...calcData, custom_fees: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
 
               {/* Results */}
-              <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+              <div className="bg-slate-50 dark:bg-neutral-800 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Selling Price:</span>
+                  <span className="text-slate-500 dark:text-neutral-500">Selling Price:</span>
                   <span className="font-medium">£{calcData.selling_price.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Purchase Price:</span>
+                  <span className="text-slate-500 dark:text-neutral-500">Purchase Price:</span>
                   <span className="font-medium">-£{calcData.purchase_price.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Platform Fee ({PLATFORM_FEES[calcData.platform]}%):</span>
+                  <span className="text-slate-500 dark:text-neutral-500">Platform Fee ({PLATFORM_FEES[calcData.platform]}%):</span>
                   <span className="font-medium">-£{calculateProfit().platformFee.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Postage & Other:</span>
+                  <span className="text-slate-500 dark:text-neutral-500">Postage & Other:</span>
                   <span className="font-medium">-£{(calcData.postage_cost + calcData.custom_fees).toFixed(2)}</span>
                 </div>
-                <div className="border-t border-slate-200 pt-2 mt-2">
+                <div className="border-t border-slate-200 dark:border-white/5 pt-2 mt-2">
                   <div className="flex justify-between">
-                    <span className="font-semibold text-slate-700">Net Profit:</span>
-                    <span className={`font-bold text-lg ${calculateProfit().profit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    <span className="font-semibold text-slate-700 dark:text-neutral-300">Net Profit:</span>
+                    <span className={`font-bold text-lg ${calculateProfit().profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600'}`}>
                       £{calculateProfit().profit.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm mt-1">
-                    <span className="text-slate-500">Profit Margin:</span>
-                    <span className={`font-medium ${calculateProfit().margin >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    <span className="text-slate-500 dark:text-neutral-500">Profit Margin:</span>
+                    <span className={`font-medium ${calculateProfit().margin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600'}`}>
                       {calculateProfit().margin.toFixed(1)}%
                     </span>
                   </div>

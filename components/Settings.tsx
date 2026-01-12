@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { api } from '../lib/api';
 import { User, Bell, CreditCard, Key, Shield, Loader2, Check, ExternalLink } from 'lucide-react';
+import { Card, Button, Badge, Input } from './ui/UIComponents';
 
 interface SubscriptionInfo {
   plan: string;
@@ -211,8 +212,8 @@ export const Settings: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-4 md:mb-6">
-        <h2 className="text-xl md:text-2xl font-bold text-slate-800">Settings</h2>
-        <p className="text-sm md:text-base text-slate-500">Manage your account preferences and subscription.</p>
+        <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Settings</h2>
+        <p className="text-sm md:text-base text-slate-500 dark:text-neutral-500">Manage your account preferences and subscription.</p>
       </div>
 
       {message && (
@@ -224,9 +225,9 @@ export const Settings: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white dark:bg-neutral-900/80 rounded-xl shadow-sm border border-slate-200 dark:border-white/5 overflow-hidden">
         {/* Tabs */}
-        <div className="border-b border-slate-200 overflow-x-auto">
+        <div className="border-b border-slate-200 dark:border-white/5 overflow-x-auto">
           <div className="flex min-w-max">
             {tabs.map((tab) => (
               <button
@@ -235,7 +236,7 @@ export const Settings: React.FC = () => {
                 className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'text-blue-600 border-blue-600'
-                    : 'text-slate-500 border-transparent hover:text-slate-700'
+                    : 'text-slate-500 dark:text-neutral-500 border-transparent hover:text-slate-700 dark:text-neutral-300'
                 }`}
               >
                 <tab.icon size={16} className="md:w-[18px] md:h-[18px]" />
@@ -251,34 +252,34 @@ export const Settings: React.FC = () => {
           {activeTab === 'profile' && (
             <div className="space-y-4 md:space-y-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5 md:mb-2">Email</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1.5 md:mb-2">Email</label>
                 <input
                   type="email"
                   value={user?.email || ''}
                   disabled
-                  className="w-full px-3 md:px-4 py-2 text-sm md:text-base border border-slate-200 rounded-lg bg-slate-50 text-slate-500"
+                  className="w-full px-3 md:px-4 py-2 text-sm md:text-base border border-slate-200 dark:border-neutral-700 rounded-lg bg-slate-50 dark:bg-neutral-800 text-slate-500 dark:text-neutral-300"
                 />
                 <p className="text-xs text-slate-400 mt-1">Email cannot be changed</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5 md:mb-2">Full Name</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1.5 md:mb-2">Full Name</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-3 md:px-4 py-2 text-sm md:text-base border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 md:px-4 py-2 text-sm md:text-base bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="Your full name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5 md:mb-2">Location (Postcode)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1.5 md:mb-2">Location (Postcode)</label>
                 <input
                   type="text"
                   value={postcode}
                   onChange={(e) => setPostcode(e.target.value)}
-                  className="w-full px-3 md:px-4 py-2 text-sm md:text-base border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 md:px-4 py-2 text-sm md:text-base bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="e.g. SW1A 1AA"
                 />
                 <p className="text-xs text-slate-400 mt-1">Used for location-based alerts</p>
@@ -287,7 +288,7 @@ export const Settings: React.FC = () => {
               <button
                 onClick={handleSaveProfile}
                 disabled={isSaving}
-                className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2.5 md:py-2 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 flex items-center justify-center gap-2 text-sm md:text-base"
+                className="w-full sm:w-auto bg-violet-600 text-white px-6 py-2.5 md:py-2 rounded-lg hover:bg-violet-500 font-medium disabled:opacity-50 flex items-center justify-center gap-2 text-sm md:text-base"
               >
                 {isSaving && <Loader2 size={16} className="animate-spin" />}
                 Save Changes
@@ -298,10 +299,10 @@ export const Settings: React.FC = () => {
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
             <div className="space-y-4 md:space-y-6">
-              <div className="flex items-center justify-between p-3 md:p-4 bg-slate-50 rounded-lg gap-3">
+              <div className="flex items-center justify-between p-3 md:p-4 bg-slate-50 dark:bg-neutral-900/50 rounded-lg gap-3">
                 <div className="min-w-0">
-                  <h4 className="font-medium text-slate-800 text-sm md:text-base">Email Notifications</h4>
-                  <p className="text-xs md:text-sm text-slate-500">Receive alerts and updates via email</p>
+                  <h4 className="font-medium text-slate-900 dark:text-white text-sm md:text-base">Email Notifications</h4>
+                  <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">Receive alerts and updates via email</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                   <input
@@ -310,14 +311,14 @@ export const Settings: React.FC = () => {
                     onChange={(e) => setEmailNotifications(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-11 h-6 bg-slate-200 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-violet-300 dark:peer-focus:ring-violet-500/50 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
                 </label>
               </div>
 
-              <div className="flex items-center justify-between p-3 md:p-4 bg-slate-50 rounded-lg gap-3">
+              <div className="flex items-center justify-between p-3 md:p-4 bg-slate-50 dark:bg-neutral-900/50 rounded-lg gap-3">
                 <div className="min-w-0">
-                  <h4 className="font-medium text-slate-800 text-sm md:text-base">Push Notifications</h4>
-                  <p className="text-xs md:text-sm text-slate-500">Get instant notifications in your browser</p>
+                  <h4 className="font-medium text-slate-900 dark:text-white text-sm md:text-base">Push Notifications</h4>
+                  <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">Get instant notifications in your browser</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                   <input
@@ -326,16 +327,16 @@ export const Settings: React.FC = () => {
                     onChange={(e) => setPushNotifications(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-11 h-6 bg-slate-200 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-violet-300 dark:peer-focus:ring-violet-500/50 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
                 </label>
               </div>
 
               {/* Telegram Notifications Section */}
-              <div className="p-3 md:p-4 bg-slate-50 rounded-lg space-y-4">
+              <div className="p-3 md:p-4 bg-slate-50 dark:bg-neutral-900/50 rounded-lg space-y-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <h4 className="font-medium text-slate-800 text-sm md:text-base">Telegram Notifications</h4>
-                    <p className="text-xs md:text-sm text-slate-500">Receive instant alerts via Telegram</p>
+                    <h4 className="font-medium text-slate-900 dark:text-white text-sm md:text-base">Telegram Notifications</h4>
+                    <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">Receive instant alerts via Telegram</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                     <input
@@ -344,12 +345,12 @@ export const Settings: React.FC = () => {
                       onChange={(e) => setTelegramNotifications(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <div className="w-11 h-6 bg-slate-200 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-violet-300 dark:peer-focus:ring-violet-500/50 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
                   </label>
                 </div>
 
                 {telegramNotifications && (
-                  <div className="space-y-4 pt-4 border-t border-slate-200">
+                  <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-white/5">
                     <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
                       <p className="text-xs md:text-sm text-blue-800">
                         <strong>Setup Instructions:</strong>
@@ -363,7 +364,7 @@ export const Settings: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1.5 md:mb-2">Chat ID or Channel ID</label>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1.5 md:mb-2">Chat ID or Channel ID</label>
                       <input
                         type="text"
                         value={telegramChatId}
@@ -371,7 +372,7 @@ export const Settings: React.FC = () => {
                           setTelegramChatId(e.target.value);
                           setIsTelegramVerified(false);
                         }}
-                        className="w-full px-3 md:px-4 py-2 text-sm md:text-base border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="w-full px-3 md:px-4 py-2 text-sm md:text-base bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                         placeholder="123456789 or @yourchannel"
                       />
                       <p className="text-xs text-slate-400 mt-1">Your personal chat ID or a channel where you've added @ReListBot as admin</p>
@@ -400,7 +401,7 @@ export const Settings: React.FC = () => {
               <button
                 onClick={handleSaveNotifications}
                 disabled={isSaving}
-                className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2.5 md:py-2 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 flex items-center justify-center gap-2 text-sm md:text-base"
+                className="w-full sm:w-auto bg-violet-600 text-white px-6 py-2.5 md:py-2 rounded-lg hover:bg-violet-500 font-medium disabled:opacity-50 flex items-center justify-center gap-2 text-sm md:text-base"
               >
                 {isSaving && <Loader2 size={16} className="animate-spin" />}
                 Save Preferences
@@ -416,20 +417,20 @@ export const Settings: React.FC = () => {
                 <div className="p-4 md:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                     <div>
-                      <h4 className="text-base md:text-lg font-bold text-slate-800 capitalize">{subscription.plan} Plan</h4>
-                      <p className="text-xs md:text-sm text-slate-600 mt-1">
-                        Status: <span className={`font-medium ${subscription.status === 'active' ? 'text-emerald-600' : 'text-slate-500'}`}>
+                      <h4 className="text-base md:text-lg font-bold text-slate-900 dark:text-white capitalize">{subscription.plan} Plan</h4>
+                      <p className="text-xs md:text-sm text-slate-600 dark:text-neutral-400 mt-1">
+                        Status: <span className={`font-medium ${subscription.status === 'active' ? 'text-emerald-600' : 'text-slate-500 dark:text-neutral-500'}`}>
                           {subscription.status}
                         </span>
                       </p>
                       {subscription.currentPeriodEnd && (
-                        <p className="text-xs md:text-sm text-slate-500 mt-1">
+                        <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500 mt-1">
                           {subscription.cancelAtPeriodEnd ? 'Cancels' : 'Renews'} on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
                         </p>
                       )}
                     </div>
                     <div className="sm:text-right">
-                      <p className="text-xs md:text-sm text-slate-500">AI Credits</p>
+                      <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">AI Credits</p>
                       <p className="text-xl md:text-2xl font-bold text-blue-600">{subscription.aiCredits}</p>
                     </div>
                   </div>
@@ -448,7 +449,7 @@ export const Settings: React.FC = () => {
 
               {/* Available Plans */}
               <div>
-                <h4 className="text-base md:text-lg font-bold text-slate-800 mb-3 md:mb-4">Available Plans</h4>
+                <h4 className="text-base md:text-lg font-bold text-slate-900 dark:text-white mb-3 md:mb-4">Available Plans</h4>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                   {plans.map((plan) => (
                     <div
@@ -456,22 +457,22 @@ export const Settings: React.FC = () => {
                       className={`p-3 md:p-4 rounded-xl border-2 transition-all ${
                         subscription?.plan === plan.id
                           ? 'border-blue-500 bg-blue-50'
-                          : 'border-slate-200 hover:border-slate-300'
+                          : 'border-slate-200 dark:border-white/5 hover:border-slate-300'
                       }`}
                     >
-                      <h5 className="font-bold text-slate-800 text-sm md:text-base">{plan.name}</h5>
-                      <p className="text-lg md:text-xl font-bold text-slate-800 mt-1">
+                      <h5 className="font-bold text-slate-900 dark:text-white text-sm md:text-base">{plan.name}</h5>
+                      <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mt-1">
                         {plan.price === 0 ? 'Free' : `£${plan.price}/mo`}
                       </p>
-                      <p className="text-xs md:text-sm text-slate-500 mt-2">
+                      <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500 mt-2">
                         {plan.alerts === -1 ? 'Unlimited' : plan.alerts} alerts
                       </p>
-                      <p className="text-xs md:text-sm text-slate-500">
+                      <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">
                         {plan.aiCredits} AI credits/mo
                       </p>
                       <ul className="mt-2 md:mt-3 space-y-1 hidden sm:block">
                         {plan.features.slice(0, 3).map((feature, i) => (
-                          <li key={i} className="text-xs text-slate-600 flex items-center gap-1">
+                          <li key={i} className="text-xs text-slate-600 dark:text-neutral-400 flex items-center gap-1">
                             <Check size={12} className="text-emerald-500 flex-shrink-0" />
                             <span className="truncate">{feature}</span>
                           </li>
@@ -481,7 +482,7 @@ export const Settings: React.FC = () => {
                         <button
                           onClick={() => handleUpgrade(plan.id)}
                           disabled={isLoading}
-                          className="mt-3 md:mt-4 w-full bg-blue-600 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                          className="mt-3 md:mt-4 w-full bg-violet-600 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-violet-500 disabled:opacity-50"
                         >
                           {isLoading ? <Loader2 size={14} className="animate-spin mx-auto" /> : 'Upgrade'}
                         </button>
@@ -501,18 +502,18 @@ export const Settings: React.FC = () => {
           {/* Security Tab */}
           {activeTab === 'security' && (
             <div className="space-y-4 md:space-y-6">
-              <div className="p-3 md:p-4 bg-slate-50 rounded-lg">
-                <h4 className="font-medium text-slate-800 mb-1 md:mb-2 text-sm md:text-base">Change Password</h4>
-                <p className="text-xs md:text-sm text-slate-500 mb-3 md:mb-4">Update your password to keep your account secure</p>
+              <div className="p-3 md:p-4 bg-slate-50 dark:bg-neutral-900/50 rounded-lg">
+                <h4 className="font-medium text-slate-900 dark:text-white mb-1 md:mb-2 text-sm md:text-base">Change Password</h4>
+                <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500 mb-3 md:mb-4">Update your password to keep your account secure</p>
                 <button className="w-full sm:w-auto bg-slate-800 text-white px-4 py-2.5 md:py-2 rounded-lg text-sm font-medium hover:bg-slate-900">
                   Change Password
                 </button>
               </div>
 
-              <div className="p-3 md:p-4 bg-slate-50 rounded-lg">
-                <h4 className="font-medium text-slate-800 mb-1 md:mb-2 text-sm md:text-base">Two-Factor Authentication</h4>
-                <p className="text-xs md:text-sm text-slate-500 mb-3 md:mb-4">Add an extra layer of security to your account</p>
-                <button className="w-full sm:w-auto bg-slate-200 text-slate-600 px-4 py-2.5 md:py-2 rounded-lg text-sm font-medium cursor-not-allowed">
+              <div className="p-3 md:p-4 bg-slate-50 dark:bg-neutral-900/50 rounded-lg">
+                <h4 className="font-medium text-slate-900 dark:text-white mb-1 md:mb-2 text-sm md:text-base">Two-Factor Authentication</h4>
+                <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500 mb-3 md:mb-4">Add an extra layer of security to your account</p>
+                <button className="w-full sm:w-auto bg-slate-200 text-slate-600 dark:text-neutral-400 px-4 py-2.5 md:py-2 rounded-lg text-sm font-medium cursor-not-allowed">
                   Coming Soon
                 </button>
               </div>

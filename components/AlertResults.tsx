@@ -191,13 +191,13 @@ export const AlertResults: React.FC = () => {
 
   const getPlatformColor = (platform: string) => {
     const colors: Record<string, string> = {
-      'eBay': 'bg-blue-100 text-blue-700',
+      'eBay': 'bg-blue-100 text-violet-700 dark:text-violet-400',
       'Vinted': 'bg-teal-100 text-teal-700',
       'Depop': 'bg-red-100 text-red-700',
       'Gumtree': 'bg-green-100 text-green-700',
       'Facebook Marketplace': 'bg-indigo-100 text-indigo-700',
     };
-    return colors[platform] || 'bg-slate-100 text-slate-700';
+    return colors[platform] || 'bg-slate-100 dark:bg-neutral-800 text-slate-700';
   };
 
   // Calculate potential profit
@@ -214,22 +214,22 @@ export const AlertResults: React.FC = () => {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold text-slate-800">Alert Results</h2>
-          <p className="text-sm md:text-base text-slate-500">Items found matching your alerts.</p>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Alert Results</h2>
+          <p className="text-sm md:text-base text-slate-500 dark:text-neutral-500">Items found matching your alerts.</p>
         </div>
         <button
           onClick={handleMarkAllAsRead}
-          className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1 self-start sm:self-auto"
+          className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 text-sm font-medium flex items-center gap-1 self-start sm:self-auto"
         >
           <Check size={16} /> Mark all as read
         </button>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-white p-3 md:p-4 rounded-xl border border-slate-200">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 sm:items-center bg-white dark:bg-neutral-900/80 p-3 md:p-4 rounded-xl border border-slate-200 dark:border-white/5">
         <div className="flex items-center gap-2">
-          <Filter size={18} className="text-slate-400" />
-          <span className="text-sm font-medium text-slate-600">Filters:</span>
+          <Filter size={18} className="text-slate-400 dark:text-neutral-500" />
+          <span className="text-sm font-medium text-slate-600 dark:text-neutral-400">Filters:</span>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 flex-wrap">
@@ -237,28 +237,28 @@ export const AlertResults: React.FC = () => {
             <select
               value={selectedAlert}
               onChange={(e) => { setSelectedAlert(e.target.value); setPage(1); }}
-              className="w-full sm:w-auto appearance-none pl-4 pr-10 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+              className="w-full sm:w-auto appearance-none pl-4 pr-10 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-slate-900 dark:text-white"
             >
               <option value="">All Alerts</option>
               {alerts.map(alert => (
                 <option key={alert.id} value={alert.id}>{alert.name}</option>
               ))}
             </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500 pointer-events-none" />
           </div>
 
           <div className="relative flex-1 sm:flex-initial">
             <select
               value={selectedPlatform}
               onChange={(e) => { setSelectedPlatform(e.target.value); setPage(1); }}
-              className="w-full sm:w-auto appearance-none pl-4 pr-10 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+              className="w-full sm:w-auto appearance-none pl-4 pr-10 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-slate-900 dark:text-white"
             >
               <option value="">All Platforms</option>
               {PLATFORMS.map(platform => (
                 <option key={platform} value={platform}>{platform}</option>
               ))}
             </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500 pointer-events-none" />
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer">
@@ -266,9 +266,9 @@ export const AlertResults: React.FC = () => {
               type="checkbox"
               checked={showUnreadOnly}
               onChange={(e) => { setShowUnreadOnly(e.target.checked); setPage(1); }}
-              className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+              className="w-4 h-4 text-violet-600 dark:text-violet-400 rounded border-slate-300 dark:border-neutral-700 focus:ring-blue-500"
             />
-            <span className="text-sm text-slate-600">Unread only</span>
+            <span className="text-sm text-slate-600 dark:text-neutral-400">Unread only</span>
           </label>
         </div>
       </div>
@@ -276,16 +276,16 @@ export const AlertResults: React.FC = () => {
       {/* Results Grid */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-violet-600 dark:text-violet-400" />
         </div>
       ) : results.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-8 md:p-12 text-center">
-          <div className="w-12 h-12 md:w-16 md:h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Eye size={24} className="md:hidden text-slate-400" />
-            <Eye size={32} className="hidden md:block text-slate-400" />
+        <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-8 md:p-12 text-center">
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-slate-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Eye size={24} className="md:hidden text-slate-400 dark:text-neutral-500" />
+            <Eye size={32} className="hidden md:block text-slate-400 dark:text-neutral-500" />
           </div>
-          <h3 className="text-base md:text-lg font-medium text-slate-800 mb-2">No results found</h3>
-          <p className="text-sm md:text-base text-slate-500">
+          <h3 className="text-base md:text-lg font-medium text-slate-900 dark:text-white mb-2">No results found</h3>
+          <p className="text-sm md:text-base text-slate-500 dark:text-neutral-500">
             {selectedAlert
               ? 'No items match this alert yet. Check back later!'
               : 'Create alerts to start finding deals.'}
@@ -297,12 +297,12 @@ export const AlertResults: React.FC = () => {
             {results.map(result => (
               <div
                 key={result.id}
-                className={`bg-white rounded-xl border overflow-hidden hover:shadow-md transition-all ${
-                  result.is_read ? 'border-slate-200' : 'border-blue-200 ring-1 ring-blue-100'
+                className={`bg-white dark:bg-neutral-900/80 rounded-xl border overflow-hidden hover:shadow-md transition-all ${
+                  result.is_read ? 'border-slate-200 dark:border-white/5' : 'border-blue-200 ring-1 ring-blue-100'
                 }`}
               >
                 {/* Image */}
-                <div className="relative aspect-video bg-slate-100">
+                <div className="relative aspect-video bg-slate-100 dark:bg-neutral-800">
                   {result.image_urls && result.image_urls.length > 0 ? (
                     <img
                       src={result.image_urls[0]}
@@ -329,22 +329,22 @@ export const AlertResults: React.FC = () => {
                 {/* Content */}
                 <div className="p-3 md:p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-slate-800 line-clamp-2 flex-1 text-sm md:text-base" title={result.title}>
+                    <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 flex-1 text-sm md:text-base" title={result.title}>
                       {result.title}
                     </h3>
                   </div>
 
                   <div className="flex items-center justify-between mb-2 md:mb-3">
-                    <span className="text-lg md:text-xl font-bold text-emerald-600">
+                    <span className="text-lg md:text-xl font-bold text-emerald-600 dark:text-emerald-400">
                       {formatPrice(result.price, result.currency)}
                     </span>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-400 dark:text-neutral-500">
                       {formatDate(result.posted_at || result.created_at)}
                     </span>
                   </div>
 
                   {result.location && (
-                    <p className="text-xs md:text-sm text-slate-500 mb-2 md:mb-3 truncate">{result.location}</p>
+                    <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500 mb-2 md:mb-3 truncate">{result.location}</p>
                   )}
 
                   {/* Actions */}
@@ -353,7 +353,7 @@ export const AlertResults: React.FC = () => {
                       href={result.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 bg-blue-600 text-white px-2 md:px-3 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-1"
+                      className="flex-1 bg-violet-600 text-white px-2 md:px-3 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-violet-500 flex items-center justify-center gap-1"
                     >
                       View <ExternalLink size={14} />
                     </a>
@@ -361,7 +361,7 @@ export const AlertResults: React.FC = () => {
                     {!result.is_saved ? (
                       <button
                         onClick={() => openQuickSaveModal(result)}
-                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 dark:text-neutral-500 hover:text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 rounded-lg transition-colors"
                         title="Quick save to inventory"
                       >
                         <Package size={18} />
@@ -375,7 +375,7 @@ export const AlertResults: React.FC = () => {
                     {!watchedIds.has(result.id) ? (
                       <button
                         onClick={() => openWatchModal(result)}
-                        className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 dark:text-neutral-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                         title="Watch for price drops"
                       >
                         <Binoculars size={18} />
@@ -389,7 +389,7 @@ export const AlertResults: React.FC = () => {
                     {!result.is_read && (
                       <button
                         onClick={() => handleMarkAsRead(result.id)}
-                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 dark:text-neutral-500 hover:text-slate-600 dark:text-neutral-400 hover:bg-slate-50 dark:bg-neutral-900 rounded-lg transition-colors"
                         title="Mark as read"
                       >
                         <Eye size={18} />
@@ -407,17 +407,17 @@ export const AlertResults: React.FC = () => {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 dark:text-neutral-400 bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/5 rounded-lg hover:bg-slate-50 dark:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
-              <span className="text-xs sm:text-sm text-slate-500 px-2">
+              <span className="text-xs sm:text-sm text-slate-500 dark:text-neutral-500 px-2">
                 Page {page} of {totalPages}
               </span>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-600 dark:text-neutral-400 bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/5 rounded-lg hover:bg-slate-50 dark:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
@@ -429,22 +429,22 @@ export const AlertResults: React.FC = () => {
       {/* Quick Save Modal */}
       {quickSaveModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Package size={20} />
                 Quick Save to Inventory
               </h3>
               <button
                 onClick={() => setQuickSaveModal(null)}
-                className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg"
+                className="p-2 text-slate-500 dark:text-neutral-500 hover:text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-700 dark:bg-neutral-800 rounded-lg"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Item Preview */}
-            <div className="flex gap-3 p-3 bg-slate-50 rounded-lg mb-4">
+            <div className="flex gap-3 p-3 bg-slate-50 dark:bg-neutral-900 rounded-lg mb-4">
               {quickSaveModal.result.image_urls?.[0] && (
                 <img
                   src={quickSaveModal.result.image_urls[0]}
@@ -453,12 +453,12 @@ export const AlertResults: React.FC = () => {
                 />
               )}
               <div className="min-w-0 flex-1">
-                <h4 className="font-medium text-slate-800 text-sm line-clamp-2">{quickSaveModal.result.title}</h4>
+                <h4 className="font-medium text-slate-900 dark:text-white text-sm line-clamp-2">{quickSaveModal.result.title}</h4>
                 <div className="flex items-center gap-2 mt-1">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${getPlatformColor(quickSaveModal.result.platform)}`}>
                     {quickSaveModal.result.platform}
                   </span>
-                  <span className="text-emerald-600 font-bold text-sm">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">
                     {formatPrice(quickSaveModal.result.price, quickSaveModal.result.currency)}
                   </span>
                 </div>
@@ -467,7 +467,7 @@ export const AlertResults: React.FC = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
                   Purchase Price (£)
                 </label>
                 <input
@@ -477,14 +477,14 @@ export const AlertResults: React.FC = () => {
                     ...quickSaveModal,
                     purchase_price: parseFloat(e.target.value) || 0
                   })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="What you'll pay"
                 />
-                <p className="text-xs text-slate-400 mt-1">Listed price: £{quickSaveModal.result.price}</p>
+                <p className="text-xs text-slate-400 dark:text-neutral-500 mt-1">Listed price: £{quickSaveModal.result.price}</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
                   Target Sell Price (£)
                 </label>
                 <input
@@ -494,13 +494,13 @@ export const AlertResults: React.FC = () => {
                     ...quickSaveModal,
                     target_price: parseFloat(e.target.value) || 0
                   })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="What you'll sell for"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
                   Notes (optional)
                 </label>
                 <input
@@ -509,7 +509,7 @@ export const AlertResults: React.FC = () => {
                     ...quickSaveModal,
                     notes: e.target.value
                   })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                   placeholder="Any notes about this item..."
                 />
               </div>
@@ -518,13 +518,13 @@ export const AlertResults: React.FC = () => {
               <div className="bg-emerald-50 rounded-lg p-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-emerald-700">Potential Profit:</span>
-                  <span className={`font-bold text-lg ${calculateProfit().profit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <span className={`font-bold text-lg ${calculateProfit().profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600'}`}>
                     £{calculateProfit().profit.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-1">
-                  <span className="text-xs text-emerald-600">Profit Margin:</span>
-                  <span className={`font-medium text-sm ${calculateProfit().margin >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400">Profit Margin:</span>
+                  <span className={`font-medium text-sm ${calculateProfit().margin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600'}`}>
                     {calculateProfit().margin.toFixed(1)}%
                   </span>
                 </div>
@@ -534,7 +534,7 @@ export const AlertResults: React.FC = () => {
             <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
               <button
                 onClick={() => setQuickSaveModal(null)}
-                className="flex-1 px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium"
+                className="flex-1 px-4 py-2.5 rounded-lg text-slate-600 dark:text-neutral-400 hover:bg-slate-50 dark:bg-neutral-900 font-medium"
               >
                 Cancel
               </button>
@@ -554,22 +554,22 @@ export const AlertResults: React.FC = () => {
       {/* Watch Modal */}
       {watchModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Binoculars size={20} className="text-amber-600" />
                 Watch for Price Drops
               </h3>
               <button
                 onClick={() => setWatchModal(null)}
-                className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg"
+                className="p-2 text-slate-500 dark:text-neutral-500 hover:text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-700 dark:bg-neutral-800 rounded-lg"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Item Preview */}
-            <div className="flex gap-3 p-3 bg-slate-50 rounded-lg mb-4">
+            <div className="flex gap-3 p-3 bg-slate-50 dark:bg-neutral-900 rounded-lg mb-4">
               {watchModal.result.image_urls?.[0] && (
                 <img
                   src={watchModal.result.image_urls[0]}
@@ -578,12 +578,12 @@ export const AlertResults: React.FC = () => {
                 />
               )}
               <div className="min-w-0 flex-1">
-                <h4 className="font-medium text-slate-800 text-sm line-clamp-2">{watchModal.result.title}</h4>
+                <h4 className="font-medium text-slate-900 dark:text-white text-sm line-clamp-2">{watchModal.result.title}</h4>
                 <div className="flex items-center gap-2 mt-1">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${getPlatformColor(watchModal.result.platform)}`}>
                     {watchModal.result.platform}
                   </span>
-                  <span className="text-emerald-600 font-bold text-sm">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">
                     {formatPrice(watchModal.result.price, watchModal.result.currency)}
                   </span>
                 </div>
@@ -598,16 +598,16 @@ export const AlertResults: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
                   Current Price
                 </label>
-                <div className="px-3 py-2 bg-slate-100 rounded-lg text-slate-700 font-medium">
+                <div className="px-3 py-2 bg-slate-100 dark:bg-neutral-800 rounded-lg text-slate-700 font-medium">
                   {formatPrice(watchModal.result.price, watchModal.result.currency)}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
                   Target Price (optional)
                 </label>
                 <input
@@ -617,10 +617,10 @@ export const AlertResults: React.FC = () => {
                     ...watchModal,
                     target_price: parseFloat(e.target.value) || 0
                   })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 dark:text-white"
                   placeholder="Alert me when price drops to..."
                 />
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-400 dark:text-neutral-500 mt-1">
                   Leave empty to get notified on any price drop
                 </p>
               </div>
@@ -629,7 +629,7 @@ export const AlertResults: React.FC = () => {
                 <div className="bg-emerald-50 rounded-lg p-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-emerald-700">Target Savings:</span>
-                    <span className="font-bold text-emerald-600">
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
                       {formatPrice(watchModal.result.price - watchModal.target_price, watchModal.result.currency)}
                       <span className="text-xs ml-1">
                         ({Math.round((1 - watchModal.target_price / watchModal.result.price) * 100)}% off)
@@ -643,7 +643,7 @@ export const AlertResults: React.FC = () => {
             <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
               <button
                 onClick={() => setWatchModal(null)}
-                className="flex-1 px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium"
+                className="flex-1 px-4 py-2.5 rounded-lg text-slate-600 dark:text-neutral-400 hover:bg-slate-50 dark:bg-neutral-900 font-medium"
               >
                 Cancel
               </button>

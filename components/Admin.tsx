@@ -126,23 +126,23 @@ export default function Admin() {
       {/* Stats Overview */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500">Total Users</h3>
             <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalUsers}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500">Active Subscriptions</h3>
             <p className="text-3xl font-bold text-green-600 mt-2">{stats.activeSubscriptions}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500">Total Alerts</h3>
-            <p className="text-3xl font-bold text-blue-600 mt-2">{stats.totalAlerts}</p>
+            <p className="text-3xl font-bold text-violet-600 dark:text-violet-400 mt-2">{stats.totalAlerts}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500">Active Alerts</h3>
             <p className="text-3xl font-bold text-purple-600 mt-2">{stats.activeAlerts}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500">Total Results</h3>
             <p className="text-3xl font-bold text-orange-600 mt-2">{stats.totalResults}</p>
           </div>
@@ -151,7 +151,7 @@ export default function Admin() {
 
       {/* Subscription Tiers */}
       {stats && Object.keys(stats.subscriptionTiers).length > 0 && (
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <div className="bg-white dark:bg-neutral-900/80 rounded-lg shadow p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Subscription Breakdown</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Object.entries(stats.subscriptionTiers).map(([tier, count]) => (
@@ -165,7 +165,7 @@ export default function Admin() {
       )}
 
       {/* Users Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+      <div className="bg-white dark:bg-neutral-900/80 rounded-lg shadow overflow-hidden mb-8">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold">All Users ({users.length})</h2>
         </div>
@@ -219,7 +219,7 @@ export default function Admin() {
                   <td className="px-6 py-4 text-sm">
                     <button
                       onClick={() => fetchUserAlerts(user.id)}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
+                      className="text-violet-600 dark:text-violet-400 hover:text-blue-800 font-medium"
                     >
                       View Alerts
                     </button>
@@ -234,7 +234,7 @@ export default function Admin() {
       {/* User Alerts Modal */}
       {selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h2 className="text-xl font-semibold">
                 User Alerts ({userAlerts.length})

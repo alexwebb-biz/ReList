@@ -381,18 +381,18 @@ export const Research: React.FC = () => {
 
   const getConfidenceIcon = (confidence: string) => {
     switch (confidence) {
-      case 'high': return <ShieldCheck size={14} className="text-emerald-600" />;
+      case 'high': return <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />;
       case 'medium': return <Shield size={14} className="text-yellow-600" />;
-      default: return <ShieldAlert size={14} className="text-slate-400" />;
+      default: return <ShieldAlert size={14} className="text-slate-400 dark:text-neutral-500" />;
     }
   };
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'low': return 'text-emerald-600 bg-emerald-50';
+      case 'low': return 'text-emerald-600 dark:text-emerald-400 bg-emerald-50';
       case 'medium': return 'text-yellow-600 bg-yellow-50';
       case 'high': return 'text-red-600 bg-red-50';
-      default: return 'text-slate-600 bg-slate-50';
+      default: return 'text-slate-600 dark:text-neutral-400 bg-slate-50 dark:bg-neutral-900';
     }
   };
 
@@ -427,8 +427,8 @@ export const Research: React.FC = () => {
   };
 
   const getListingScoreColor = (score: number) => {
-    if (score >= 80) return 'text-emerald-600';
-    if (score >= 60) return 'text-blue-600';
+    if (score >= 80) return 'text-emerald-600 dark:text-emerald-400';
+    if (score >= 60) return 'text-violet-600 dark:text-violet-400';
     if (score >= 40) return 'text-yellow-600';
     return 'text-red-600';
   };
@@ -502,35 +502,35 @@ export const Research: React.FC = () => {
       case 'aging': return 'bg-yellow-100 text-yellow-700';
       case 'stale': return 'bg-orange-100 text-orange-700';
       case 'critical': return 'bg-red-100 text-red-700';
-      default: return 'bg-slate-100 text-slate-700';
+      default: return 'bg-slate-100 dark:bg-neutral-800 text-slate-700';
     }
   };
 
   const getPlatformColor = (platform: string) => {
     const colors: Record<string, string> = {
-      'eBay': 'bg-blue-100 text-blue-700',
+      'eBay': 'bg-blue-100 text-violet-700 dark:text-violet-400',
       'Vinted': 'bg-teal-100 text-teal-700',
       'Depop': 'bg-red-100 text-red-700',
       'Gumtree': 'bg-green-100 text-green-700',
     };
-    return colors[platform] || 'bg-slate-100 text-slate-700';
+    return colors[platform] || 'bg-slate-100 dark:bg-neutral-800 text-slate-700';
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800">Research & Tools</h2>
-        <p className="text-slate-500">Price tracking, market research, and inventory insights.</p>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Research & Tools</h2>
+        <p className="text-slate-500 dark:text-neutral-500">Price tracking, market research, and inventory insights.</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-slate-200">
+      <div className="flex gap-2 border-b border-slate-200 dark:border-white/5">
         <button
           onClick={() => setActiveTab('watchlist')}
           className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'watchlist'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-blue-600 text-violet-600 dark:text-violet-400'
+              : 'border-transparent text-slate-500 dark:text-neutral-500 hover:text-slate-700'
           }`}
         >
           <Eye size={16} className="inline mr-2" />
@@ -540,8 +540,8 @@ export const Research: React.FC = () => {
           onClick={() => setActiveTab('research')}
           className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'research'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-blue-600 text-violet-600 dark:text-violet-400'
+              : 'border-transparent text-slate-500 dark:text-neutral-500 hover:text-slate-700'
           }`}
         >
           <Search size={16} className="inline mr-2" />
@@ -551,8 +551,8 @@ export const Research: React.FC = () => {
           onClick={() => setActiveTab('aging')}
           className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'aging'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-blue-600 text-violet-600 dark:text-violet-400'
+              : 'border-transparent text-slate-500 dark:text-neutral-500 hover:text-slate-700'
           }`}
         >
           <Clock size={16} className="inline mr-2" />
@@ -562,8 +562,8 @@ export const Research: React.FC = () => {
           onClick={() => setActiveTab('flipfinder')}
           className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'flipfinder'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-blue-600 text-violet-600 dark:text-violet-400'
+              : 'border-transparent text-slate-500 dark:text-neutral-500 hover:text-slate-700'
           }`}
         >
           <Zap size={16} className="inline mr-2" />
@@ -573,8 +573,8 @@ export const Research: React.FC = () => {
           onClick={() => setActiveTab('optimizer')}
           className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'optimizer'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-blue-600 text-violet-600 dark:text-violet-400'
+              : 'border-transparent text-slate-500 dark:text-neutral-500 hover:text-slate-700'
           }`}
         >
           <Target size={16} className="inline mr-2" />
@@ -586,12 +586,12 @@ export const Research: React.FC = () => {
       {activeTab === 'watchlist' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-neutral-500">
               Track prices on items you're interested in. Get notified when they drop.
             </p>
             <button
               onClick={loadWatchlist}
-              className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 flex items-center gap-1"
             >
               <RefreshCw size={14} /> Refresh
             </button>
@@ -599,13 +599,13 @@ export const Research: React.FC = () => {
 
           {watchlistLoading ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-violet-600 dark:text-violet-400" />
             </div>
           ) : watchlist.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+            <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-8 text-center">
               <Eye size={48} className="mx-auto text-slate-300 mb-4" />
-              <h3 className="font-medium text-slate-800 mb-2">No items being watched</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="font-medium text-slate-900 dark:text-white mb-2">No items being watched</h3>
+              <p className="text-sm text-slate-500 dark:text-neutral-500">
                 Click the eye icon on Alert Results to start watching items for price drops.
               </p>
             </div>
@@ -614,9 +614,9 @@ export const Research: React.FC = () => {
               {watchlist.map(item => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md transition-all"
+                  className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden hover:shadow-md transition-all"
                 >
-                  <div className="relative aspect-video bg-slate-100">
+                  <div className="relative aspect-video bg-slate-100 dark:bg-neutral-800">
                     {item.image_url ? (
                       <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
                     ) : (
@@ -640,25 +640,25 @@ export const Research: React.FC = () => {
                   </div>
 
                   <div className="p-4">
-                    <h3 className="font-semibold text-slate-800 text-sm line-clamp-2 mb-2">{item.title}</h3>
+                    <h3 className="font-semibold text-slate-900 dark:text-white text-sm line-clamp-2 mb-2">{item.title}</h3>
 
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <span className="text-xs text-slate-400 block">Current</span>
-                        <span className="text-lg font-bold text-slate-800">{formatPrice(item.current_price)}</span>
+                        <span className="text-xs text-slate-400 dark:text-neutral-500 block">Current</span>
+                        <span className="text-lg font-bold text-slate-900 dark:text-white">{formatPrice(item.current_price)}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs text-slate-400 block">Was</span>
-                        <span className="text-sm text-slate-500 line-through">{formatPrice(item.initial_price)}</span>
+                        <span className="text-xs text-slate-400 dark:text-neutral-500 block">Was</span>
+                        <span className="text-sm text-slate-500 dark:text-neutral-500 line-through">{formatPrice(item.initial_price)}</span>
                       </div>
                     </div>
 
                     {item.target_price && (
-                      <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
+                      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-neutral-500 mb-3">
                         <Target size={12} />
                         Target: {formatPrice(item.target_price)}
                         {item.current_price <= item.target_price && (
-                          <span className="text-emerald-600 font-medium">Target reached!</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">Target reached!</span>
                         )}
                       </div>
                     )}
@@ -668,13 +668,13 @@ export const Research: React.FC = () => {
                         href={item.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-medium hover:bg-blue-700 flex items-center justify-center gap-1"
+                        className="flex-1 bg-violet-600 text-white px-3 py-2 rounded-lg text-xs font-medium hover:bg-violet-500 flex items-center justify-center gap-1"
                       >
                         View <ExternalLink size={12} />
                       </a>
                       <button
                         onClick={() => removeFromWatchlist(item.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                        className="p-2 text-slate-400 dark:text-neutral-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
                         title="Stop watching"
                       >
                         <X size={16} />
@@ -691,8 +691,8 @@ export const Research: React.FC = () => {
       {/* ============== MARKET RESEARCH TAB ============== */}
       {activeTab === 'research' && (
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-4">
+            <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-2">
               Search for sold items to see market prices
             </label>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -702,12 +702,12 @@ export const Research: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="e.g. iPhone 15 Pro Max 256GB"
-                className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="flex-1 px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
               />
               <button
                 onClick={handleSearch}
                 disabled={researchLoading || !searchQuery.trim() || selectedPlatforms.length === 0}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="bg-violet-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-violet-500 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {researchLoading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
                 Search
@@ -716,7 +716,7 @@ export const Research: React.FC = () => {
 
             {/* Platform Selection */}
             <div className="mt-3 pt-3 border-t border-slate-100">
-              <span className="text-xs font-medium text-slate-500 block mb-2">Search platforms:</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-neutral-500 block mb-2">Search platforms:</span>
               <div className="flex flex-wrap gap-2">
                 {RESEARCH_PLATFORMS.map(platform => (
                   <button
@@ -724,8 +724,8 @@ export const Research: React.FC = () => {
                     onClick={() => togglePlatform(platform)}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                       selectedPlatforms.includes(platform)
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        ? 'bg-violet-600 text-white'
+                        : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
                     }`}
                   >
                     {platform}
@@ -738,34 +738,34 @@ export const Research: React.FC = () => {
           {researchResults.length > 0 && (
             <div className="space-y-6">
               {researchResults.map((result, idx) => (
-                <div key={idx} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div key={idx} className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
                   {/* Stats Header */}
-                  <div className="p-4 bg-slate-50 border-b border-slate-200">
+                  <div className="p-4 bg-slate-50 dark:bg-neutral-900 border-b border-slate-200 dark:border-white/5">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-slate-800">
+                      <h3 className="font-semibold text-slate-900 dark:text-white">
                         {result.platform} - "{result.query}"
                       </h3>
-                      <span className="text-sm text-slate-500">
+                      <span className="text-sm text-slate-500 dark:text-neutral-500">
                         {result.stats.total_sold} sold items found
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-white rounded-lg p-3 border border-slate-200">
-                        <span className="text-xs text-slate-500 block">Average</span>
-                        <span className="text-lg font-bold text-slate-800">{formatPrice(result.stats.average_price)}</span>
+                      <div className="bg-white dark:bg-neutral-900/80 rounded-lg p-3 border border-slate-200 dark:border-white/5">
+                        <span className="text-xs text-slate-500 dark:text-neutral-500 block">Average</span>
+                        <span className="text-lg font-bold text-slate-900 dark:text-white">{formatPrice(result.stats.average_price)}</span>
                       </div>
-                      <div className="bg-white rounded-lg p-3 border border-slate-200">
-                        <span className="text-xs text-slate-500 block">Median</span>
-                        <span className="text-lg font-bold text-blue-600">{formatPrice(result.stats.median_price)}</span>
+                      <div className="bg-white dark:bg-neutral-900/80 rounded-lg p-3 border border-slate-200 dark:border-white/5">
+                        <span className="text-xs text-slate-500 dark:text-neutral-500 block">Median</span>
+                        <span className="text-lg font-bold text-violet-600 dark:text-violet-400">{formatPrice(result.stats.median_price)}</span>
                       </div>
-                      <div className="bg-white rounded-lg p-3 border border-slate-200">
-                        <span className="text-xs text-slate-500 block">Lowest</span>
-                        <span className="text-lg font-bold text-emerald-600">{formatPrice(result.stats.lowest_price)}</span>
+                      <div className="bg-white dark:bg-neutral-900/80 rounded-lg p-3 border border-slate-200 dark:border-white/5">
+                        <span className="text-xs text-slate-500 dark:text-neutral-500 block">Lowest</span>
+                        <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{formatPrice(result.stats.lowest_price)}</span>
                       </div>
-                      <div className="bg-white rounded-lg p-3 border border-slate-200">
-                        <span className="text-xs text-slate-500 block">Highest</span>
-                        <span className="text-lg font-bold text-slate-800">{formatPrice(result.stats.highest_price)}</span>
+                      <div className="bg-white dark:bg-neutral-900/80 rounded-lg p-3 border border-slate-200 dark:border-white/5">
+                        <span className="text-xs text-slate-500 dark:text-neutral-500 block">Highest</span>
+                        <span className="text-lg font-bold text-slate-900 dark:text-white">{formatPrice(result.stats.highest_price)}</span>
                       </div>
                     </div>
                   </div>
@@ -773,22 +773,22 @@ export const Research: React.FC = () => {
                   {/* Sold Items List */}
                   <div className="divide-y divide-slate-100 max-h-96 overflow-y-auto">
                     {result.sold_items.slice(0, 20).map((item, i) => (
-                      <div key={i} className="flex items-center gap-4 p-3 hover:bg-slate-50">
+                      <div key={i} className="flex items-center gap-4 p-3 hover:bg-slate-50 dark:bg-neutral-900">
                         {item.image_url && (
                           <img src={item.image_url} alt="" className="w-12 h-12 rounded object-cover flex-shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-800 truncate">{item.title}</p>
-                          <p className="text-xs text-slate-500">{item.condition} · {item.sold_date}</p>
+                          <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{item.title}</p>
+                          <p className="text-xs text-slate-500 dark:text-neutral-500">{item.condition} · {item.sold_date}</p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <span className="font-bold text-emerald-600">{formatPrice(item.sold_price)}</span>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatPrice(item.sold_price)}</span>
                         </div>
                         <a
                           href={item.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-slate-400 hover:text-blue-600"
+                          className="text-slate-400 dark:text-neutral-500 hover:text-violet-600 dark:text-violet-400"
                         >
                           <ExternalLink size={14} />
                         </a>
@@ -801,10 +801,10 @@ export const Research: React.FC = () => {
           )}
 
           {!researchLoading && researchResults.length === 0 && searchQuery && (
-            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+            <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-8 text-center">
               <Search size={48} className="mx-auto text-slate-300 mb-4" />
-              <h3 className="font-medium text-slate-800 mb-2">Search for sold items</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="font-medium text-slate-900 dark:text-white mb-2">Search for sold items</h3>
+              <p className="text-sm text-slate-500 dark:text-neutral-500">
                 Enter a product name to see what similar items have sold for.
               </p>
             </div>
@@ -818,12 +818,12 @@ export const Research: React.FC = () => {
           {/* Stats Cards */}
           {agingStats && (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <span className="text-xs text-slate-500 block">Total Listed</span>
-                <span className="text-2xl font-bold text-slate-800">{agingStats.total_listed}</span>
+              <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-4">
+                <span className="text-xs text-slate-500 dark:text-neutral-500 block">Total Listed</span>
+                <span className="text-2xl font-bold text-slate-900 dark:text-white">{agingStats.total_listed}</span>
               </div>
               <div className="bg-emerald-50 rounded-xl border border-emerald-200 p-4">
-                <span className="text-xs text-emerald-600 block">Fresh (0-7d)</span>
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 block">Fresh (0-7d)</span>
                 <span className="text-2xl font-bold text-emerald-700">{agingStats.fresh_count}</span>
               </div>
               <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-4">
@@ -838,9 +838,9 @@ export const Research: React.FC = () => {
                 <span className="text-xs text-red-600 block">Critical (30d+)</span>
                 <span className="text-2xl font-bold text-red-700">{agingStats.critical_count}</span>
               </div>
-              <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
-                <span className="text-xs text-slate-500 block">Avg. Days Listed</span>
-                <span className="text-2xl font-bold text-slate-800">{agingStats.avg_days_listed}</span>
+              <div className="bg-slate-50 dark:bg-neutral-900 rounded-xl border border-slate-200 dark:border-white/5 p-4">
+                <span className="text-xs text-slate-500 dark:text-neutral-500 block">Avg. Days Listed</span>
+                <span className="text-2xl font-bold text-slate-900 dark:text-white">{agingStats.avg_days_listed}</span>
               </div>
             </div>
           )}
@@ -869,7 +869,7 @@ export const Research: React.FC = () => {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   agingFilter === status
                     ? 'bg-slate-800 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
                 }`}
               >
                 {status === '' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
@@ -880,41 +880,41 @@ export const Research: React.FC = () => {
           {/* Items List */}
           {agingLoading ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-violet-600 dark:text-violet-400" />
             </div>
           ) : agingItems.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+            <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-8 text-center">
               <Clock size={48} className="mx-auto text-slate-300 mb-4" />
-              <h3 className="font-medium text-slate-800 mb-2">No listed items</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="font-medium text-slate-900 dark:text-white mb-2">No listed items</h3>
+              <p className="text-sm text-slate-500 dark:text-neutral-500">
                 Items will appear here once you list them for sale.
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
               <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-slate-50 dark:bg-neutral-900 border-b border-slate-200 dark:border-white/5">
                   <tr>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-slate-500">Item</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 hidden md:table-cell">Days Listed</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-slate-500">Status</th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-slate-500">Current Price</th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-slate-500">Suggested</th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-slate-500">Action</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 dark:text-neutral-500">Item</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 dark:text-neutral-500 hidden md:table-cell">Days Listed</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 dark:text-neutral-500">Status</th>
+                    <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 dark:text-neutral-500">Current Price</th>
+                    <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 dark:text-neutral-500">Suggested</th>
+                    <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 dark:text-neutral-500">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {agingItems.map(item => (
-                    <tr key={item.id} className="hover:bg-slate-50">
+                    <tr key={item.id} className="hover:bg-slate-50 dark:bg-neutral-900">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           {item.images?.[0] && (
                             <img src={item.images[0]} alt="" className="w-10 h-10 rounded object-cover" />
                           )}
-                          <span className="font-medium text-slate-800 text-sm line-clamp-1">{item.title}</span>
+                          <span className="font-medium text-slate-900 dark:text-white text-sm line-clamp-1">{item.title}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600 hidden md:table-cell">
+                      <td className="px-4 py-3 text-sm text-slate-600 dark:text-neutral-400 hidden md:table-cell">
                         {item.days_listed} days
                       </td>
                       <td className="px-4 py-3">
@@ -922,17 +922,17 @@ export const Research: React.FC = () => {
                           {item.aging_status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-medium text-slate-800">
+                      <td className="px-4 py-3 text-right font-medium text-slate-900 dark:text-white">
                         {formatPrice(item.selling_price)}
                       </td>
                       <td className="px-4 py-3 text-right">
                         {item.suggested_price ? (
                           <div>
-                            <span className="font-medium text-emerald-600">{formatPrice(item.suggested_price)}</span>
-                            <span className="text-xs text-slate-400 block">-{item.suggested_reduction}%</span>
+                            <span className="font-medium text-emerald-600 dark:text-emerald-400">{formatPrice(item.suggested_price)}</span>
+                            <span className="text-xs text-slate-400 dark:text-neutral-500 block">-{item.suggested_reduction}%</span>
                           </div>
                         ) : (
-                          <span className="text-slate-400">-</span>
+                          <span className="text-slate-400 dark:text-neutral-500">-</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -973,8 +973,8 @@ export const Research: React.FC = () => {
           </div>
 
           {/* Search Form */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-4">
+            <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-2">
               Search for items to flip
             </label>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -984,7 +984,7 @@ export const Research: React.FC = () => {
                 onChange={(e) => setFlipQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && findFlipOpportunities()}
                 placeholder="e.g. vintage Levi's 501, Nike Dunk Low, Casio G-Shock"
-                className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                className="flex-1 px-4 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-slate-900 dark:text-white"
               />
               <button
                 onClick={findFlipOpportunities}
@@ -1000,12 +1000,12 @@ export const Research: React.FC = () => {
             <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Mode Toggle */}
               <div>
-                <span className="text-xs font-medium text-slate-500 block mb-2">Mode:</span>
+                <span className="text-xs font-medium text-slate-500 dark:text-neutral-500 block mb-2">Mode:</span>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setArbitrageMode(false)}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                      !arbitrageMode ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      !arbitrageMode ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
                     }`}
                   >
                     Same Platform
@@ -1013,7 +1013,7 @@ export const Research: React.FC = () => {
                   <button
                     onClick={() => setArbitrageMode(true)}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
-                      arbitrageMode ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      arbitrageMode ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
                     }`}
                   >
                     <ArrowRight size={14} />
@@ -1025,7 +1025,7 @@ export const Research: React.FC = () => {
               {/* Platform Selection (only for same platform mode) */}
               {!arbitrageMode && (
                 <div>
-                  <span className="text-xs font-medium text-slate-500 block mb-2">Platforms:</span>
+                  <span className="text-xs font-medium text-slate-500 dark:text-neutral-500 block mb-2">Platforms:</span>
                   <div className="flex gap-2">
                     {FLIP_PLATFORMS.map(platform => (
                       <button
@@ -1034,7 +1034,7 @@ export const Research: React.FC = () => {
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                           flipPlatforms.includes(platform)
                             ? 'bg-purple-600 text-white'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
                         }`}
                       >
                         {platform}
@@ -1047,7 +1047,7 @@ export const Research: React.FC = () => {
               {/* Min Profit Margin */}
               {!arbitrageMode && (
                 <div>
-                  <span className="text-xs font-medium text-slate-500 block mb-2">
+                  <span className="text-xs font-medium text-slate-500 dark:text-neutral-500 block mb-2">
                     Min Profit Margin: {minProfitMargin}%
                   </span>
                   <input
@@ -1067,34 +1067,34 @@ export const Research: React.FC = () => {
           {!arbitrageMode && flipResults.length > 0 && (
             <div className="space-y-6">
               {flipResults.map((result, idx) => (
-                <div key={idx} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div key={idx} className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
                   {/* Stats Header */}
-                  <div className="p-4 bg-slate-50 border-b border-slate-200">
+                  <div className="p-4 bg-slate-50 dark:bg-neutral-900 border-b border-slate-200 dark:border-white/5">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-slate-800">
+                      <h3 className="font-semibold text-slate-900 dark:text-white">
                         {result.platform} - "{result.query}"
                       </h3>
-                      <span className="text-sm text-slate-500">
+                      <span className="text-sm text-slate-500 dark:text-neutral-500">
                         {result.stats.opportunities_found} opportunities from {result.stats.listings_analyzed} listings
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-white rounded-lg p-3 border border-slate-200">
-                        <span className="text-xs text-slate-500 block">Opportunities</span>
+                      <div className="bg-white dark:bg-neutral-900/80 rounded-lg p-3 border border-slate-200 dark:border-white/5">
+                        <span className="text-xs text-slate-500 dark:text-neutral-500 block">Opportunities</span>
                         <span className="text-lg font-bold text-purple-600">{result.stats.opportunities_found}</span>
                       </div>
-                      <div className="bg-white rounded-lg p-3 border border-slate-200">
-                        <span className="text-xs text-slate-500 block">Avg Margin</span>
-                        <span className="text-lg font-bold text-emerald-600">{result.stats.avg_profit_margin}%</span>
+                      <div className="bg-white dark:bg-neutral-900/80 rounded-lg p-3 border border-slate-200 dark:border-white/5">
+                        <span className="text-xs text-slate-500 dark:text-neutral-500 block">Avg Margin</span>
+                        <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{result.stats.avg_profit_margin}%</span>
                       </div>
-                      <div className="bg-white rounded-lg p-3 border border-slate-200">
-                        <span className="text-xs text-slate-500 block">Best ROI</span>
-                        <span className="text-lg font-bold text-blue-600">{result.stats.best_roi}%</span>
+                      <div className="bg-white dark:bg-neutral-900/80 rounded-lg p-3 border border-slate-200 dark:border-white/5">
+                        <span className="text-xs text-slate-500 dark:text-neutral-500 block">Best ROI</span>
+                        <span className="text-lg font-bold text-violet-600 dark:text-violet-400">{result.stats.best_roi}%</span>
                       </div>
-                      <div className="bg-white rounded-lg p-3 border border-slate-200">
-                        <span className="text-xs text-slate-500 block">Analyzed</span>
-                        <span className="text-lg font-bold text-slate-800">{result.stats.listings_analyzed}</span>
+                      <div className="bg-white dark:bg-neutral-900/80 rounded-lg p-3 border border-slate-200 dark:border-white/5">
+                        <span className="text-xs text-slate-500 dark:text-neutral-500 block">Analyzed</span>
+                        <span className="text-lg font-bold text-slate-900 dark:text-white">{result.stats.listings_analyzed}</span>
                       </div>
                     </div>
                   </div>
@@ -1103,18 +1103,18 @@ export const Research: React.FC = () => {
                   {result.opportunities.length === 0 ? (
                     <div className="p-8 text-center">
                       <Zap size={32} className="mx-auto text-slate-300 mb-2" />
-                      <p className="text-slate-500">No flip opportunities found matching your criteria.</p>
+                      <p className="text-slate-500 dark:text-neutral-500">No flip opportunities found matching your criteria.</p>
                     </div>
                   ) : (
                     <div className="divide-y divide-slate-100">
                       {result.opportunities.map((opp, i) => (
-                        <div key={i} className="p-4 hover:bg-slate-50">
+                        <div key={i} className="p-4 hover:bg-slate-50 dark:bg-neutral-900">
                           <div className="flex items-start gap-4">
                             {/* Image */}
                             {opp.listing.image_url ? (
                               <img src={opp.listing.image_url} alt="" className="w-20 h-20 rounded-lg object-cover flex-shrink-0" />
                             ) : (
-                              <div className="w-20 h-20 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                              <div className="w-20 h-20 rounded-lg bg-slate-100 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0">
                                 <Package size={24} className="text-slate-300" />
                               </div>
                             )}
@@ -1123,8 +1123,8 @@ export const Research: React.FC = () => {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-4">
                                 <div>
-                                  <h4 className="font-medium text-slate-800 line-clamp-2">{opp.listing.title}</h4>
-                                  <p className="text-xs text-slate-500 mt-1">
+                                  <h4 className="font-medium text-slate-900 dark:text-white line-clamp-2">{opp.listing.title}</h4>
+                                  <p className="text-xs text-slate-500 dark:text-neutral-500 mt-1">
                                     {opp.listing.condition && `${opp.listing.condition} · `}
                                     {opp.listing.location && `${opp.listing.location} · `}
                                     {opp.market_data.sold_count} sold recently
@@ -1140,20 +1140,20 @@ export const Research: React.FC = () => {
                               {/* Price Analysis */}
                               <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <div>
-                                  <span className="text-xs text-slate-400 block">Buy For</span>
-                                  <span className="font-bold text-slate-800">{formatPrice(opp.listing.price)}</span>
+                                  <span className="text-xs text-slate-400 dark:text-neutral-500 block">Buy For</span>
+                                  <span className="font-bold text-slate-900 dark:text-white">{formatPrice(opp.listing.price)}</span>
                                 </div>
                                 <div>
-                                  <span className="text-xs text-slate-400 block">Sell For (median)</span>
-                                  <span className="font-bold text-slate-800">{formatPrice(opp.market_data.median_sold_price)}</span>
+                                  <span className="text-xs text-slate-400 dark:text-neutral-500 block">Sell For (median)</span>
+                                  <span className="font-bold text-slate-900 dark:text-white">{formatPrice(opp.market_data.median_sold_price)}</span>
                                 </div>
                                 <div>
-                                  <span className="text-xs text-slate-400 block">Est. Profit</span>
-                                  <span className="font-bold text-emerald-600">{formatPrice(opp.profit_analysis.estimated_profit)}</span>
+                                  <span className="text-xs text-slate-400 dark:text-neutral-500 block">Est. Profit</span>
+                                  <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatPrice(opp.profit_analysis.estimated_profit)}</span>
                                 </div>
                                 <div>
-                                  <span className="text-xs text-slate-400 block">ROI</span>
-                                  <span className="font-bold text-blue-600">{opp.profit_analysis.roi_percent}%</span>
+                                  <span className="text-xs text-slate-400 dark:text-neutral-500 block">ROI</span>
+                                  <span className="font-bold text-violet-600 dark:text-violet-400">{opp.profit_analysis.roi_percent}%</span>
                                 </div>
                               </div>
 
@@ -1166,14 +1166,14 @@ export const Research: React.FC = () => {
                                 <span className={`px-2 py-0.5 rounded text-xs font-medium capitalize ${getRiskColor(opp.profit_analysis.risk_level)}`}>
                                   {opp.profit_analysis.risk_level} risk
                                 </span>
-                                <span className="text-xs text-slate-500 flex items-center gap-1">
+                                <span className="text-xs text-slate-500 dark:text-neutral-500 flex items-center gap-1">
                                   <Percent size={12} />
                                   {opp.profit_analysis.profit_margin_percent}% margin
                                 </span>
                               </div>
 
                               {/* Recommendation */}
-                              <p className="mt-2 text-sm text-slate-600 italic">{opp.recommendation}</p>
+                              <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400 italic">{opp.recommendation}</p>
 
                               {/* Action */}
                               <div className="mt-3">
@@ -1199,7 +1199,7 @@ export const Research: React.FC = () => {
 
           {/* Results - Arbitrage Mode */}
           {arbitrageMode && arbitrageResults.length > 0 && (
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
               <div className="p-4 bg-gradient-to-r from-teal-500 to-blue-500 text-white">
                 <h3 className="font-semibold flex items-center gap-2">
                   <ArrowRight size={18} />
@@ -1212,36 +1212,36 @@ export const Research: React.FC = () => {
 
               <div className="divide-y divide-slate-100">
                 {arbitrageResults.map((arb, i) => (
-                  <div key={i} className="p-4 hover:bg-slate-50">
+                  <div key={i} className="p-4 hover:bg-slate-50 dark:bg-neutral-900">
                     <div className="flex items-start gap-4">
                       {arb.buy_listing.image_url ? (
                         <img src={arb.buy_listing.image_url} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                       ) : (
-                        <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                        <div className="w-16 h-16 rounded-lg bg-slate-100 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0">
                           <Package size={20} className="text-slate-300" />
                         </div>
                       )}
 
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-slate-800 line-clamp-1">{arb.buy_listing.title}</h4>
+                        <h4 className="font-medium text-slate-900 dark:text-white line-clamp-1">{arb.buy_listing.title}</h4>
 
                         <div className="mt-2 flex items-center gap-4 text-sm">
                           <div className="flex items-center gap-2">
                             <span className="px-2 py-0.5 rounded bg-teal-100 text-teal-700 text-xs font-medium">Vinted</span>
                             <span className="font-bold">{formatPrice(arb.buy_listing.price)}</span>
                           </div>
-                          <ArrowRight size={16} className="text-slate-400" />
+                          <ArrowRight size={16} className="text-slate-400 dark:text-neutral-500" />
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium">eBay</span>
+                            <span className="px-2 py-0.5 rounded bg-blue-100 text-violet-700 dark:text-violet-400 text-xs font-medium">eBay</span>
                             <span className="font-bold">{formatPrice(arb.estimated_sell_price)}</span>
                           </div>
                         </div>
 
                         <div className="mt-2 flex items-center gap-4">
-                          <span className="text-emerald-600 font-bold">
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                             +{formatPrice(arb.estimated_profit)} profit
                           </span>
-                          <span className="text-blue-600 font-medium text-sm">
+                          <span className="text-violet-600 dark:text-violet-400 font-medium text-sm">
                             {arb.roi_percent}% ROI
                           </span>
                         </div>
@@ -1264,10 +1264,10 @@ export const Research: React.FC = () => {
 
           {/* Empty State */}
           {!flipLoading && flipResults.length === 0 && arbitrageResults.length === 0 && (
-            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+            <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-8 text-center">
               <Zap size={48} className="mx-auto text-purple-200 mb-4" />
-              <h3 className="font-medium text-slate-800 mb-2">Search for flip opportunities</h3>
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
+              <h3 className="font-medium text-slate-900 dark:text-white mb-2">Search for flip opportunities</h3>
+              <p className="text-sm text-slate-500 dark:text-neutral-500 max-w-md mx-auto">
                 Enter a product name to find underpriced listings. We'll compare active listings against recent sold prices to find the best profit opportunities.
               </p>
             </div>
@@ -1289,7 +1289,7 @@ export const Research: React.FC = () => {
           </div>
 
           {/* Input Form */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-4">
             {/* Mode Toggle */}
             <div className="flex gap-2 mb-4 flex-wrap">
               <button
@@ -1297,7 +1297,7 @@ export const Research: React.FC = () => {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   optimizerMode === 'analyze'
                     ? 'bg-amber-600 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
                 }`}
               >
                 Analyze Listing
@@ -1307,7 +1307,7 @@ export const Research: React.FC = () => {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   optimizerMode === 'keywords'
                     ? 'bg-amber-600 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
                 }`}
               >
                 Keyword Research
@@ -1317,7 +1317,7 @@ export const Research: React.FC = () => {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                   optimizerMode === 'generate'
                     ? 'bg-purple-600 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
                 }`}
               >
                 <Sparkles size={14} />
@@ -1329,7 +1329,7 @@ export const Research: React.FC = () => {
             {(optimizerMode === 'analyze' || optimizerMode === 'keywords') && (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
                     {optimizerMode === 'analyze' ? 'Listing Title' : 'Search Term / Category'}
                   </label>
                   <input
@@ -1341,13 +1341,13 @@ export const Research: React.FC = () => {
                       ? "e.g. Vintage Levi's 501 Jeans W32 L34 Blue"
                       : "e.g. vintage denim jeans"
                     }
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                    className="w-full px-4 py-2 border border-slate-200 dark:border-white/5 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 dark:text-white"
                   />
                 </div>
 
                 {optimizerMode === 'analyze' && (
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
                       Description (optional)
                     </label>
                     <textarea
@@ -1355,7 +1355,7 @@ export const Research: React.FC = () => {
                       onChange={(e) => setOptimizerDescription(e.target.value)}
                       placeholder="Paste your listing description for more detailed analysis..."
                       rows={4}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none resize-none"
+                      className="w-full px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-500/50 outline-none resize-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
                     />
                   </div>
                 )}
@@ -1390,7 +1390,7 @@ export const Research: React.FC = () => {
                       onChange={(e) => setAiTitle(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && quickGenerateDescription()}
                       placeholder="e.g. Nike Air Max 90 Size UK 9 White"
-                      className="flex-1 px-4 py-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                      className="flex-1 px-4 py-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-slate-900 dark:text-white"
                     />
                     <button
                       onClick={quickGenerateDescription}
@@ -1404,36 +1404,36 @@ export const Research: React.FC = () => {
                 </div>
 
                 {/* Detailed Form */}
-                <div className="border-t border-slate-200 pt-4">
-                  <h4 className="font-medium text-slate-700 mb-3">Or provide details for a better description:</h4>
+                <div className="border-t border-slate-200 dark:border-white/5 pt-4">
+                  <h4 className="font-medium text-slate-700 dark:text-neutral-300 mb-3">Or provide details for a better description:</h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Item Title *</label>
+                      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-500 mb-1">Item Title *</label>
                       <input
                         type="text"
                         value={aiTitle}
                         onChange={(e) => setAiTitle(e.target.value)}
                         placeholder="e.g. Vintage Levi's 501 Jeans"
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                        className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/50 outline-none text-slate-900 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Brand</label>
+                      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-500 mb-1">Brand</label>
                       <input
                         type="text"
                         value={aiBrand}
                         onChange={(e) => setAiBrand(e.target.value)}
                         placeholder="e.g. Levi's, Nike, Gucci"
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                        className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/50 outline-none text-slate-900 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Condition</label>
+                      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-500 mb-1">Condition</label>
                       <select
                         value={aiCondition}
                         onChange={(e) => setAiCondition(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                        className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/50 outline-none text-slate-900 dark:text-white"
                       >
                         <option value="New with Tags">New with Tags</option>
                         <option value="New without Tags">New without Tags</option>
@@ -1445,40 +1445,40 @@ export const Research: React.FC = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Size</label>
+                      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-500 mb-1">Size</label>
                       <input
                         type="text"
                         value={aiSize}
                         onChange={(e) => setAiSize(e.target.value)}
                         placeholder="e.g. M, UK 10, W32 L34"
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                        className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/50 outline-none text-slate-900 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Color</label>
+                      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-500 mb-1">Color</label>
                       <input
                         type="text"
                         value={aiColor}
                         onChange={(e) => setAiColor(e.target.value)}
                         placeholder="e.g. Blue, Black, Multicolor"
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                        className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/50 outline-none text-slate-900 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Material</label>
+                      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-500 mb-1">Material</label>
                       <input
                         type="text"
                         value={aiMaterial}
                         onChange={(e) => setAiMaterial(e.target.value)}
                         placeholder="e.g. Cotton, Leather, Denim"
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                        className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/50 outline-none text-slate-900 dark:text-white"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">
+                      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-500 mb-1">
                         Features (comma separated)
                       </label>
                       <input
@@ -1486,11 +1486,11 @@ export const Research: React.FC = () => {
                         value={aiFeatures}
                         onChange={(e) => setAiFeatures(e.target.value)}
                         placeholder="e.g. Rare, Limited Edition, Original box"
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                        className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/50 outline-none text-slate-900 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">
+                      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-500 mb-1">
                         Flaws (comma separated)
                       </label>
                       <input
@@ -1498,7 +1498,7 @@ export const Research: React.FC = () => {
                         value={aiFlaws}
                         onChange={(e) => setAiFlaws(e.target.value)}
                         placeholder="e.g. Small stain on collar, Minor wear"
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                        className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/50 outline-none text-slate-900 dark:text-white"
                       />
                     </div>
                   </div>
@@ -1506,7 +1506,7 @@ export const Research: React.FC = () => {
                   {/* AI Provider Selection */}
                   {aiProviders.length > 1 && (
                     <div className="mt-3">
-                      <label className="block text-xs font-medium text-slate-500 mb-1">
+                      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-500 mb-1">
                         AI Provider (optional)
                       </label>
                       <div className="flex gap-2 flex-wrap">
@@ -1517,7 +1517,7 @@ export const Research: React.FC = () => {
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                               aiProvider === provider
                                 ? 'bg-purple-600 text-white'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
                             }`}
                           >
                             {provider === 'groq' && 'Groq (Llama)'}
@@ -1545,7 +1545,7 @@ export const Research: React.FC = () => {
 
           {/* Generated Description Result */}
           {generatedDescription && optimizerMode === 'generate' && (
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
               <div className="p-4 bg-purple-50 border-b border-purple-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles size={18} className="text-purple-600" />
@@ -1564,12 +1564,12 @@ export const Research: React.FC = () => {
               </div>
 
               <div className="p-4">
-                <div className="bg-slate-50 rounded-lg p-4 font-mono text-sm text-slate-700 whitespace-pre-wrap">
+                <div className="bg-slate-50 dark:bg-neutral-900 rounded-lg p-4 font-mono text-sm text-slate-700 whitespace-pre-wrap">
                   {generatedDescription.description}
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-slate-100">
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-neutral-500">
                     💡 Tip: Review and personalize this description before using it. Add any specific details about your item that the AI might have missed.
                   </p>
                 </div>
@@ -1581,20 +1581,20 @@ export const Research: React.FC = () => {
           {listingAnalysis && optimizerMode !== 'generate' && (
             <div className="space-y-4">
               {/* Score Card */}
-              <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-slate-800">Listing Score</h3>
+                  <h3 className="font-semibold text-slate-900 dark:text-white">Listing Score</h3>
                   <div className="flex items-center gap-4">
                     <div className="text-center">
-                      <span className="text-xs text-slate-500 block">Current</span>
+                      <span className="text-xs text-slate-500 dark:text-neutral-500 block">Current</span>
                       <span className={`text-3xl font-bold ${getListingScoreColor(listingAnalysis.score.current)}`}>
                         {listingAnalysis.score.current}
                       </span>
                     </div>
-                    <ArrowRight size={20} className="text-slate-400" />
+                    <ArrowRight size={20} className="text-slate-400 dark:text-neutral-500" />
                     <div className="text-center">
-                      <span className="text-xs text-slate-500 block">Potential</span>
-                      <span className="text-3xl font-bold text-emerald-600">
+                      <span className="text-xs text-slate-500 dark:text-neutral-500 block">Potential</span>
+                      <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
                         {listingAnalysis.score.potential}
                       </span>
                     </div>
@@ -1618,7 +1618,7 @@ export const Research: React.FC = () => {
 
                 {listingAnalysis.score.improvement_areas.length > 0 && (
                   <div className="mt-4">
-                    <span className="text-xs font-medium text-slate-500">Areas to improve:</span>
+                    <span className="text-xs font-medium text-slate-500 dark:text-neutral-500">Areas to improve:</span>
                     <div className="flex flex-wrap gap-2 mt-1">
                       {listingAnalysis.score.improvement_areas.map((area, i) => (
                         <span key={i} className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium">
@@ -1631,20 +1631,20 @@ export const Research: React.FC = () => {
               </div>
 
               {/* Title Improvements */}
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h3 className="font-semibold text-slate-800 mb-3">Title Improvements</h3>
+              <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-4">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Title Improvements</h3>
 
                 {listingAnalysis.suggestions.title_improvements.length > 0 ? (
                   <ul className="space-y-2">
                     {listingAnalysis.suggestions.title_improvements.map((improvement, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm">
                         <AlertTriangle size={16} className="text-amber-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-slate-600">{improvement}</span>
+                        <span className="text-slate-600 dark:text-neutral-400">{improvement}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-emerald-600 flex items-center gap-2">
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
                     <CheckCircle size={16} />
                     Your title looks great!
                   </p>
@@ -1652,10 +1652,10 @@ export const Research: React.FC = () => {
 
                 {listingAnalysis.suggestions.keyword_suggestions.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-slate-100">
-                    <span className="text-xs font-medium text-slate-500 block mb-2">Suggested keywords to add:</span>
+                    <span className="text-xs font-medium text-slate-500 dark:text-neutral-500 block mb-2">Suggested keywords to add:</span>
                     <div className="flex flex-wrap gap-2">
                       {listingAnalysis.suggestions.keyword_suggestions.map((keyword, i) => (
-                        <span key={i} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                        <span key={i} className="px-2 py-1 bg-blue-100 text-violet-700 dark:text-violet-400 rounded text-xs font-medium">
                           {keyword}
                         </span>
                       ))}
@@ -1665,13 +1665,13 @@ export const Research: React.FC = () => {
               </div>
 
               {/* Description Tips */}
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h3 className="font-semibold text-slate-800 mb-3">Description Tips</h3>
+              <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-4">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Description Tips</h3>
                 <ul className="space-y-2">
                   {listingAnalysis.suggestions.description_tips.map((tip, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
                       <CheckCircle size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">{tip}</span>
+                      <span className="text-slate-600 dark:text-neutral-400">{tip}</span>
                     </li>
                   ))}
                 </ul>
@@ -1679,24 +1679,24 @@ export const Research: React.FC = () => {
 
               {/* Pricing Insight */}
               {listingAnalysis.suggestions.pricing_insight && (
-                <div className="bg-white rounded-xl border border-slate-200 p-4">
-                  <h3 className="font-semibold text-slate-800 mb-3">Pricing Insight</h3>
+                <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-4">
+                  <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Pricing Insight</h3>
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-3 bg-slate-50 rounded-lg">
-                      <span className="text-xs text-slate-500 block">Suggested Price</span>
-                      <span className="text-xl font-bold text-emerald-600">
+                    <div className="text-center p-3 bg-slate-50 dark:bg-neutral-900 rounded-lg">
+                      <span className="text-xs text-slate-500 dark:text-neutral-500 block">Suggested Price</span>
+                      <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                         {formatPrice(listingAnalysis.suggestions.pricing_insight.suggested_price)}
                       </span>
                     </div>
-                    <div className="text-center p-3 bg-slate-50 rounded-lg">
-                      <span className="text-xs text-slate-500 block">Price Range</span>
-                      <span className="text-lg font-bold text-slate-800">
+                    <div className="text-center p-3 bg-slate-50 dark:bg-neutral-900 rounded-lg">
+                      <span className="text-xs text-slate-500 dark:text-neutral-500 block">Price Range</span>
+                      <span className="text-lg font-bold text-slate-900 dark:text-white">
                         {formatPrice(listingAnalysis.suggestions.pricing_insight.price_range.min)} - {formatPrice(listingAnalysis.suggestions.pricing_insight.price_range.max)}
                       </span>
                     </div>
-                    <div className="text-center p-3 bg-slate-50 rounded-lg">
-                      <span className="text-xs text-slate-500 block">Based On</span>
-                      <span className="text-lg font-bold text-slate-800">
+                    <div className="text-center p-3 bg-slate-50 dark:bg-neutral-900 rounded-lg">
+                      <span className="text-xs text-slate-500 dark:text-neutral-500 block">Based On</span>
+                      <span className="text-lg font-bold text-slate-900 dark:text-white">
                         {listingAnalysis.suggestions.pricing_insight.based_on} sold
                       </span>
                     </div>
@@ -1709,29 +1709,29 @@ export const Research: React.FC = () => {
           {/* Keyword Analysis Results */}
           {keywordAnalysis && optimizerMode !== 'generate' && (
             <div className="space-y-4">
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h3 className="font-semibold text-slate-800 mb-3">Top Keywords for "{keywordAnalysis.query}"</h3>
+              <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-4">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Top Keywords for "{keywordAnalysis.query}"</h3>
 
                 {keywordAnalysis.top_keywords.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-slate-200">
-                          <th className="text-left py-2 text-slate-500 font-medium">Keyword</th>
-                          <th className="text-center py-2 text-slate-500 font-medium">Frequency</th>
-                          <th className="text-right py-2 text-slate-500 font-medium">Avg. Price</th>
+                        <tr className="border-b border-slate-200 dark:border-white/5">
+                          <th className="text-left py-2 text-slate-500 dark:text-neutral-500 font-medium">Keyword</th>
+                          <th className="text-center py-2 text-slate-500 dark:text-neutral-500 font-medium">Frequency</th>
+                          <th className="text-right py-2 text-slate-500 dark:text-neutral-500 font-medium">Avg. Price</th>
                         </tr>
                       </thead>
                       <tbody>
                         {keywordAnalysis.top_keywords.map((kw, i) => (
-                          <tr key={i} className="border-b border-slate-100 hover:bg-slate-50">
-                            <td className="py-2 font-medium text-slate-800">{kw.keyword}</td>
+                          <tr key={i} className="border-b border-slate-100 hover:bg-slate-50 dark:bg-neutral-900">
+                            <td className="py-2 font-medium text-slate-900 dark:text-white">{kw.keyword}</td>
                             <td className="py-2 text-center">
-                              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                              <span className="px-2 py-0.5 bg-blue-100 text-violet-700 dark:text-violet-400 rounded text-xs">
                                 {kw.frequency}x
                               </span>
                             </td>
-                            <td className="py-2 text-right text-emerald-600 font-medium">
+                            <td className="py-2 text-right text-emerald-600 dark:text-emerald-400 font-medium">
                               {formatPrice(kw.avg_price)}
                             </td>
                           </tr>
@@ -1740,14 +1740,14 @@ export const Research: React.FC = () => {
                     </table>
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-500">No keyword data found for this search term.</p>
+                  <p className="text-sm text-slate-500 dark:text-neutral-500">No keyword data found for this search term.</p>
                 )}
               </div>
 
               {keywordAnalysis.trending_terms.length > 0 && (
-                <div className="bg-white rounded-xl border border-slate-200 p-4">
-                  <h3 className="font-semibold text-slate-800 mb-3">Trending Terms</h3>
-                  <p className="text-sm text-slate-500 mb-2">These terms appear frequently in higher-priced sold listings:</p>
+                <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-4">
+                  <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Trending Terms</h3>
+                  <p className="text-sm text-slate-500 dark:text-neutral-500 mb-2">These terms appear frequently in higher-priced sold listings:</p>
                   <div className="flex flex-wrap gap-2">
                     {keywordAnalysis.trending_terms.map((term, i) => (
                       <span key={i} className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">
@@ -1758,9 +1758,9 @@ export const Research: React.FC = () => {
                 </div>
               )}
 
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h3 className="font-semibold text-slate-800 mb-3">Terms to Avoid</h3>
-                <p className="text-sm text-slate-500 mb-2">These terms may lower perceived value or deter buyers:</p>
+              <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-4">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Terms to Avoid</h3>
+                <p className="text-sm text-slate-500 dark:text-neutral-500 mb-2">These terms may lower perceived value or deter buyers:</p>
                 <div className="flex flex-wrap gap-2">
                   {keywordAnalysis.avoid_terms.map((term, i) => (
                     <span key={i} className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
@@ -1774,10 +1774,10 @@ export const Research: React.FC = () => {
 
           {/* Empty State */}
           {!optimizerLoading && !listingAnalysis && !keywordAnalysis && !generatedDescription && optimizerMode !== 'generate' && (
-            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+            <div className="bg-white dark:bg-neutral-900/80 rounded-xl border border-slate-200 dark:border-white/5 p-8 text-center">
               <Target size={48} className="mx-auto text-amber-200 mb-4" />
-              <h3 className="font-medium text-slate-800 mb-2">Optimize your listings</h3>
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
+              <h3 className="font-medium text-slate-900 dark:text-white mb-2">Optimize your listings</h3>
+              <p className="text-sm text-slate-500 dark:text-neutral-500 max-w-md mx-auto">
                 Enter your listing title to get optimization suggestions, or research keywords to find the best terms to use in your listings.
               </p>
             </div>

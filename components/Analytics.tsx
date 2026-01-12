@@ -197,8 +197,8 @@ export const Analytics: React.FC = () => {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold text-slate-800">Analytics</h2>
-          <p className="text-sm md:text-base text-slate-500">Track your reselling performance and profitability.</p>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Analytics</h2>
+          <p className="text-sm md:text-base text-slate-500 dark:text-neutral-500">Track your reselling performance and profitability.</p>
         </div>
         <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-1 -mx-1 px-1">
           {(['7d', '30d', '90d', 'all'] as const).map((range) => (
@@ -207,8 +207,8 @@ export const Analytics: React.FC = () => {
               onClick={() => setDateRange(range)}
               className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 dateRange === range
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-violet-600 text-white'
+                  : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
               }`}
             >
               {range === 'all' ? 'All Time' : range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : '90 Days'}
@@ -219,11 +219,11 @@ export const Analytics: React.FC = () => {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div className="bg-white p-3 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white dark:bg-neutral-900/80 p-3 md:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-white/5">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-xs md:text-sm text-slate-500">Total Revenue</p>
-              <p className="text-lg md:text-2xl font-bold text-slate-800 truncate">£{stats?.total_revenue?.toFixed(2) || '0.00'}</p>
+              <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">Total Revenue</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white truncate">£{stats?.total_revenue?.toFixed(2) || '0.00'}</p>
             </div>
             <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
               <DollarSign className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
@@ -235,10 +235,10 @@ export const Analytics: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-3 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white dark:bg-neutral-900/80 p-3 md:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-white/5">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-xs md:text-sm text-slate-500">Total Profit</p>
+              <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">Total Profit</p>
               <p className={`text-lg md:text-2xl font-bold truncate ${(stats?.total_profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 £{stats?.total_profit?.toFixed(2) || '0.00'}
               </p>
@@ -252,37 +252,37 @@ export const Analytics: React.FC = () => {
             </div>
           </div>
           <div className="mt-2 flex items-center gap-1 text-xs md:text-sm">
-            <span className="text-slate-500">{calculateProfitMargin()}% margin</span>
+            <span className="text-slate-500 dark:text-neutral-500">{calculateProfitMargin()}% margin</span>
           </div>
         </div>
 
-        <div className="bg-white p-3 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white dark:bg-neutral-900/80 p-3 md:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-white/5">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-xs md:text-sm text-slate-500">Avg. Profit/Item</p>
-              <p className="text-lg md:text-2xl font-bold text-slate-800 truncate">£{calculateAverageProfit()}</p>
+              <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">Avg. Profit/Item</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white truncate">£{calculateAverageProfit()}</p>
             </div>
             <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <BarChart3 className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+              <BarChart3 className="w-5 h-5 md:w-6 md:h-6 text-violet-600 dark:text-violet-400" />
             </div>
           </div>
           <div className="mt-2 flex items-center gap-1 text-xs md:text-sm">
-            <span className="text-slate-500">per sold item</span>
+            <span className="text-slate-500 dark:text-neutral-500">per sold item</span>
           </div>
         </div>
 
-        <div className="bg-white p-3 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white dark:bg-neutral-900/80 p-3 md:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-white/5">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-xs md:text-sm text-slate-500">Inventory Value</p>
-              <p className="text-lg md:text-2xl font-bold text-slate-800 truncate">£{stats?.total_invested?.toFixed(2) || '0.00'}</p>
+              <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">Inventory Value</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white truncate">£{stats?.total_invested?.toFixed(2) || '0.00'}</p>
             </div>
             <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
               <Package className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
             </div>
           </div>
           <div className="mt-2 flex items-center gap-1 text-xs md:text-sm">
-            <span className="text-slate-500">{stats?.listed_count || 0} items listed</span>
+            <span className="text-slate-500 dark:text-neutral-500">{stats?.listed_count || 0} items listed</span>
           </div>
         </div>
       </div>
@@ -290,8 +290,8 @@ export const Analytics: React.FC = () => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Revenue & Profit Over Time */}
-        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
-          <h3 className="font-semibold text-slate-800 mb-3 md:mb-4 text-sm md:text-base">Revenue & Profit Over Time</h3>
+        <div className="bg-white dark:bg-neutral-900/80 p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-white/5">
+          <h3 className="font-semibold text-slate-900 dark:text-white mb-3 md:mb-4 text-sm md:text-base">Revenue & Profit Over Time</h3>
           {monthlyData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250} className="md:!h-[300px]">
               <BarChart data={monthlyData}>
@@ -308,15 +308,15 @@ export const Analytics: React.FC = () => {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-48 md:h-64 flex items-center justify-center text-slate-400 text-sm">
+            <div className="h-48 md:h-64 flex items-center justify-center text-slate-400 dark:text-neutral-500 text-sm">
               No sales data yet
             </div>
           )}
         </div>
 
         {/* Sales by Platform */}
-        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
-          <h3 className="font-semibold text-slate-800 mb-3 md:mb-4 text-sm md:text-base">Sales by Platform</h3>
+        <div className="bg-white dark:bg-neutral-900/80 p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-white/5">
+          <h3 className="font-semibold text-slate-900 dark:text-white mb-3 md:mb-4 text-sm md:text-base">Sales by Platform</h3>
           {platformData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250} className="md:!h-[300px]">
               <RechartsPie>
@@ -338,7 +338,7 @@ export const Analytics: React.FC = () => {
               </RechartsPie>
             </ResponsiveContainer>
           ) : (
-            <div className="h-48 md:h-64 flex items-center justify-center text-slate-400">
+            <div className="h-48 md:h-64 flex items-center justify-center text-slate-400 dark:text-neutral-500">
               <div className="text-center">
                 <PieChart className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 text-slate-300" />
                 <span className="text-sm">No platform data yet</span>
@@ -349,14 +349,14 @@ export const Analytics: React.FC = () => {
       </div>
 
       {/* Top Performers */}
-      <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
-        <h3 className="font-semibold text-slate-800 mb-3 md:mb-4 text-sm md:text-base">Top Performing Items</h3>
+      <div className="bg-white dark:bg-neutral-900/80 p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 dark:border-white/5">
+        <h3 className="font-semibold text-slate-900 dark:text-white mb-3 md:mb-4 text-sm md:text-base">Top Performing Items</h3>
         {topPerformers.length > 0 ? (
           <>
             {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 text-slate-500 font-medium">
+                <thead className="bg-slate-50 dark:bg-neutral-900 text-slate-500 dark:text-neutral-500 font-medium">
                   <tr>
                     <th className="px-4 py-3 rounded-l-lg">Item</th>
                     <th className="px-4 py-3">Platform</th>
@@ -368,24 +368,24 @@ export const Analytics: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {topPerformers.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-slate-50">
+                    <tr key={item.id} className="hover:bg-slate-50 dark:bg-neutral-900">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                             index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                            index === 1 ? 'bg-slate-200 text-slate-600' :
+                            index === 1 ? 'bg-slate-200 text-slate-600 dark:text-neutral-400' :
                             index === 2 ? 'bg-orange-100 text-orange-700' :
-                            'bg-slate-100 text-slate-500'
+                            'bg-slate-100 dark:bg-neutral-800 text-slate-500 dark:text-neutral-500'
                           }`}>
                             {index + 1}
                           </span>
-                          <span className="font-medium text-slate-800 truncate max-w-[200px]">{item.title}</span>
+                          <span className="font-medium text-slate-900 dark:text-white truncate max-w-[200px]">{item.title}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{item.sold_platform || '-'}</td>
-                      <td className="px-4 py-3 text-slate-600">£{(item.purchase_price || 0).toFixed(2)}</td>
-                      <td className="px-4 py-3 text-slate-600">£{(item.sold_price || 0).toFixed(2)}</td>
-                      <td className="px-4 py-3 text-slate-600">£{(item.fees_total + item.postage_cost).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">{item.sold_platform || '-'}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">£{(item.purchase_price || 0).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">£{(item.sold_price || 0).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">£{(item.fees_total + item.postage_cost).toFixed(2)}</td>
                       <td className="px-4 py-3">
                         <span className={`font-semibold ${item.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           £{item.profit.toFixed(2)}
@@ -400,25 +400,25 @@ export const Analytics: React.FC = () => {
             {/* Mobile Card List */}
             <div className="md:hidden space-y-3">
               {topPerformers.map((item, index) => (
-                <div key={item.id} className="bg-slate-50 rounded-lg p-3">
+                <div key={item.id} className="bg-slate-50 dark:bg-neutral-900 rounded-lg p-3">
                   <div className="flex items-start gap-2 mb-2">
                     <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
                       index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                      index === 1 ? 'bg-slate-200 text-slate-600' :
+                      index === 1 ? 'bg-slate-200 text-slate-600 dark:text-neutral-400' :
                       index === 2 ? 'bg-orange-100 text-orange-700' :
-                      'bg-slate-100 text-slate-500'
+                      'bg-slate-100 dark:bg-neutral-800 text-slate-500 dark:text-neutral-500'
                     }`}>
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-slate-800 text-sm truncate">{item.title}</p>
-                      <p className="text-xs text-slate-500">{item.sold_platform || 'Unknown platform'}</p>
+                      <p className="font-medium text-slate-900 dark:text-white text-sm truncate">{item.title}</p>
+                      <p className="text-xs text-slate-500 dark:text-neutral-500">{item.sold_platform || 'Unknown platform'}</p>
                     </div>
                     <span className={`font-bold text-sm ${item.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       £{item.profit.toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex justify-between text-xs text-slate-500 pl-8">
+                  <div className="flex justify-between text-xs text-slate-500 dark:text-neutral-500 pl-8">
                     <span>Cost: £{(item.purchase_price || 0).toFixed(2)}</span>
                     <span>Sold: £{(item.sold_price || 0).toFixed(2)}</span>
                     <span>Fees: £{(item.fees_total + item.postage_cost).toFixed(2)}</span>
@@ -428,7 +428,7 @@ export const Analytics: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className="py-6 md:py-8 text-center text-slate-400">
+          <div className="py-6 md:py-8 text-center text-slate-400 dark:text-neutral-500">
             <ShoppingBag className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 text-slate-300" />
             <span className="text-sm">No sold items yet. Start selling to see your top performers!</span>
           </div>
@@ -437,36 +437,36 @@ export const Analytics: React.FC = () => {
 
       {/* Inventory Summary */}
       <div className="grid grid-cols-3 gap-2 md:gap-4">
-        <div className="bg-slate-50 p-3 md:p-4 rounded-xl border border-slate-200">
+        <div className="bg-slate-50 dark:bg-neutral-900 p-3 md:p-4 rounded-xl border border-slate-200 dark:border-white/5">
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-200 rounded-lg flex items-center justify-center">
-              <Package className="w-4 h-4 md:w-5 md:h-5 text-slate-600" />
+              <Package className="w-4 h-4 md:w-5 md:h-5 text-slate-600 dark:text-neutral-400" />
             </div>
             <div className="text-center sm:text-left">
-              <p className="text-xs md:text-sm text-slate-500">Draft</p>
-              <p className="text-lg md:text-xl font-bold text-slate-800">{stats?.draft_count || 0}</p>
+              <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">Draft</p>
+              <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">{stats?.draft_count || 0}</p>
             </div>
           </div>
         </div>
-        <div className="bg-blue-50 p-3 md:p-4 rounded-xl border border-blue-200">
+        <div className="bg-blue-50 dark:bg-blue-500/10 p-3 md:p-4 rounded-xl border border-blue-200 dark:border-blue-500/20">
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-200 rounded-lg flex items-center justify-center">
-              <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-200 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-violet-600 dark:text-violet-400" />
             </div>
             <div className="text-center sm:text-left">
-              <p className="text-xs md:text-sm text-blue-600">Listed</p>
-              <p className="text-lg md:text-xl font-bold text-blue-800">{stats?.listed_count || 0}</p>
+              <p className="text-xs md:text-sm text-violet-600 dark:text-violet-400">Listed</p>
+              <p className="text-lg md:text-xl font-bold text-blue-800 dark:text-blue-300">{stats?.listed_count || 0}</p>
             </div>
           </div>
         </div>
-        <div className="bg-green-50 p-3 md:p-4 rounded-xl border border-green-200">
+        <div className="bg-green-50 dark:bg-green-500/10 p-3 md:p-4 rounded-xl border border-green-200 dark:border-green-500/20">
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-green-200 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-green-200 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-600 dark:text-green-400" />
             </div>
             <div className="text-center sm:text-left">
-              <p className="text-xs md:text-sm text-green-600">Sold</p>
-              <p className="text-lg md:text-xl font-bold text-green-800">{stats?.sold_count || 0}</p>
+              <p className="text-xs md:text-sm text-green-600 dark:text-green-400">Sold</p>
+              <p className="text-lg md:text-xl font-bold text-green-800 dark:text-green-300">{stats?.sold_count || 0}</p>
             </div>
           </div>
         </div>
