@@ -248,6 +248,27 @@ const App: React.FC = () => {
             </button>
           )}
         </nav>
+
+        {user ? (
+          <div className="p-4 mt-auto border-t border-slate-200 dark:border-white/5">
+            <button
+              onClick={() => { logout(); setIsMobileNavOpen(false); }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-slate-600 dark:text-neutral-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
+            >
+              <LogOut className="w-5 h-5" />
+              Sign Out
+            </button>
+          </div>
+        ) : (
+          <div className="p-4 mt-auto border-t border-slate-200 dark:border-white/5">
+            <button
+              onClick={() => { setShowAuthModal(true); setIsMobileNavOpen(false); }}
+              className="w-full bg-violet-600 hover:bg-violet-500 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200"
+            >
+              Sign In
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
