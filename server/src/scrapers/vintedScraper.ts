@@ -1,4 +1,6 @@
 import { AlertConfig, ScrapedItem } from '../services/scraperService.js';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { getRandomProxy, getProxyUrl } from '../config/proxies.js';
 
 const VINTED_BASE_URL = 'https://www.vinted.co.uk';
 const VINTED_API_URL = `${VINTED_BASE_URL}/api/v2/catalog/items`;
@@ -8,50 +10,94 @@ let sessionCache: {
   accessToken: string | null;
   cookies: string;
   expiresAt: number;
+  proxyAgent: HttpsProxyAgent<string> | null;
 } | null = null;
 
 // Initialize session to get access token and cookies
-const initializeSession = async (): Promise<{ accessToken: string | null; cookies: string } | null> => {
+const initializeSession = async (): Promise<{ accessToken: string | null; cookies: string; proxyAgent: HttpsProxyAgent<string> | null } | null> => {
   // Check if we have a valid cached session
   if (sessionCache && sessionCache.expiresAt > Date.now()) {
-    return { accessToken: sessionCache.accessToken, cookies: sessionCache.cookies };
+    return { accessToken: sessionCache.accessToken, cookies: sessionCache.cookies, proxyAgent: sessionCache.proxyAgent };
   }
 
   try {
-    // First, hit the main page to get session cookies
-    const response = await fetch(VINTED_BASE_URL, {
+    // Get a random proxy for this session
+    const proxy = getRandomProxy();
+    const fetchOptions: any = {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-GB,en;q=0.9',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Referer': 'https://www.google.com/',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'cross-site',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
       },
-    });
+    };
+
+    // Add proxy if available
+    if (proxy) {
+      const proxyUrl = getProxyUrl(proxy);
+      fetchOptions.agent = new HttpsProxyAgent(proxyUrl);
+      console.log(`Using proxy: ${proxy.host}:${proxy.port}`);
+    } else {
+      console.warn('No proxies available, making direct request');
+    }
+
+    // First, hit the main page to get session cookies
+    const response = await fetch(VINTED_BASE_URL, fetchOptions);
 
     if (!response.ok) {
       console.log('Vinted session init failed:', response.status);
       return null;
     }
 
-    // Extract cookies from response
+    // Extract cookies from response - improved parsing
+    // Note: Standard fetch Headers don't support getSetCookie() in Node.js yet
+    // So we'll use a workaround by getting all set-cookie headers
     const setCookieHeader = response.headers.get('set-cookie') || '';
-    const cookies = setCookieHeader
-      .split(',')
-      .map(c => c.split(';')[0].trim())
-      .filter(c => c.includes('='))
+    const cookieMap = new Map<string, string>();
+
+    // Split by comma but be careful of expires dates which also contain commas
+    const cookieParts = setCookieHeader.split(/,(?=\s*\w+=)/);
+
+    for (const cookieStr of cookieParts) {
+      const parts = cookieStr.split(';')[0].trim();
+      const equalsIndex = parts.indexOf('=');
+      if (equalsIndex > 0) {
+        const key = parts.substring(0, equalsIndex);
+        const value = parts.substring(equalsIndex + 1);
+        if (key && value) {
+          cookieMap.set(key, value);
+        }
+      }
+    }
+
+    const cookies = Array.from(cookieMap.entries())
+      .map(([k, v]) => `${k}=${v}`)
       .join('; ');
 
     // Try to extract access token from cookies
-    const accessTokenMatch = cookies.match(/access_token_web=([^;]+)/);
-    const accessToken = accessTokenMatch ? accessTokenMatch[1] : null;
+    const accessToken = cookieMap.get('access_token_web') || null;
+
+    // Get the proxy agent to reuse for subsequent requests
+    const proxyAgent = proxy ? new HttpsProxyAgent(getProxyUrl(proxy)) : null;
 
     // Cache session for 1.5 hours (tokens expire in 2 hours)
     sessionCache = {
       accessToken,
       cookies,
       expiresAt: Date.now() + 90 * 60 * 1000,
+      proxyAgent,
     };
 
-    return { accessToken, cookies };
+    return { accessToken, cookies, proxyAgent };
   } catch (error) {
     console.error('Vinted session init error:', error);
     return null;
@@ -158,11 +204,16 @@ const parseResponse = (data: any): ScrapedItem[] => {
 const fetchWithRetry = async (
   url: string,
   headers: Record<string, string>,
+  proxyAgent: HttpsProxyAgent<string> | null,
   maxRetries = 3
 ): Promise<Response | null> => {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const response = await fetch(url, { headers });
+      const fetchOptions: any = { headers };
+      if (proxyAgent) {
+        fetchOptions.agent = proxyAgent;
+      }
+      const response = await fetch(url, fetchOptions);
 
       if (response.status === 401 || response.status === 403) {
         // Session expired or blocked - clear cache and retry with new session
@@ -206,16 +257,24 @@ const fetchWithRetry = async (
 const fetchPage = async (
   config: AlertConfig,
   page: number,
-  session: { accessToken: string | null; cookies: string }
+  session: { accessToken: string | null; cookies: string; proxyAgent: HttpsProxyAgent<string> | null }
 ): Promise<ScrapedItem[]> => {
   const params = buildSearchParams(config, page);
   const url = `${VINTED_API_URL}?${params.toString()}`;
 
   const headers: Record<string, string> = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Accept': 'application/json',
-    'Accept-Language': 'en-GB,en;q=0.9',
-    'X-Requested-With': 'XMLHttpRequest',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Referer': 'https://www.vinted.co.uk/',
+    'Origin': 'https://www.vinted.co.uk',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-origin',
+    'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
     'Cookie': session.cookies,
   };
 
@@ -223,7 +282,7 @@ const fetchPage = async (
     headers['Authorization'] = `Bearer ${session.accessToken}`;
   }
 
-  const response = await fetchWithRetry(url, headers);
+  const response = await fetchWithRetry(url, headers, session.proxyAgent);
 
   if (!response || !response.ok) {
     return [];
@@ -236,7 +295,7 @@ const fetchPage = async (
 // Main scrape function - fetches multiple pages
 export const scrapeVinted = async (config: AlertConfig): Promise<ScrapedItem[]> => {
   const MAX_PAGES = 3; // Fetch up to 3 pages (288 items max)
-  const PAGE_DELAY = 1500; // 1.5s delay between pages to avoid rate limits
+  const PAGE_DELAY = 2000 + Math.random() * 1000; // 2-3s randomized delay between pages
 
   try {
     // Initialize session first
