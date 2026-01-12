@@ -31,23 +31,37 @@ export const parseProxy = (proxyString: string): ProxyConfig | null => {
 export const loadProxies = (): ProxyConfig[] => {
   const proxiesEnv = process.env.RESIDENTIAL_PROXIES || '';
 
-  if (!proxiesEnv) {
-    console.warn('No residential proxies configured. Set RESIDENTIAL_PROXIES environment variable.');
+  if (!proxiesEnv || proxiesEnv.trim() === '') {
+    console.warn('⚠️  No residential proxies configured. Set RESIDENTIAL_PROXIES environment variable.');
+    console.warn('⚠️  Scrapers will make direct requests which may get blocked.');
     return [];
   }
 
   // Split by newline or comma
   const proxyStrings = proxiesEnv.split(/[\n,]/).map(s => s.trim()).filter(s => s);
 
+  if (proxyStrings.length === 0) {
+    console.warn('⚠️  RESIDENTIAL_PROXIES is set but no valid proxy strings found');
+    return [];
+  }
+
   const proxies: ProxyConfig[] = [];
   for (const proxyStr of proxyStrings) {
     const proxy = parseProxy(proxyStr);
     if (proxy) {
       proxies.push(proxy);
+    } else {
+      console.error(`❌ Failed to parse proxy: ${proxyStr.substring(0, 20)}...`);
     }
   }
 
-  console.log(`Loaded ${proxies.length} residential proxies`);
+  if (proxies.length > 0) {
+    console.log(`✅ Loaded ${proxies.length} residential proxies`);
+    console.log(`   First proxy: ${proxies[0].host}:${proxies[0].port}`);
+  } else {
+    console.error('❌ No valid proxies could be parsed from RESIDENTIAL_PROXIES');
+  }
+
   return proxies;
 };
 
