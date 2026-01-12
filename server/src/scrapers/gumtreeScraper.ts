@@ -1,5 +1,7 @@
 import * as cheerio from 'cheerio';
 import { AlertConfig, ScrapedItem } from '../services/scraperService.js';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { getRandomProxy, getProxyUrl } from '../config/proxies.js';
 
 const GUMTREE_BASE_URL = 'https://www.gumtree.com/search';
 
@@ -162,10 +164,14 @@ const parseListings = (html: string): ScrapedItem[] => {
 };
 
 // Fetch with exponential backoff retry
-const fetchWithRetry = async (url: string, maxRetries = 3): Promise<Response> => {
+const fetchWithRetry = async (url: string, proxyAgent: HttpsProxyAgent<string> | null, maxRetries = 3): Promise<Response> => {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const response = await fetch(url, { headers: CONFIG.headers });
+      const fetchOptions: any = { headers: CONFIG.headers };
+      if (proxyAgent) {
+        fetchOptions.agent = proxyAgent;
+      }
+      const response = await fetch(url, fetchOptions);
 
       if (response.status === 429) {
         // Rate limited - exponential backoff with jitter
@@ -186,11 +192,11 @@ const fetchWithRetry = async (url: string, maxRetries = 3): Promise<Response> =>
 };
 
 // Fetch a single page of results
-const fetchPage = async (config: AlertConfig, page: number): Promise<ScrapedItem[]> => {
+const fetchPage = async (config: AlertConfig, page: number, proxyAgent: HttpsProxyAgent<string> | null): Promise<ScrapedItem[]> => {
   const url = buildSearchUrl(config, page);
 
   try {
-    const response = await fetchWithRetry(url);
+    const response = await fetchWithRetry(url, proxyAgent);
 
     if (!response.ok) {
       console.error(`Gumtree page ${page} returned ${response.status}`);
@@ -218,6 +224,16 @@ export const scrapeGumtree = async (config: AlertConfig): Promise<ScrapedItem[]>
   const PAGE_DELAY = 4000; // 4s delay between pages to avoid rate limits
 
   try {
+    // Get proxy for this scraping session
+    const proxy = getRandomProxy();
+    const proxyAgent = proxy ? new HttpsProxyAgent(getProxyUrl(proxy)) : null;
+
+    if (proxy) {
+      console.log(`Gumtree using proxy: ${proxy.host}:${proxy.port}`);
+    } else {
+      console.warn('Gumtree: No proxies available, making direct request');
+    }
+
     console.log(`Scraping Gumtree: ${config.keywords.join(' ')}`);
 
     const allItems: ScrapedItem[] = [];
@@ -227,7 +243,7 @@ export const scrapeGumtree = async (config: AlertConfig): Promise<ScrapedItem[]>
       // Add randomized delay before each request
       await delay(CONFIG.baseDelay + Math.random() * CONFIG.randomDelay);
 
-      const items = await fetchPage(config, page);
+      const items = await fetchPage(config, page, proxyAgent);
 
       if (items.length === 0) {
         // No more results or blocked

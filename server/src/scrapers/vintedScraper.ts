@@ -55,8 +55,14 @@ const initializeSession = async (): Promise<{ accessToken: string | null; cookie
 
     if (!response.ok) {
       console.log('Vinted session init failed:', response.status);
+      if (response.status === 403) {
+        console.warn('⚠️  Vinted 403 - Proxy may be blocked or fingerprint detected');
+      }
       return null;
     }
+
+    // Add delay to simulate human behavior
+    await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000));
 
     // Extract cookies from response - improved parsing
     // Note: Standard fetch Headers don't support getSetCookie() in Node.js yet
@@ -77,6 +83,13 @@ const initializeSession = async (): Promise<{ accessToken: string | null; cookie
           cookieMap.set(key, value);
         }
       }
+    }
+
+    // Add essential cookies if missing (Vinted requires these)
+    if (!cookieMap.has('_vinted_fr_session')) {
+      // Generate a session-like value
+      const sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      cookieMap.set('_vinted_fr_session', sessionId);
     }
 
     const cookies = Array.from(cookieMap.entries())
@@ -266,8 +279,8 @@ const fetchPage = async (
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     'Accept': 'application/json, text/plain, */*',
     'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Referer': 'https://www.vinted.co.uk/',
+    'Accept-Encoding': 'gzip, deflate, br, zstd',
+    'Referer': 'https://www.vinted.co.uk/catalog',
     'Origin': 'https://www.vinted.co.uk',
     'Sec-Fetch-Dest': 'empty',
     'Sec-Fetch-Mode': 'cors',
@@ -275,6 +288,9 @@ const fetchPage = async (
     'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"Windows"',
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Priority': 'u=1, i',
     'Cookie': session.cookies,
   };
 
