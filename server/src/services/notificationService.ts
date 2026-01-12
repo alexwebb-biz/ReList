@@ -20,7 +20,7 @@ export interface NotificationPayload {
   title: string;
   message: string;
   data?: Record<string, any>;
-  channels?: ('email' | 'push' | 'telegram' | 'in_app')[];
+  channels?: ('email' | 'push' | 'telegram' | 'discord' | 'in_app')[];
 }
 
 // Send notification through configured channels
@@ -30,7 +30,7 @@ export const sendNotification = async (payload: NotificationPayload): Promise<vo
   // Get user preferences
   const { data: user } = await supabase
     .from('users')
-    .select('email, notification_email, notification_push, notification_telegram, telegram_chat_id')
+    .select('email, notification_email, notification_push, notification_telegram, telegram_chat_id, notification_discord, discord_webhook_url')
     .eq('id', userId)
     .single();
 
@@ -52,6 +52,11 @@ export const sendNotification = async (payload: NotificationPayload): Promise<vo
   // Send Telegram notification using the ReList bot
   if (channels.includes('telegram') && user.notification_telegram && user.telegram_chat_id) {
     await sendTelegramNotification(user.telegram_chat_id, title, message, data);
+  }
+
+  // Send Discord webhook notification
+  if (channels.includes('discord') && user.notification_discord && user.discord_webhook_url) {
+    await sendDiscordNotification(user.discord_webhook_url, title, message, data);
   }
 
   // Push notifications would go here (requires OneSignal/FCM setup)
@@ -479,6 +484,66 @@ export const notifyPriceDropsBatch = async (
       data: { items, alertName: 'Price Watch' },
       channels: ['in_app', 'email', 'telegram'],
     });
+  }
+};
+
+// Send Discord webhook notification
+const sendDiscordNotification = async (
+  webhookUrl: string,
+  title: string,
+  message: string,
+  data?: Record<string, any>
+): Promise<void> => {
+  try {
+    const items = data?.items || [];
+    const alertName = data?.alertName || title;
+
+    // Build Discord embed
+    const embed: any = {
+      title: `🔔 ${alertName}`,
+      description: message,
+      color: 0x7C3AED, // Violet color
+      timestamp: new Date().toISOString(),
+      footer: {
+        text: 'ReList Alert',
+      },
+    };
+
+    // Add items as fields (limit to first 5)
+    if (items.length > 0) {
+      embed.fields = items.slice(0, 5).map((item: any, index: number) => ({
+        name: `${index + 1}. ${item.title || 'Unknown Item'}`,
+        value: `💰 **£${item.price || '?'}** on ${item.platform || 'Unknown'}\n🔗 [View Listing](${item.url || '#'})`,
+        inline: false,
+      }));
+
+      if (items.length > 5) {
+        embed.fields.push({
+          name: '📦 More Items',
+          value: `... and ${items.length - 5} more items`,
+          inline: false,
+        });
+      }
+
+      // Add thumbnail from first item with image
+      const firstItemWithImage = items.find((item: any) => item.image);
+      if (firstItemWithImage?.image) {
+        embed.thumbnail = { url: firstItemWithImage.image };
+      }
+    }
+
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: items.length > 0 ? `Found ${items.length} new item${items.length === 1 ? '' : 's'}!` : null,
+        embeds: [embed],
+      }),
+    });
+
+    console.log('Discord notification sent');
+  } catch (error) {
+    console.error('Failed to send Discord notification:', error);
   }
 };
 

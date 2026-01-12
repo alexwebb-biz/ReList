@@ -21,6 +21,8 @@ const notificationSettingsSchema = z.object({
   notification_push: z.boolean().optional(),
   notification_telegram: z.boolean().optional(),
   telegram_chat_id: z.string().nullable().optional(),
+  notification_discord: z.boolean().optional(),
+  discord_webhook_url: z.string().nullable().optional(),
   alert_frequency: z.enum(['instant', 'hourly', 'daily']).optional(),
 });
 
@@ -135,7 +137,7 @@ router.get('/notification-settings', async (req: AuthenticatedRequest, res: Resp
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('notification_email, notification_push, notification_telegram, telegram_chat_id')
+      .select('notification_email, notification_push, notification_telegram, telegram_chat_id, notification_discord, discord_webhook_url')
       .eq('id', req.user.id)
       .single();
 
@@ -167,7 +169,7 @@ router.patch('/notification-settings', async (req: AuthenticatedRequest, res: Re
         updated_at: new Date().toISOString(),
       })
       .eq('id', req.user.id)
-      .select('notification_email, notification_push, notification_telegram, telegram_chat_id')
+      .select('notification_email, notification_push, notification_telegram, telegram_chat_id, notification_discord, discord_webhook_url')
       .single();
 
     if (error || !user) {
@@ -240,6 +242,63 @@ router.post('/test-telegram', async (req: AuthenticatedRequest, res: Response) =
     sendSuccess(res, { message: 'Test message sent successfully' });
   } catch (error) {
     sendError(res, 'TELEGRAM_ERROR', error instanceof Error ? error.message : 'Failed to send test message', 500);
+  }
+});
+
+// POST /api/user/test-discord - Send a test Discord message
+router.post('/test-discord', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      sendError(res, 'UNAUTHORIZED', 'User not authenticated', 401);
+      return;
+    }
+
+    const { discord_webhook_url } = req.body;
+
+    if (!discord_webhook_url) {
+      sendError(res, 'VALIDATION_ERROR', 'Discord webhook URL is required', 400);
+      return;
+    }
+
+    // Validate webhook URL format
+    if (!discord_webhook_url.startsWith('https://discord.com/api/webhooks/') && !discord_webhook_url.startsWith('https://discordapp.com/api/webhooks/')) {
+      sendError(res, 'VALIDATION_ERROR', 'Invalid Discord webhook URL format', 400);
+      return;
+    }
+
+    // Send test message via Discord webhook
+    const embed = {
+      title: '✅ ReList Connected!',
+      description: 'Your Discord notifications are configured correctly. You\'ll receive alerts for your saved searches here.',
+      color: 0x7C3AED, // Violet
+      timestamp: new Date().toISOString(),
+      footer: { text: 'ReList Alert' },
+    };
+
+    const response = await fetch(discord_webhook_url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        embeds: [embed],
+      }),
+    });
+
+    if (!response.ok) {
+      let errorMsg = 'Failed to send message';
+      if (response.status === 404) {
+        errorMsg = 'Webhook not found. Please check your webhook URL.';
+      } else if (response.status === 401 || response.status === 403) {
+        errorMsg = 'Invalid webhook URL or webhook has been deleted.';
+      } else if (response.status === 429) {
+        errorMsg = 'Rate limited. Please wait a moment and try again.';
+      }
+      sendError(res, 'DISCORD_ERROR', errorMsg, 400);
+      return;
+    }
+
+    sendSuccess(res, { message: 'Test message sent successfully' });
+  } catch (error) {
+    sendError(res, 'DISCORD_ERROR', error instanceof Error ? error.message : 'Failed to send test message', 500);
   }
 });
 

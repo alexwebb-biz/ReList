@@ -37,7 +37,7 @@ export const createTelegramSession = (
     messageId,
     chatId,
     alertName,
-    expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+    expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 };
 

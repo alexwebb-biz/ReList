@@ -40,6 +40,10 @@ export const Settings: React.FC = () => {
   const [telegramChatId, setTelegramChatId] = useState('');
   const [isTelegramVerified, setIsTelegramVerified] = useState(false);
   const [isVerifyingTelegram, setIsVerifyingTelegram] = useState(false);
+  const [discordNotifications, setDiscordNotifications] = useState(false);
+  const [discordWebhookUrl, setDiscordWebhookUrl] = useState('');
+  const [isDiscordVerified, setIsDiscordVerified] = useState(false);
+  const [isVerifyingDiscord, setIsVerifyingDiscord] = useState(false);
 
   // Subscription state
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
@@ -102,6 +106,8 @@ export const Settings: React.FC = () => {
       notification_push: boolean;
       notification_telegram: boolean;
       telegram_chat_id: string | null;
+      notification_discord: boolean;
+      discord_webhook_url: string | null;
     }>('/user/notification-settings');
     if (response.success && response.data) {
       setEmailNotifications(response.data.notification_email ?? true);
@@ -109,6 +115,9 @@ export const Settings: React.FC = () => {
       setTelegramNotifications(response.data.notification_telegram ?? false);
       setTelegramChatId(response.data.telegram_chat_id || '');
       setIsTelegramVerified(!!response.data.telegram_chat_id);
+      setDiscordNotifications(response.data.notification_discord ?? false);
+      setDiscordWebhookUrl(response.data.discord_webhook_url || '');
+      setIsDiscordVerified(!!response.data.discord_webhook_url);
     }
   };
 
@@ -140,11 +149,14 @@ export const Settings: React.FC = () => {
       notification_push: pushNotifications,
       notification_telegram: telegramNotifications,
       telegram_chat_id: telegramChatId || null,
+      notification_discord: discordNotifications,
+      discord_webhook_url: discordWebhookUrl || null,
     });
 
     if (response.success) {
       setMessage({ type: 'success', text: 'Notification settings saved!' });
       setIsTelegramVerified(!!telegramChatId);
+      setIsDiscordVerified(!!discordWebhookUrl);
     } else {
       setMessage({ type: 'error', text: 'Failed to save notification settings' });
     }
@@ -174,6 +186,30 @@ export const Settings: React.FC = () => {
     }
 
     setIsVerifyingTelegram(false);
+  };
+
+  const handleTestDiscord = async () => {
+    if (!discordWebhookUrl) {
+      setMessage({ type: 'error', text: 'Please enter your Discord webhook URL' });
+      return;
+    }
+
+    setIsVerifyingDiscord(true);
+    setMessage(null);
+
+    const response = await api.post('/user/test-discord', {
+      discord_webhook_url: discordWebhookUrl,
+    });
+
+    if (response.success) {
+      setMessage({ type: 'success', text: 'Test message sent! Check your Discord channel.' });
+      setIsDiscordVerified(true);
+    } else {
+      setMessage({ type: 'error', text: response.error?.message || 'Failed to send test message. Make sure your webhook URL is correct.' });
+      setIsDiscordVerified(false);
+    }
+
+    setIsVerifyingDiscord(false);
   };
 
   const handleUpgrade = async (planId: string) => {
@@ -388,6 +424,76 @@ export const Settings: React.FC = () => {
                         Send Test Message
                       </button>
                       {isTelegramVerified && (
+                        <span className="flex items-center gap-1 text-emerald-600 text-sm">
+                          <Check size={16} />
+                          Verified
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Discord Notifications Section */}
+              <div className="p-3 md:p-4 bg-slate-50 dark:bg-neutral-900/50 rounded-lg space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <h4 className="font-medium text-slate-900 dark:text-white text-sm md:text-base">Discord Notifications</h4>
+                    <p className="text-xs md:text-sm text-slate-500 dark:text-neutral-500">Receive instant alerts via Discord webhook</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={discordNotifications}
+                      onChange={(e) => setDiscordNotifications(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-violet-300 dark:peer-focus:ring-violet-500/50 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                  </label>
+                </div>
+
+                {discordNotifications && (
+                  <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-white/5">
+                    <div className="bg-violet-50 border border-violet-100 rounded-lg p-3">
+                      <p className="text-xs md:text-sm text-violet-800">
+                        <strong>Setup Instructions:</strong>
+                      </p>
+                      <ol className="text-xs md:text-sm text-violet-700 mt-2 space-y-1 list-decimal list-inside">
+                        <li>Open your Discord server settings</li>
+                        <li>Go to Integrations → Webhooks → New Webhook</li>
+                        <li>Choose the channel where you want notifications</li>
+                        <li>Copy the Webhook URL and paste it below</li>
+                      </ol>
+                      <p className="text-xs text-violet-600 mt-2">
+                        <strong>Note:</strong> Keep your webhook URL private - anyone with it can send messages to your channel.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1.5 md:mb-2">Discord Webhook URL</label>
+                      <input
+                        type="text"
+                        value={discordWebhookUrl}
+                        onChange={(e) => {
+                          setDiscordWebhookUrl(e.target.value);
+                          setIsDiscordVerified(false);
+                        }}
+                        className="w-full px-3 md:px-4 py-2 text-sm md:text-base bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 dark:focus:border-violet-400 outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500"
+                        placeholder="https://discord.com/api/webhooks/..."
+                      />
+                      <p className="text-xs text-slate-400 mt-1">Paste your Discord webhook URL here</p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <button
+                        onClick={handleTestDiscord}
+                        disabled={isVerifyingDiscord || !discordWebhookUrl}
+                        className="bg-violet-600 text-white px-4 py-2.5 md:py-2 rounded-lg text-sm font-medium hover:bg-violet-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {isVerifyingDiscord && <Loader2 size={14} className="animate-spin" />}
+                        Send Test Message
+                      </button>
+                      {isDiscordVerified && (
                         <span className="flex items-center gap-1 text-emerald-600 text-sm">
                           <Check size={16} />
                           Verified
