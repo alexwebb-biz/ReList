@@ -1,0 +1,325 @@
+import { AlertConfig, ScrapedItem } from '../services/scraperService.js';
+import { gotScraping } from 'got-scraping';
+import { getRandomProxy, ProxyConfig } from '../config/proxies.js';
+import { CookieJar } from 'tough-cookie';
+
+const VINTED_BASE_URL = 'https://www.vinted.co.uk';
+const VINTED_API_URL = `${VINTED_BASE_URL}/api/v2/catalog/items`;
+
+let sessionCache: {
+  accessToken: string | null;
+  csrfToken: string | null;
+  cookies: string;
+  expiresAt: number;
+} | null = null;
+
+const cookieJar = new CookieJar();
+
+const buildProxyUrl = (proxy: ProxyConfig): string => {
+  return `http://${proxy.username}:${proxy.password}@${proxy.host}:${proxy.port}`;
+};
+
+// FIXED: Extract CSRF token more aggressively
+const extractCsrfTokenFromHtml = (html: string): string | null => {
+  // Try meta tag first
+  const metaMatch = html.match(/<meta[^>]*name=["']csrf-token["'][^>]*content=["']([^"']+)["']/i);
+  if (metaMatch?.[1]) return metaMatch[1];
+  
+  // Try embedded in JS
+  const jsMatch = html.match(/["_]csrf_token["']\s*:\s*"([^"]+)"/i);
+  if (jsMatch?.[1]) return jsMatch[1];
+  
+  // Try window.__INITIAL_STATE__
+  const initialStateMatch = html.match(/window\.__INITIAL_STATE__\s*=\s*({.+?});/s);
+  if (initialStateMatch) {
+    try {
+      const state = JSON.parse(initialStateMatch[1]);
+      return state?.config?.csrfToken || state?.csrfToken || null;
+    } catch {
+      // Ignore parse errors
+    }
+  }
+  
+  return null;
+};
+
+const initializeSession = async () => {
+  if (sessionCache?.expiresAt > Date.now()) {
+    return sessionCache;
+  }
+
+  try {
+    const proxy = getRandomProxy();
+    console.log(`Initializing Vinted session${proxy ? ' with proxy' : ''}...`);
+    
+    const response = await gotScraping.get(VINTED_BASE_URL, {
+      headerGeneratorOptions: {
+        browsers: [{ name: 'chrome', minVersion: 131 }],
+        operatingSystems: ['windows'],
+        locales: ['en-GB'],
+      },
+      proxyUrl: proxy ? buildProxyUrl(proxy) : undefined,
+      cookieJar,
+      timeout: { request: 30000 },
+      throwHttpErrors: false,
+    });
+
+    if (response.statusCode !== 200) {
+      console.error(`❌ Vinted session init failed: ${response.statusCode}`);
+      if (response.statusCode === 403) {
+        console.error('Cloudflare block detected');
+        console.error('Body preview:', response.body.substring(0, 300));
+      }
+      return null;
+    }
+
+    // Wait for page to fully load
+    await new Promise(r => setTimeout(r, 3000 + Math.random() * 2000));
+
+    const cookies = await cookieJar.getCookieString(VINTED_BASE_URL);
+    const csrfToken = extractCsrfTokenFromHtml(response.body);
+
+    if (!csrfToken) {
+      console.warn('⚠️ No CSRF token found - this will cause 400 errors');
+    } else {
+      console.log('✅ CSRF token extracted:', csrfToken.substring(0, 20) + '...');
+    }
+
+    sessionCache = {
+      accessToken: null, // Usually not needed for search
+      csrfToken,
+      cookies,
+      expiresAt: Date.now() + 90 * 60 * 1000,
+    };
+
+    return sessionCache;
+  } catch (error) {
+    console.error('Session init error:', error);
+    return null;
+  }
+};
+
+const generateSessionId = (): string => {
+  const rand = () => Math.random().toString(36).substring(2, 15);
+  return `${rand()}${rand()}`.substring(0, 43);
+};
+
+// FIXED: Use Unix timestamp in seconds
+const buildSearchParams = (config: AlertConfig, page: number = 1) => {
+  const searchText = config.keywords.join(' ').trim();
+  if (!searchText) {
+    throw new Error('No search keywords provided');
+  }
+
+  const params = new URLSearchParams({
+    search_text: searchText,
+    order: 'newest_first',
+    per_page: '96',
+    page: page.toString(),
+    currency: 'GBP',
+    time: Math.floor(Date.now() / 1000).toString(), // FIX: Seconds, not milliseconds
+  });
+
+  if (config.price_min) params.set('price_from', config.price_min.toString());
+  if (config.price_max) params.set('price_to', config.price_max.toString());
+
+  return params;
+};
+
+const humanDelay = (min: number, max: number) =>
+  new Promise(r => setTimeout(r, min + Math.random() * (max - min)));
+
+const fetchWithRetry = async (url: string, session: any, maxRetries = 3) => {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const proxy = getRandomProxy();
+      
+      // Build dynamic Referer
+      const refererUrl = `${VINTED_BASE_URL}/catalog?${buildSearchParams(session.config, 1).toString()}`;
+      
+      const response = await gotScraping.get(url, {
+        headers: {
+          'referer': refererUrl,
+          'x-csrf-token': session.csrfToken || '', // Will be empty if not found
+          // Don't pass Cookie header - cookieJar handles it
+          // Authorization header usually not needed for search
+        },
+        proxyUrl: proxy ? buildProxyUrl(proxy) : undefined,
+        cookieJar,
+        headerGeneratorOptions: {
+          browsers: [{ name: 'chrome', minVersion: 131 }],
+          operatingSystems: ['windows'],
+          locales: ['en-GB'],
+        },
+        timeout: { request: 30000 },
+        throwHttpErrors: false,
+      });
+
+      // FIXED: Better error handling
+      if (response.statusCode === 400) {
+        let errorData = null;
+        try {
+          errorData = JSON.parse(response.body);
+        } catch {
+          // Not JSON
+        }
+        
+        console.error('❌ Vinted 400 Bad Request:', {
+          url: url,
+          csrfToken: session.csrfToken ? 'Present' : 'Missing',
+          cookies: session.cookies ? 'Present' : 'Missing',
+          error: errorData || response.body.substring(0, 300),
+        });
+        
+        // If CSRF token is missing, refresh session
+        if (!session.csrfToken && attempt < maxRetries - 1) {
+          console.log('CSRF token missing, refreshing session...');
+          sessionCache = null;
+          const newSession = await initializeSession();
+          if (newSession) {
+            session = newSession;
+            await humanDelay(2000, 4000);
+            continue;
+          }
+        }
+        
+        return null; // Don't retry on 400 unless we refreshed session
+      }
+
+      if (response.statusCode === 403) {
+        console.error('Cloudflare block detected');
+        sessionCache = null;
+        if (attempt < maxRetries - 1) {
+          const newSession = await initializeSession();
+          if (newSession) {
+            session = newSession;
+            await humanDelay(2000, 4000);
+            continue;
+          }
+        }
+        return null;
+      }
+
+      if (response.statusCode === 429) {
+        const delay = Math.pow(2, attempt) * 3000 + Math.random() * 2000;
+        console.log(`Rate limited, waiting ${Math.round(delay)}ms`);
+        await humanDelay(delay, delay + 1000);
+        continue;
+      }
+
+      if (response.statusCode !== 200) {
+        console.error(`HTTP ${response.statusCode}: ${response.body.substring(0, 200)}`);
+        throw new Error(`HTTP ${response.statusCode}`);
+      }
+
+      return response;
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1} failed:`, error);
+      if (attempt === maxRetries - 1) return null;
+      await humanDelay(1000 * (attempt + 1), 2000 * (attempt + 1));
+    }
+  }
+  return null;
+};
+
+const extractPrice = (item: any): number => {
+  if (typeof item.price === 'number') return item.price;
+  if (typeof item.price === 'string') {
+    const parsed = parseFloat(item.price);
+    if (!isNaN(parsed)) return parsed;
+  }
+  if (item.price?.amount) {
+    const parsed = parseFloat(item.price.amount);
+    if (!isNaN(parsed)) return parsed;
+  }
+  if (item.total_item_price) {
+    if (typeof item.total_item_price === 'number') return item.total_item_price;
+    const parsed = parseFloat(item.total_item_price);
+    if (!isNaN(parsed)) return parsed;
+  }
+  return 0;
+};
+
+const parseResponse = (data: any): ScrapedItem[] => {
+  if (!data?.items?.length) return [];
+
+  return data.items
+    .map((item: any) => {
+      try {
+        const imageUrls: string[] = [];
+        if (item.photo?.url) imageUrls.push(item.photo.url);
+        if (item.photos) {
+          for (const photo of item.photos.slice(0, 5)) {
+            if (photo.url && !imageUrls.includes(photo.url)) {
+              imageUrls.push(photo.url);
+            }
+          }
+        }
+
+        const price = extractPrice(item);
+        if (price <= 0) return null;
+
+        return {
+          external_id: `vinted-${item.id}`,
+          platform: 'Vinted',
+          title: item.title || '',
+          description: item.description || null,
+          price,
+          currency: item.currency || 'GBP',
+          location: item.user?.city || null,
+          condition: item.status || null,
+          image_urls: imageUrls,
+          url: `https://www.vinted.co.uk/items/${item.id}`,
+          seller_name: item.user?.login || null,
+          posted_at: item.created_at_ts ? new Date(item.created_at_ts * 1000).toISOString() : null,
+        };
+      } catch (err) {
+        console.error('Error parsing item:', err);
+        return null;
+      }
+    })
+    .filter(Boolean) as ScrapedItem[];
+};
+
+export const scrapeVinted = async (config: AlertConfig): Promise<ScrapedItem[]> => {
+  const MAX_PAGES = 3;
+  const session = await initializeSession();
+  if (!session) return [];
+
+  // Store config for Referer building
+  (session as any).config = config;
+
+  console.log(`Scraping Vinted: ${config.keywords.join(' ')}`);
+
+  const allItems: ScrapedItem[] = [];
+  const seenIds = new Set<string>();
+
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    const params = buildSearchParams(config, page);
+    const url = `${VINTED_API_URL}?${params.toString()}`;
+
+    const response = await fetchWithRetry(url, session);
+    if (!response) break;
+
+    const items = parseResponse(JSON.parse(response.body));
+    if (!items.length) break;
+
+    items.forEach(item => {
+      if (!seenIds.has(item.external_id)) {
+        seenIds.add(item.external_id);
+        allItems.push(item);
+      }
+    });
+
+    console.log(`Page ${page}: ${items.length} items (total: ${allItems.length})`);
+
+    if (items.length < 96 || page === MAX_PAGES) break;
+
+    await humanDelay(3000, 7000);
+  }
+
+  console.log(`Found ${allItems.length} total items`);
+  return allItems;
+};
+
+export default scrapeVinted;
