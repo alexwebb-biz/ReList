@@ -523,65 +523,19 @@ export const Research: React.FC = () => {
         <p className="text-slate-500 dark:text-neutral-500">Price tracking, market research, and inventory insights.</p>
       </div>
 
-      {/* Tabs */}
-      <div className="overflow-x-auto border-b border-slate-200 dark:border-white/5 -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="flex gap-2 min-w-max sm:min-w-0">
-          <button
-            onClick={() => setActiveTab('watchlist')}
-            className={`flex-shrink-0 px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === 'watchlist'
-                ? 'border-blue-600 text-violet-600 dark:text-violet-400'
-                : 'border-transparent text-slate-500 dark:text-neutral-500 hover:text-slate-700 dark:hover:text-neutral-300'
-            }`}
-          >
-            <Eye size={16} className="inline mr-2" />
-            Price Watch
-          </button>
-          <button
-            onClick={() => setActiveTab('research')}
-            className={`flex-shrink-0 px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === 'research'
-                ? 'border-blue-600 text-violet-600 dark:text-violet-400'
-                : 'border-transparent text-slate-500 dark:text-neutral-500 hover:text-slate-700 dark:hover:text-neutral-300'
-            }`}
-          >
-            <Search size={16} className="inline mr-2" />
-            Market Research
-          </button>
-          <button
-            onClick={() => setActiveTab('aging')}
-            className={`flex-shrink-0 px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === 'aging'
-                ? 'border-blue-600 text-violet-600 dark:text-violet-400'
-                : 'border-transparent text-slate-500 dark:text-neutral-500 hover:text-slate-700 dark:hover:text-neutral-300'
-            }`}
-          >
-            <Clock size={16} className="inline mr-2" />
-            Inventory Aging
-          </button>
-          <button
-            onClick={() => setActiveTab('flipfinder')}
-            className={`flex-shrink-0 px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === 'flipfinder'
-                ? 'border-blue-600 text-violet-600 dark:text-violet-400'
-                : 'border-transparent text-slate-500 dark:text-neutral-500 hover:text-slate-700 dark:hover:text-neutral-300'
-            }`}
-          >
-            <Zap size={16} className="inline mr-2" />
-            Flip Finder
-          </button>
-          <button
-            onClick={() => setActiveTab('optimizer')}
-            className={`flex-shrink-0 px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === 'optimizer'
-                ? 'border-blue-600 text-violet-600 dark:text-violet-400'
-                : 'border-transparent text-slate-500 dark:text-neutral-500 hover:text-slate-700 dark:hover:text-neutral-300'
-            }`}
-          >
-            <Target size={16} className="inline mr-2" />
-            Listing Optimizer
-          </button>
-        </div>
+      {/* Tool Selector Dropdown */}
+      <div className="w-full">
+        <select
+          value={activeTab}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setActiveTab(e.target.value as TabType)}
+          className="w-full px-4 py-3 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-700 rounded-lg text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 dark:focus:ring-violet-400"
+        >
+          <option value="watchlist">👁️ Price Watch</option>
+          <option value="research">🔍 Market Research</option>
+          <option value="aging">⏰ Inventory Aging</option>
+          <option value="flipfinder">⚡ Flip Finder</option>
+          <option value="optimizer">🎯 Listing Optimizer</option>
+        </select>
       </div>
 
       {/* ============== WATCHLIST TAB ============== */}

@@ -398,7 +398,7 @@ export const notifyAlertMatches = async (
     title: `${items.length} new matches for "${alertName}"`,
     message: `We found ${items.length} new items matching your alert.`,
     data: { items, alertName }, // Include items and alert name for interactive Telegram
-    channels: ['in_app', 'email', 'telegram'],
+    channels: ['in_app', 'email', 'telegram', 'discord'],
   });
 };
 
@@ -448,7 +448,7 @@ export const notifyPriceDrop = async (
       target_price: item.target_price,
       target_reached: targetReached,
     },
-    channels: ['in_app', 'email', 'telegram'],
+    channels: ['in_app', 'email', 'telegram', 'discord'],
   });
 };
 
@@ -500,7 +500,7 @@ export const notifyPriceDropsBatch = async (
       title,
       message,
       data: { items, alertName: 'Price Watch' },
-      channels: ['in_app', 'email', 'telegram'],
+      channels: ['in_app', 'email', 'telegram', 'discord'],
     });
   }
 };
