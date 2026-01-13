@@ -1,224 +1,444 @@
-import puppeteer, { Browser, Page } from 'puppeteer';
 import { AlertConfig, ScrapedItem } from '../services/scraperService.js';
-import { getRandomProxy, getProxyUrl } from '../config/proxies.js';
+import { gotScraping } from 'got-scraping';
+import { CookieJar } from 'tough-cookie';
+import { chromium, Browser, Page } from 'playwright';
+import { getRandomProxy, getProxyUrl, ProxyConfig } from '../config/proxies.js';
 
-const DEPOP_BASE_URL = 'https://www.depop.com';
+const DEPOB_BASE_URL = 'https://www.depop.com';
+const DEPOB_API_URL = 'https://webapi.depop.com/api/v3/search/products/';
 
-// Browser instance cache (reuse browser across scrapes)
-let browserInstance: Browser | null = null;
-
-// Get or create browser instance
-const getBrowser = async (proxyUrl?: string): Promise<Browser> => {
-  if (browserInstance && browserInstance.connected) {
-    return browserInstance;
-  }
-
-  const launchOptions: any = {
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-gpu',
-    ],
-  };
-
-  // Add proxy if available
-  if (proxyUrl) {
-    const url = new URL(proxyUrl);
-    launchOptions.args.push(`--proxy-server=${url.host}`);
-  }
-
-  browserInstance = await puppeteer.launch(launchOptions);
-  return browserInstance;
+// Generate random UUID-like string
+const generateId = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 };
 
-// Build Depop search URL
-const buildSearchUrl = (config: AlertConfig): string => {
-  const keywords = config.keywords.join(' ');
-  const encodedKeywords = encodeURIComponent(keywords);
+/**
+ * Primary API-based scraper for Depop
+ */
+class DepopApiScraper {
+  private cookieJar = new CookieJar();
 
-  let url = `${DEPOP_BASE_URL}/search/?q=${encodedKeywords}`;
-
-  // Add price filters if specified
-  if (config.price_min) {
-    url += `&priceMin=${config.price_min}`;
-  }
-  if (config.price_max) {
-    url += `&priceMax=${config.price_max}`;
+  private buildProxyUrl(proxy: ProxyConfig): string {
+    return `http://${proxy.username}:${proxy.password}@${proxy.host}:${proxy.port}`;
   }
 
-  // Sort by newest
-  url += '&sort=newlyListed';
+  private delay = (min: number, max: number) =>
+    new Promise(r => setTimeout(r, min + Math.random() * (max - min)));
 
-  return url;
-};
-
-// Scrape a single page
-const scrapePage = async (page: Page, config: AlertConfig): Promise<ScrapedItem[]> => {
-  const items: ScrapedItem[] = [];
-
-  try {
-    const searchUrl = buildSearchUrl(config);
-    console.log(`Navigating to: ${searchUrl}`);
-
-    // Navigate to search page with extended timeout
-    await page.goto(searchUrl, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000,
-    });
-
-    // Wait a bit for JavaScript to render
-    await new Promise(r => setTimeout(r, 3000));
-
-    // Try to wait for products to load, but don't fail if selector not found
-    try {
-      await page.waitForSelector('article[data-testid*="product"]', { timeout: 10000 });
-    } catch (e) {
-      console.log('Depop: Product selector not found, page might be empty or layout changed');
-      // Check if there's a "no results" message or different layout
-      const pageContent = await page.content();
-      if (pageContent.includes('No results') || pageContent.includes('no products')) {
-        console.log('Depop: No results found for this search');
-        return items;
-      }
-      // If no "no results" message, layout might have changed - log and return empty
-      console.warn('Depop: Page layout may have changed, unable to find products');
-      return items;
-    }
-
-    // Scroll to load more items
-    await page.evaluate(() => {
-      window.scrollBy(0, window.innerHeight * 2);
-    });
-    await new Promise(r => setTimeout(r, 2000));
-
-    // Extract product data
-    const products = await page.evaluate(() => {
-      const productCards = document.querySelectorAll('article[data-testid*="product"]');
-      const results: any[] = [];
-
-      productCards.forEach((card) => {
-        try {
-          // Get product link
-          const linkEl = card.querySelector('a[href*="/products/"]') as HTMLAnchorElement;
-          if (!linkEl) return;
-
-          const url = linkEl.href;
-          const slug = url.split('/products/')[1]?.split('?')[0];
-          if (!slug) return;
-
-          // Get title/description
-          const titleEl = card.querySelector('p[data-testid="product__title"]');
-          const title = titleEl?.textContent?.trim() || '';
-
-          // Get price
-          const priceEl = card.querySelector('p[data-testid="product__price"]');
-          const priceText = priceEl?.textContent?.trim() || '';
-          const priceMatch = priceText.match(/£([\d.]+)/);
-          const price = priceMatch ? parseFloat(priceMatch[1]) : 0;
-
-          // Get image
-          const imgEl = card.querySelector('img') as HTMLImageElement;
-          const imageUrl = imgEl?.src || imgEl?.dataset?.src || null;
-
-          // Get seller (if available)
-          const sellerEl = card.querySelector('p[data-testid="product__seller"]');
-          const seller = sellerEl?.textContent?.trim() || null;
-
-          results.push({
-            slug,
-            title,
-            price,
-            imageUrl,
-            seller,
-            url,
-          });
-        } catch (err) {
-          console.error('Error extracting product:', err);
-        }
-      });
-
-      return results;
-    });
-
-    console.log(`Extracted ${products.length} products from Depop`);
-
-    // Convert to ScrapedItem format
-    for (const product of products) {
-      if (!product.slug || product.price <= 0) continue;
-
-      items.push({
-        external_id: `depop-${product.slug}`,
-        platform: 'Depop',
-        title: product.title,
-        description: null,
-        price: product.price,
-        currency: 'GBP',
-        location: null,
-        condition: null,
-        image_urls: product.imageUrl ? [product.imageUrl] : [],
-        url: product.url,
-        seller_name: product.seller,
-        posted_at: null,
-      });
-    }
-
-    return items;
-  } catch (error) {
-    console.error('Error scraping Depop page:', error);
-    return items;
-  }
-};
-
-// Main scrape function
-export const scrapeDepop = async (config: AlertConfig): Promise<ScrapedItem[]> => {
-  let browser: Browser | null = null;
-  let page: Page | null = null;
-
-  try {
-    // Get proxy
+  async scrape(config: AlertConfig): Promise<{ items: ScrapedItem[]; hadAuthError: boolean }> {
     const proxy = getRandomProxy();
-    const proxyUrl = proxy ? getProxyUrl(proxy) : undefined;
+    const deviceId = generateId();
+    const sessionId = generateId();
 
-    if (proxy) {
-      console.log(`Depop using proxy: ${proxy.host}:${proxy.port}`);
-    } else {
-      console.warn('Depop: No proxies available, making direct request');
-    }
+    console.log(`🔌 API: Initializing session${proxy ? ' with proxy' : ''}...`);
 
-    console.log(`Scraping Depop: ${config.keywords.join(' ')}`);
-
-    // Launch browser
-    browser = await getBrowser(proxyUrl);
-    page = await browser.newPage();
-
-    // Set viewport
-    await page.setViewport({ width: 1920, height: 1080 });
-
-    // Set realistic user agent
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-    );
-
-    // Authenticate proxy if needed
-    if (proxy) {
-      await page.authenticate({
-        username: proxy.username,
-        password: proxy.password,
+    try {
+      // Get cookies first
+      const response = await gotScraping.get(DEPOB_BASE_URL, {
+        headerGeneratorOptions: {
+          browsers: [{ name: 'chrome', minVersion: 131 }],
+          operatingSystems: ['windows'],
+          locales: ['en-GB'],
+        },
+        proxyUrl: proxy ? this.buildProxyUrl(proxy) : undefined,
+        cookieJar: this.cookieJar,
+        timeout: { request: 30000 },
+        throwHttpErrors: false,
       });
+
+      if (response.statusCode !== 200) {
+        return { items: [], hadAuthError: true };
+      }
+
+      await this.delay(2000, 3000);
+
+      const searchText = config.keywords.join(' ').trim();
+      if (!searchText) {
+        throw new Error('No search keywords provided');
+      }
+
+      const items: ScrapedItem[] = [];
+      let cursor: string | null = null;
+      let hasMore = true;
+      let pageCount = 0;
+      const maxPages = 10;
+
+      while (hasMore && pageCount < maxPages) {
+        const params = new URLSearchParams({
+          what: searchText,
+          items_per_page: '48',
+          country: 'gb',
+          currency: 'GBP',
+          sort: 'newest_first',
+          ...(cursor && { cursor }),
+        });
+
+        if (config.price_min) {
+          params.set('price_from', config.price_min.toString());
+        }
+        if (config.price_max) {
+          params.set('price_to', config.price_max.toString());
+        }
+
+        const url = `${DEPOB_API_URL}?${params.toString()}`;
+
+        const apiResponse = await gotScraping.get(url, {
+          headers: {
+            'depop-device-id': deviceId,
+            'depop-session-id': sessionId,
+            'depop-search-id': generateId(),
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-GB,en;q=0.9',
+            'referer': `${DEPOB_BASE_URL}/search/?q=${encodeURIComponent(searchText)}`,
+            'user-agent': response.request.options.headers['user-agent'] as string,
+            'origin': DEPOB_BASE_URL,
+            'dnt': '1',
+          },
+          proxyUrl: proxy ? this.buildProxyUrl(proxy) : undefined,
+          cookieJar: this.cookieJar,
+          timeout: { request: 30000 },
+          throwHttpErrors: false,
+        });
+
+        if (apiResponse.statusCode === 401 || apiResponse.statusCode === 403 || apiResponse.statusCode === 429) {
+          console.error(`❌ API HTTP ${apiResponse.statusCode} - Will fallback to browser`);
+          return { items, hadAuthError: true };
+        }
+
+        if (apiResponse.statusCode !== 200) {
+          throw new Error(`HTTP ${apiResponse.statusCode}`);
+        }
+
+        const data = JSON.parse(apiResponse.body);
+        const pageItems = this.parseItems(data);
+        items.push(...pageItems);
+
+        cursor = data.meta?.cursor || null;
+        hasMore = data.meta?.has_more || false;
+        pageCount++;
+
+        console.log(`✅ API: Page ${pageCount} - Found ${pageItems.length} items (Total: ${items.length})`);
+        await this.delay(1500, 2500);
+      }
+
+      return { items, hadAuthError: false };
+
+    } catch (error) {
+      console.error('API scrape error:', error);
+      return { items: [], hadAuthError: true };
+    }
+  }
+
+  private parseItems(data: any): ScrapedItem[] {
+    if (!data?.products?.length) {
+      return [];
     }
 
-    // Scrape products
-    const items = await scrapePage(page, config);
+    return data.products.map((product: any) => {
+      try {
+        const imageUrls: string[] = [];
+        if (product.preview) {
+          const resolutions = ['1280', '960', '640', '480', '320', '210', '150'];
+          for (const res of resolutions) {
+            if (product.preview[res]) {
+              imageUrls.push(product.preview[res]);
+              break;
+            }
+          }
+        }
 
+        const price = this.extractPrice(product.price);
+        if (price <= 0) {
+          return null;
+        }
+
+        return {
+          external_id: `depop-${product.id}`,
+          platform: 'Depop',
+          title: product.slug ? product.slug.replace(/-/g, ' ') : '',
+          description: product.description || null,
+          price: price,
+          currency: 'GBP',
+          location: null,
+          condition: product.status || null,
+          image_urls: imageUrls,
+          url: `${DEPOB_BASE_URL}/products/${product.slug || product.id}/`,
+          seller_name: null,
+          posted_at: null,
+        };
+      } catch (err) {
+        console.error('Error parsing product:', err);
+        return null;
+      }
+    }).filter(Boolean);
+  }
+
+  private extractPrice(productPrice: any): number {
+    try {
+      if (typeof productPrice === 'number') {
+        return productPrice;
+      }
+      if (productPrice?.priceAmount) {
+        return parseFloat(productPrice.priceAmount);
+      }
+      if (productPrice?.nationalShippingCost) {
+        return parseFloat(productPrice.nationalShippingCost);
+      }
+      return 0;
+    } catch (error) {
+      console.error('Error extracting price:', error);
+      return 0;
+    }
+  }
+}
+
+/**
+ * Fallback browser scraper using Playwright
+ */
+class DepopBrowserScraper {
+  private browser: Browser | null = null;
+  private page: Page | null = null;
+
+  async initialize(): Promise<boolean> {
+    try {
+      console.log('🎭 Browser: Launching Playwright...');
+      
+      const proxy = getRandomProxy();
+      
+      this.browser = await chromium.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--disable-gpu',
+          '--disable-web-security',
+        ],
+      });
+
+      const context = await this.browser.newContext({
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        viewport: { width: 1920, height: 1080 },
+        proxy: proxy ? {
+          server: `http://${proxy.host}:${proxy.port}`,
+          username: proxy.username,
+          password: proxy.password,
+        } : undefined,
+        extraHTTPHeaders: {
+          'Accept-Language': 'en-GB,en;q=0.9',
+        },
+      });
+
+      this.page = await context.newPage();
+      
+      await this.page.setExtraHTTPHeaders({
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-GB,en;q=0.9',
+      });
+
+      console.log('✅ Browser: Session initialized');
+      return true;
+    } catch (error) {
+      console.error('Browser init failed:', error);
+      await this.close();
+      return false;
+    }
+  }
+
+  async scrape(config: AlertConfig): Promise<ScrapedItem[]> {
+    if (!this.page) {
+      const ok = await this.initialize();
+      if (!ok) return [];
+    }
+
+    try {
+      const searchText = config.keywords.join(' ').trim();
+      console.log(`🎭 Browser: Searching "${searchText}"...`);
+
+      const params = new URLSearchParams({
+        q: searchText,
+        sort: 'newlyListed',
+      });
+
+      if (config.price_min) {
+        params.set('priceMin', config.price_min.toString());
+      }
+      if (config.price_max) {
+        params.set('priceMax', config.price_max.toString());
+      }
+
+      const searchUrl = `${DEPOB_BASE_URL}/search/?${params.toString()}`;
+      
+      await this.page!.goto(searchUrl, { 
+        waitUntil: 'networkidle',
+        timeout: 60000 
+      });
+      
+      await this.page!.waitForLoadState('domcontentloaded');
+      await this.delay(3000, 4000);
+
+      const items: ScrapedItem[] = [];
+      let previousItemCount = 0;
+      let scrollAttempts = 0;
+      const maxScrollAttempts = 5;
+
+      while (scrollAttempts < maxScrollAttempts) {
+        const pageItems = await this.extractItemsFromPage();
+        
+        for (const item of pageItems) {
+          if (!items.find(existing => existing.external_id === item.external_id)) {
+            items.push(item);
+          }
+        }
+
+        console.log(`🎭 Browser: Scroll ${scrollAttempts + 1} - Found ${items.length} total items`);
+
+        if (items.length === previousItemCount) {
+          scrollAttempts++;
+        } else {
+          scrollAttempts = 0;
+          previousItemCount = items.length;
+        }
+
+        await this.page!.evaluate(() => {
+          window.scrollBy(0, window.innerHeight * 2);
+        });
+        
+        await this.delay(2000, 3000);
+
+        try {
+          const loadMoreButton = await this.page!.$('button[data-testid*="load-more"], button[class*="load-more"]');
+          if (loadMoreButton) {
+            await loadMoreButton.click();
+            await this.delay(1500, 2500);
+          }
+        } catch (e) {
+          // No load more button found
+        }
+      }
+
+      console.log(`✅ Browser: Found ${items.length} items total`);
+      return items;
+
+    } catch (error) {
+      console.error('Browser scrape error:', error);
+      return [];
+    }
+  }
+
+  private async extractItemsFromPage(): Promise<ScrapedItem[]> {
+    if (!this.page) return [];
+
+    const selectors = [
+      'article[data-testid*="product"]',
+      '[data-testid="product-card"]',
+      'article[class*="product"]',
+      '[class*="ProductCard"]',
+      'a[href*="/products/"]'
+    ];
+
+    for (const selector of selectors) {
+      try {
+        const items = await this.page.$$eval(selector, (elements: Element[]) => {
+          return elements.map((el: Element) => {
+            try {
+              let linkEl: HTMLAnchorElement | null = null;
+              let titleEl: HTMLElement | null = null;
+              let priceEl: HTMLElement | null = null;
+              let imgEl: HTMLImageElement | null = null;
+
+              if (el.tagName === 'A') {
+                linkEl = el as HTMLAnchorElement;
+              } else {
+                linkEl = el.querySelector('a[href*="/products/"]') as HTMLAnchorElement;
+              }
+
+              if (!linkEl || !linkEl.href) return null;
+
+              const url = linkEl.href;
+              const slug = url.split('/products/')[1]?.split('?')[0];
+              if (!slug) return null;
+
+              titleEl = el.querySelector('p[data-testid="product__title"], h3, p[class*="title"]') as HTMLElement;
+              const title = titleEl?.textContent?.trim() || slug.replace(/-/g, ' ');
+
+              priceEl = el.querySelector('p[data-testid="product__price"], p[class*="price"], span[class*="price"]') as HTMLElement;
+              const priceText = priceEl?.textContent?.trim() || '';
+              const priceMatch = priceText.match(/£?([\d.]+)/);
+              const price = priceMatch ? parseFloat(priceMatch[1]) : 0;
+
+              imgEl = el.querySelector('img') as HTMLImageElement;
+              const imageUrl = imgEl?.src || imgEl?.dataset?.src || null;
+
+              return { slug, title, price, imageUrl, url };
+            } catch (err) {
+              console.error('Error extracting item:', err);
+              return null;
+            }
+          }).filter(Boolean);
+        });
+
+        if (items.length > 0) {
+          return items.map((item: any) => ({
+            external_id: `depop-${item.slug}`,
+            platform: 'Depop',
+            title: item.title,
+            description: null,
+            price: item.price,
+            currency: 'GBP',
+            location: null,
+            condition: null,
+            image_urls: item.imageUrl ? [item.imageUrl] : [],
+            url: item.url,
+            seller_name: null,
+            posted_at: null,
+          }));
+        }
+      } catch (e) {
+        continue;
+      }
+    }
+
+    return [];
+  }
+
+  private delay = (min: number, max: number) =>
+    new Promise(r => setTimeout(r, min + Math.random() * (max - min)));
+
+  async close(): Promise<void> {
+    if (this.page) {
+      await this.page.close();
+      this.page = null;
+    }
+    if (this.browser) {
+      await this.browser.close();
+      this.browser = null;
+    }
+  }
+}
+
+/**
+ * Main hybrid scraper function
+ * Tries API first, then falls back to browser scraping
+ */
+export const scrapeDepop = async (config: AlertConfig): Promise<ScrapedItem[]> => {
+  console.log(`\n=== Starting Depop scrape: "${config.keywords.join(' ')}" ===`);
+  
+  // Try API first
+  const apiScraper = new DepopApiScraper();
+  const apiResult = await apiScraper.scrape(config);
+  
+  if (!apiResult.hadAuthError && apiResult.items.length > 0) {
+    console.log(`✅ API scraper successful - found ${apiResult.items.length} items`);
+    
     // Apply filters
-    let filteredItems = items;
-
-    // Filter by price range
+    let filteredItems = apiResult.items;
+    
     if (config.price_min || config.price_max) {
       filteredItems = filteredItems.filter(item => {
         if (config.price_min && item.price < config.price_min) return false;
@@ -227,7 +447,6 @@ export const scrapeDepop = async (config: AlertConfig): Promise<ScrapedItem[]> =
       });
     }
 
-    // Filter by exclude keywords
     if (config.exclude_keywords && config.exclude_keywords.length > 0) {
       const excludePattern = new RegExp(config.exclude_keywords.join('|'), 'i');
       filteredItems = filteredItems.filter(item => {
@@ -235,22 +454,39 @@ export const scrapeDepop = async (config: AlertConfig): Promise<ScrapedItem[]> =
       });
     }
 
-    console.log(`Found ${filteredItems.length} items on Depop (${items.length} before filtering)`);
-
-    await page.close();
+    console.log(`✅ After filtering: ${filteredItems.length} items`);
     return filteredItems;
-  } catch (error) {
-    console.error('Depop scraping error:', error);
-    if (page) await page.close();
-    return [];
   }
-};
 
-// Cleanup function - call this on server shutdown
-export const closeBrowser = async (): Promise<void> => {
-  if (browserInstance) {
-    await browserInstance.close();
-    browserInstance = null;
+  // Fallback to browser if API fails
+  console.log('⚠️  API failed or was blocked, falling back to browser...');
+  const browserScraper = new DepopBrowserScraper();
+  
+  try {
+    const items = await browserScraper.scrape(config);
+    
+    // Apply same filters
+    let filteredItems = items;
+    
+    if (config.price_min || config.price_max) {
+      filteredItems = filteredItems.filter(item => {
+        if (config.price_min && item.price < config.price_min) return false;
+        if (config.price_max && item.price > config.price_max) return false;
+        return true;
+      });
+    }
+
+    if (config.exclude_keywords && config.exclude_keywords.length > 0) {
+      const excludePattern = new RegExp(config.exclude_keywords.join('|'), 'i');
+      filteredItems = filteredItems.filter(item => {
+        return !excludePattern.test(item.title);
+      });
+    }
+
+    console.log(`✅ Browser scraper - found ${filteredItems.length} items after filtering`);
+    return filteredItems;
+  } finally {
+    await browserScraper.close();
   }
 };
 
