@@ -3,7 +3,6 @@ import { gotScraping } from 'got-scraping';
 import { getRandomProxy, ProxyConfig } from '../config/proxies.js';
 import { CookieJar } from 'tough-cookie';
 import { chromium, Browser, Page } from 'playwright';
-import { executablePath } from 'playwright-core';
 
 // FIX: Remove trailing space
 const VINTED_BASE_URL = 'https://www.vinted.co.uk';
@@ -187,7 +186,6 @@ class VintedBrowserScraper {
       
       this.browser = await chromium.launch({
         headless: true,
-        executablePath: executablePath(),
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
