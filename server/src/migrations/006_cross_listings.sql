@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS cross_listings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   inventory_id UUID NOT NULL REFERENCES inventory(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   platform VARCHAR(50) NOT NULL CHECK (platform IN ('eBay', 'Vinted', 'Depop', 'Facebook', 'Gumtree', 'Shpock')),
   external_listing_id VARCHAR(255),
   title VARCHAR(255) NOT NULL,

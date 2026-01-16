@@ -163,12 +163,17 @@ export const CrossListingManager: React.FC = () => {
 
   const fetchInventoryForCreate = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/inventory?status=listed&per_page=100`, {
+      // Fetch both draft and listed items (exclude sold items)
+      const res = await fetch(`${API_BASE}/api/inventory?per_page=100`, {
         headers: getAuthHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
-        setAvailableInventory(data.data || []);
+        // Filter out sold items, keep draft and listed
+        const availableItems = (data.data || []).filter(
+          (item: InventoryItem) => item.status !== 'sold'
+        );
+        setAvailableInventory(availableItems);
       }
     } catch (err) {
       console.error('Error fetching inventory:', err);
