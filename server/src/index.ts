@@ -28,6 +28,9 @@ import listingsRoutes from './routes/listings.js';
 import watchlistRoutes from './routes/watchlist.js';
 import researchRoutes from './routes/research.js';
 import adminRoutes from './routes/admin.js';
+import crossListingRoutes from './routes/crossListing.js';
+import arbitrageRoutes from './routes/arbitrage.js';
+import dealsRoutes from './routes/deals.js';
 
 // Import services
 import { startScheduler } from './services/schedulerService.js';
@@ -116,6 +119,9 @@ app.use('/api/listings', listingsRoutes);
 app.use('/api/watchlist', watchlistRoutes);
 app.use('/api/research', researchRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/cross-listings', crossListingRoutes);
+app.use('/api/arbitrage', arbitrageRoutes);
+app.use('/api/deals', dealsRoutes);
 
 // Serve static files from Vite build in production
 if (process.env.NODE_ENV === 'production') {

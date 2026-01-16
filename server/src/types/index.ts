@@ -114,6 +114,26 @@ export interface Notification {
   sent_at: string;
 }
 
+export type Platform = 'eBay' | 'Vinted' | 'Depop' | 'Facebook' | 'Gumtree' | 'Shpock';
+
+export interface CrossListing {
+  id: string;
+  inventory_id: string;
+  user_id: string;
+  platform: Platform;
+  external_listing_id: string | null;
+  title: string;
+  description: string | null;
+  price: number;
+  url: string | null;
+  status: 'draft' | 'active' | 'sold' | 'ended' | 'error';
+  error_message: string | null;
+  listed_at: string | null;
+  synced_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Request types
 export interface AuthenticatedRequest extends Request {
   user?: {

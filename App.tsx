@@ -13,7 +13,9 @@ import {
   Sun,
   Moon,
   Shield,
-  BarChart3
+  BarChart3,
+  Globe,
+  Users
 } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { InventoryManager } from './components/InventoryManager';
@@ -23,6 +25,9 @@ import { Settings } from './components/Settings';
 import { Analytics } from './components/Analytics';
 import { Research } from './components/Research';
 import Admin from './components/Admin';
+import { CrossListingManager } from './components/CrossListingManager';
+import { ArbitrageScanner } from './components/ArbitrageScanner';
+import { DealMarketplace } from './components/DealMarketplace';
 import { AuthModal } from './components/AuthModal';
 import { ViewState } from './types';
 import { useAuthStore } from './stores/authStore';
@@ -58,7 +63,10 @@ const App: React.FC = () => {
   const navItems = [
     { id: 'dashboard' as ViewState, label: 'Dashboard', icon: LayoutGrid },
     { id: 'inventory' as ViewState, label: 'Inventory', icon: Package },
-    { id: 'alerts' as ViewState, label: 'Smart Alerts', icon: Zap },
+    { id: 'crosslisting' as ViewState, label: 'Cross-Post', icon: Globe },
+    { id: 'arbitrage' as ViewState, label: 'Arbitrage', icon: Zap },
+    { id: 'deals' as ViewState, label: 'Deal Hub', icon: Users },
+    { id: 'alerts' as ViewState, label: 'Smart Alerts', icon: Bell },
     { id: 'results' as ViewState, label: 'Alert Results', icon: Search },
     { id: 'analytics' as ViewState, label: 'Analytics', icon: BarChart3 },
     { id: 'research' as ViewState, label: 'AI Research', icon: Search },
@@ -71,6 +79,12 @@ const App: React.FC = () => {
         return <Dashboard onViewChange={(v) => setCurrentView(v as ViewState)} />;
       case 'inventory':
         return <InventoryManager />;
+      case 'crosslisting':
+        return <CrossListingManager />;
+      case 'arbitrage':
+        return <ArbitrageScanner />;
+      case 'deals':
+        return <DealMarketplace />;
       case 'alerts':
         return <AlertsManager />;
       case 'results':
