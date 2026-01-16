@@ -277,7 +277,7 @@ export async function getDealsFeed(
     .from('shared_deals')
     .select(`
       *,
-      sharer:user_id (
+      sharer:users!shared_deals_user_id_fkey (
         id,
         full_name,
         email
@@ -344,7 +344,7 @@ export async function getDealById(dealId: string): Promise<SharedDeal | null> {
     .from('shared_deals')
     .select(`
       *,
-      sharer:user_id (
+      sharer:users!shared_deals_user_id_fkey (
         id,
         full_name,
         email

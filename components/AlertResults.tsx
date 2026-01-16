@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, AlertResult, Alert } from '../lib/api';
-import { ExternalLink, Check, Bookmark, Trash2, Filter, Loader2, ChevronDown, Eye, X, Package, DollarSign, Binoculars } from 'lucide-react';
+import { ExternalLink, Check, Bookmark, Trash2, Filter, Loader2, ChevronDown, Eye, X, Package, DollarSign, Binoculars, Share2 } from 'lucide-react';
 
 interface QuickSaveData {
   result: AlertResult;
@@ -13,6 +13,25 @@ interface WatchData {
   result: AlertResult;
   target_price: number;
 }
+
+interface ShareDealData {
+  result: AlertResult;
+  estimated_sell_price: number;
+  category: string;
+}
+
+const DEAL_CATEGORIES = [
+  'Electronics',
+  'Clothing',
+  'Shoes',
+  'Accessories',
+  'Home & Garden',
+  'Toys & Games',
+  'Sports & Outdoors',
+  'Books & Media',
+  'Collectibles',
+  'Other',
+];
 
 export const AlertResults: React.FC = () => {
   const [results, setResults] = useState<AlertResult[]>([]);
@@ -34,6 +53,11 @@ export const AlertResults: React.FC = () => {
   const [watchModal, setWatchModal] = useState<WatchData | null>(null);
   const [isWatching, setIsWatching] = useState(false);
   const [watchedIds, setWatchedIds] = useState<Set<string>>(new Set());
+
+  // Share deal modal state
+  const [shareDealModal, setShareDealModal] = useState<ShareDealData | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const [sharedIds, setSharedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadAlerts();
@@ -165,6 +189,44 @@ export const AlertResults: React.FC = () => {
     }
 
     setIsWatching(false);
+  };
+
+  // Open share deal modal
+  const openShareDealModal = (result: AlertResult) => {
+    setShareDealModal({
+      result,
+      estimated_sell_price: Math.round(result.price * 1.5), // Default 50% markup
+      category: '',
+    });
+  };
+
+  // Share to deals hub
+  const handleShareDeal = async () => {
+    if (!shareDealModal || !shareDealModal.category) return;
+
+    setIsSharing(true);
+
+    const response = await api.post(`/results/${shareDealModal.result.id}/share-deal`, {
+      estimated_sell_price: shareDealModal.estimated_sell_price,
+      category: shareDealModal.category,
+    });
+
+    if (response.success) {
+      setSharedIds(prev => new Set(prev).add(shareDealModal.result.id));
+      setShareDealModal(null);
+    }
+
+    setIsSharing(false);
+  };
+
+  // Calculate deal profit for share modal
+  const calculateDealProfit = () => {
+    if (!shareDealModal) return { profit: 0, roi: 0 };
+    const profit = shareDealModal.estimated_sell_price - shareDealModal.result.price;
+    const roi = shareDealModal.result.price > 0
+      ? (profit / shareDealModal.result.price) * 100
+      : 0;
+    return { profit, roi };
   };
 
   const formatPrice = (price: number, currency: string) => {
@@ -383,6 +445,20 @@ export const AlertResults: React.FC = () => {
                     ) : (
                       <div className="p-2 text-amber-500" title="Watching">
                         <Binoculars size={18} />
+                      </div>
+                    )}
+
+                    {!sharedIds.has(result.id) ? (
+                      <button
+                        onClick={() => openShareDealModal(result)}
+                        className="p-2 text-slate-400 dark:text-neutral-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Share to Deals Hub"
+                      >
+                        <Share2 size={18} />
+                      </button>
+                    ) : (
+                      <div className="p-2 text-blue-500" title="Shared to Deals">
+                        <Share2 size={18} />
                       </div>
                     )}
 
@@ -655,6 +731,145 @@ export const AlertResults: React.FC = () => {
                 {isWatching && <Loader2 size={16} className="animate-spin" />}
                 <Binoculars size={16} />
                 Start Watching
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Deal Modal */}
+      {shareDealModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white dark:bg-neutral-900/80 rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Share2 size={20} className="text-blue-600" />
+                Share to Deals Hub
+              </h3>
+              <button
+                onClick={() => setShareDealModal(null)}
+                className="p-2 text-slate-500 dark:text-neutral-500 hover:text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-700 dark:bg-neutral-800 rounded-lg"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Item Preview */}
+            <div className="flex gap-3 p-3 bg-slate-50 dark:bg-neutral-900 rounded-lg mb-4">
+              {shareDealModal.result.image_urls?.[0] && (
+                <img
+                  src={shareDealModal.result.image_urls[0]}
+                  alt=""
+                  className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <h4 className="font-medium text-slate-900 dark:text-white text-sm line-clamp-2">{shareDealModal.result.title}</h4>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${getPlatformColor(shareDealModal.result.platform)}`}>
+                    {shareDealModal.result.platform}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  Share this deal with the community! If someone profits from your deal, you'll earn <strong>5% commission</strong>.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
+                  Buy Price
+                </label>
+                <div className="px-3 py-2 bg-slate-100 dark:bg-neutral-800 rounded-lg text-slate-700 dark:text-neutral-300 font-medium">
+                  {formatPrice(shareDealModal.result.price, shareDealModal.result.currency)}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
+                  Category <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={shareDealModal.category}
+                    onChange={(e) => setShareDealModal({
+                      ...shareDealModal,
+                      category: e.target.value
+                    })}
+                    className="w-full appearance-none px-3 py-2 pr-10 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white"
+                  >
+                    <option value="">Select a category...</option>
+                    {DEAL_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
+                  Estimated Sell Price (£) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={shareDealModal.estimated_sell_price || ''}
+                  onChange={(e) => setShareDealModal({
+                    ...shareDealModal,
+                    estimated_sell_price: parseFloat(e.target.value) || 0
+                  })}
+                  className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-slate-900 dark:text-white"
+                  placeholder="What can this sell for?"
+                />
+                {shareDealModal.estimated_sell_price <= shareDealModal.result.price && shareDealModal.estimated_sell_price > 0 && (
+                  <p className="text-xs text-red-500 mt-1">Sell price must be higher than buy price</p>
+                )}
+              </div>
+
+              {/* Profit Preview */}
+              {shareDealModal.estimated_sell_price > shareDealModal.result.price && (
+                <div className="bg-emerald-50 rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-emerald-700">Estimated Profit:</span>
+                    <span className="font-bold text-lg text-emerald-600">
+                      £{calculateDealProfit().profit.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-xs text-emerald-600">ROI:</span>
+                    <span className="font-medium text-sm text-emerald-600">
+                      {calculateDealProfit().roi.toFixed(0)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-emerald-200">
+                    <span className="text-xs text-emerald-600">Your Commission (5%):</span>
+                    <span className="font-medium text-sm text-emerald-700">
+                      £{(calculateDealProfit().profit * 0.05).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
+              <button
+                onClick={() => setShareDealModal(null)}
+                className="flex-1 px-4 py-2.5 rounded-lg text-slate-600 dark:text-neutral-400 hover:bg-slate-50 dark:hover:bg-neutral-800 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleShareDeal}
+                disabled={isSharing || !shareDealModal.category || shareDealModal.estimated_sell_price <= shareDealModal.result.price}
+                className="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSharing && <Loader2 size={16} className="animate-spin" />}
+                <Share2 size={16} />
+                Share Deal
               </button>
             </div>
           </div>
