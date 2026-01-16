@@ -23,13 +23,15 @@ export interface ScrapedItem {
 }
 
 export interface AlertConfig {
-  id: string;
+  id?: string;
   keywords: string[];
-  exclude_keywords: string[] | null;
+  exclude_keywords?: string[] | null;
   platforms: string[];
   price_min: number | null;
   price_max: number | null;
-  condition: string[] | null;
+  condition?: string[] | null;
+  radius_miles?: number | null;
+  location_postcode?: string | null;
 }
 
 // Main function to process an alert

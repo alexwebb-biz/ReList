@@ -3,10 +3,11 @@
  * Community-powered deal sharing with reputation and commissions
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { z } from 'zod';
 import { authenticateToken } from '../middleware/auth.js';
 import { success, error as sendError, paginated } from '../utils/response.js';
+import { AuthenticatedRequest } from '../types/index.js';
 import {
   shareDeal,
   getDealsFeed,
@@ -46,7 +47,7 @@ const voteSchema = z.object({
 });
 
 // GET /api/deals - Get deals feed
-router.get('/', authenticateToken, async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const {
       category,
@@ -79,7 +80,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // GET /api/deals/categories - Get deal categories
-router.get('/categories', authenticateToken, async (_req: Request, res: Response) => {
+router.get('/categories', authenticateToken, async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const categories = await getDealCategories();
 
@@ -101,7 +102,7 @@ router.get('/categories', authenticateToken, async (_req: Request, res: Response
 });
 
 // GET /api/deals/leaderboard - Get reputation leaderboard
-router.get('/leaderboard', authenticateToken, async (req: Request, res: Response) => {
+router.get('/leaderboard', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { sort_by = 'reputation', limit = '20' } = req.query;
 
@@ -118,7 +119,7 @@ router.get('/leaderboard', authenticateToken, async (req: Request, res: Response
 });
 
 // GET /api/deals/my-deals - Get current user's deals
-router.get('/my-deals', authenticateToken, async (req: Request, res: Response) => {
+router.get('/my-deals', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { type = 'shared' } = req.query;
@@ -132,7 +133,7 @@ router.get('/my-deals', authenticateToken, async (req: Request, res: Response) =
 });
 
 // GET /api/deals/my-reputation - Get current user's reputation
-router.get('/my-reputation', authenticateToken, async (req: Request, res: Response) => {
+router.get('/my-reputation', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const reputation = await getUserReputation(userId);
@@ -144,7 +145,7 @@ router.get('/my-reputation', authenticateToken, async (req: Request, res: Respon
 });
 
 // GET /api/deals/:id - Get a specific deal
-router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.get('/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deal = await getDealById(id);
@@ -161,7 +162,7 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // POST /api/deals - Share a new deal
-router.post('/', authenticateToken, async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const data = shareDealSchema.parse(req.body);
@@ -186,7 +187,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // POST /api/deals/:id/claim - Claim a deal
-router.post('/:id/claim', authenticateToken, async (req: Request, res: Response) => {
+router.post('/:id/claim', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -206,7 +207,7 @@ router.post('/:id/claim', authenticateToken, async (req: Request, res: Response)
 });
 
 // POST /api/deals/:id/outcome - Report deal outcome
-router.post('/:id/outcome', authenticateToken, async (req: Request, res: Response) => {
+router.post('/:id/outcome', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -243,7 +244,7 @@ router.post('/:id/outcome', authenticateToken, async (req: Request, res: Respons
 });
 
 // POST /api/deals/:id/vote - Vote on a deal
-router.post('/:id/vote', authenticateToken, async (req: Request, res: Response) => {
+router.post('/:id/vote', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;

@@ -3,10 +3,11 @@
  * Real-time cross-platform arbitrage opportunity detection
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { z } from 'zod';
 import { authenticateToken } from '../middleware/auth.js';
 import { success, error as sendError } from '../utils/response.js';
+import { AuthenticatedRequest } from '../types/index.js';
 import {
   scanForArbitrage,
   multiPlatformScan,
@@ -78,7 +79,7 @@ const saveOpportunitySchema = z.object({
 });
 
 // POST /api/arbitrage/scan - Scan for arbitrage opportunities
-router.post('/scan', authenticateToken, async (req: Request, res: Response) => {
+router.post('/scan', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const data = scanConfigSchema.parse(req.body);
 
@@ -112,7 +113,7 @@ router.post('/scan', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // POST /api/arbitrage/multi-scan - Scan across multiple platform combinations
-router.post('/multi-scan', authenticateToken, async (req: Request, res: Response) => {
+router.post('/multi-scan', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const data = multiScanSchema.parse(req.body);
 
@@ -164,7 +165,7 @@ router.post('/multi-scan', authenticateToken, async (req: Request, res: Response
 });
 
 // POST /api/arbitrage/save-watchlist - Save opportunity to watchlist
-router.post('/save-watchlist', authenticateToken, async (req: Request, res: Response) => {
+router.post('/save-watchlist', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { opportunity } = saveOpportunitySchema.parse(req.body);
@@ -186,7 +187,7 @@ router.post('/save-watchlist', authenticateToken, async (req: Request, res: Resp
 });
 
 // POST /api/arbitrage/create-draft - Create inventory draft from opportunity
-router.post('/create-draft', authenticateToken, async (req: Request, res: Response) => {
+router.post('/create-draft', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { opportunity } = saveOpportunitySchema.parse(req.body);
@@ -212,7 +213,7 @@ router.post('/create-draft', authenticateToken, async (req: Request, res: Respon
 });
 
 // GET /api/arbitrage/popular-searches - Get popular arbitrage searches
-router.get('/popular-searches', authenticateToken, async (_req: Request, res: Response) => {
+router.get('/popular-searches', authenticateToken, async (_req: AuthenticatedRequest, res: Response) => {
   const popularSearches = [
     { query: 'Nike Air Max', category: 'Sneakers', avg_roi: 45 },
     { query: 'North Face Nuptse', category: 'Jackets', avg_roi: 60 },

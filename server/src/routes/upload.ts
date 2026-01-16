@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { authenticateToken } from '../middleware/auth.js';
 import { uploadFile, getUploadUrl, getPublicUrl, deleteFile } from '../config/s3.js';
 import { success, error } from '../utils/response.js';
+import { AuthenticatedRequest } from '../types/index.js';
 
 const router = Router();
 
@@ -24,7 +25,7 @@ const upload = multer({
 });
 
 // Get presigned upload URL (for direct client upload)
-router.get('/presigned-url', authenticateToken, async (req: Request, res: Response) => {
+router.get('/presigned-url', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { filename, contentType } = req.query;
 
@@ -51,7 +52,7 @@ router.get('/presigned-url', authenticateToken, async (req: Request, res: Respon
 });
 
 // Direct file upload
-router.post('/image', authenticateToken, upload.single('image'), async (req: Request, res: Response) => {
+router.post('/image', authenticateToken, upload.single('image'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json(error('NO_FILE', 'No image file provided'));
@@ -78,7 +79,7 @@ router.post('/image', authenticateToken, upload.single('image'), async (req: Req
 });
 
 // Upload multiple images
-router.post('/images', authenticateToken, upload.array('images', 10), async (req: Request, res: Response) => {
+router.post('/images', authenticateToken, upload.array('images', 10), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const files = req.files as Express.Multer.File[];
 
@@ -115,7 +116,7 @@ router.post('/images', authenticateToken, upload.array('images', 10), async (req
 });
 
 // Delete an uploaded file
-router.delete('/:key', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/:key', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { key } = req.params;
     const userId = req.user!.id;

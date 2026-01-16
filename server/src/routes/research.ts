@@ -1,7 +1,8 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { z } from 'zod';
 import { authenticateToken } from '../middleware/auth.js';
 import { success, error as sendError } from '../utils/response.js';
+import { AuthenticatedRequest } from '../types/index.js';
 import * as marketResearchService from '../services/marketResearchService.js';
 import * as inventoryAgingService from '../services/inventoryAgingService.js';
 import * as flipFinderService from '../services/flipFinderService.js';
@@ -23,7 +24,7 @@ const suggestPriceSchema = z.object({
 // ============== MARKET RESEARCH ==============
 
 // POST /api/research/sold - Search sold listings
-router.post('/sold', authenticateToken, async (req: Request, res: Response) => {
+router.post('/sold', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { query, platforms } = searchSchema.parse(req.body);
 
@@ -40,7 +41,7 @@ router.post('/sold', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // POST /api/research/suggest-price - Get suggested price for an item
-router.post('/suggest-price', authenticateToken, async (req: Request, res: Response) => {
+router.post('/suggest-price', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { query, condition } = suggestPriceSchema.parse(req.body);
 
@@ -59,7 +60,7 @@ router.post('/suggest-price', authenticateToken, async (req: Request, res: Respo
 // ============== INVENTORY AGING ==============
 
 // GET /api/research/aging - Get inventory aging report
-router.get('/aging', authenticateToken, async (req: Request, res: Response) => {
+router.get('/aging', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const filter = req.query.status as 'fresh' | 'aging' | 'stale' | 'critical' | undefined;
@@ -73,7 +74,7 @@ router.get('/aging', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // GET /api/research/aging/stats - Get aging statistics
-router.get('/aging/stats', authenticateToken, async (req: Request, res: Response) => {
+router.get('/aging/stats', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
 
@@ -86,7 +87,7 @@ router.get('/aging/stats', authenticateToken, async (req: Request, res: Response
 });
 
 // GET /api/research/aging/:id/suggestion - Get smart repricing suggestion for an item
-router.get('/aging/:id/suggestion', authenticateToken, async (req: Request, res: Response) => {
+router.get('/aging/:id/suggestion', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -103,7 +104,7 @@ router.get('/aging/:id/suggestion', authenticateToken, async (req: Request, res:
 });
 
 // POST /api/research/aging/:id/apply - Apply price reduction to an item
-router.post('/aging/:id/apply', authenticateToken, async (req: Request, res: Response) => {
+router.post('/aging/:id/apply', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -122,7 +123,7 @@ router.post('/aging/:id/apply', authenticateToken, async (req: Request, res: Res
 });
 
 // POST /api/research/aging/bulk-apply - Bulk apply price reductions
-router.post('/aging/bulk-apply', authenticateToken, async (req: Request, res: Response) => {
+router.post('/aging/bulk-apply', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { items } = z.object({
@@ -161,7 +162,7 @@ const arbitrageSchema = z.object({
 });
 
 // POST /api/research/flip-finder - Find flip opportunities
-router.post('/flip-finder', authenticateToken, async (req: Request, res: Response) => {
+router.post('/flip-finder', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { query, platforms, min_profit_margin, min_score } = flipFinderSchema.parse(req.body);
 
@@ -183,7 +184,7 @@ router.post('/flip-finder', authenticateToken, async (req: Request, res: Respons
 });
 
 // POST /api/research/arbitrage - Find cross-platform arbitrage opportunities
-router.post('/arbitrage', authenticateToken, async (req: Request, res: Response) => {
+router.post('/arbitrage', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { query, buy_platform, sell_platform, min_profit } = arbitrageSchema.parse(req.body);
 
@@ -205,7 +206,7 @@ router.post('/arbitrage', authenticateToken, async (req: Request, res: Response)
 });
 
 // GET /api/research/trending-flips - Get trending categories with flip potential
-router.get('/trending-flips', authenticateToken, async (req: Request, res: Response) => {
+router.get('/trending-flips', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Default trending categories, can be customized via query params
     const categoriesParam = req.query.categories as string | undefined;
@@ -236,7 +237,7 @@ const keywordSuggestionsSchema = z.object({
 });
 
 // POST /api/research/optimize-listing - Analyze and optimize a listing
-router.post('/optimize-listing', authenticateToken, async (req: Request, res: Response) => {
+router.post('/optimize-listing', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { title, description, category } = analyzeListingSchema.parse(req.body);
 
@@ -253,7 +254,7 @@ router.post('/optimize-listing', authenticateToken, async (req: Request, res: Re
 });
 
 // POST /api/research/keyword-suggestions - Get keyword suggestions for a search term
-router.post('/keyword-suggestions', authenticateToken, async (req: Request, res: Response) => {
+router.post('/keyword-suggestions', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { search_term } = keywordSuggestionsSchema.parse(req.body);
 
@@ -270,7 +271,7 @@ router.post('/keyword-suggestions', authenticateToken, async (req: Request, res:
 });
 
 // POST /api/research/analyze-keywords - Analyze keywords from sold listings
-router.post('/analyze-keywords', authenticateToken, async (req: Request, res: Response) => {
+router.post('/analyze-keywords', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { query } = z.object({ query: z.string().min(2).max(100) }).parse(req.body);
 
@@ -287,7 +288,7 @@ router.post('/analyze-keywords', authenticateToken, async (req: Request, res: Re
 });
 
 // POST /api/research/quick-title-check - Quick title suggestions without full analysis
-router.post('/quick-title-check', authenticateToken, async (req: Request, res: Response) => {
+router.post('/quick-title-check', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { title } = z.object({ title: z.string().min(1).max(200) }).parse(req.body);
 
@@ -320,7 +321,7 @@ const generateDescriptionSchema = z.object({
 });
 
 // POST /api/research/generate-description - Generate AI-powered listing description
-router.post('/generate-description', authenticateToken, async (req: Request, res: Response) => {
+router.post('/generate-description', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const input = generateDescriptionSchema.parse(req.body);
 
@@ -337,7 +338,7 @@ router.post('/generate-description', authenticateToken, async (req: Request, res
 });
 
 // POST /api/research/quick-description - Quick description from just title
-router.post('/quick-description', authenticateToken, async (req: Request, res: Response) => {
+router.post('/quick-description', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { title } = z.object({ title: z.string().min(1).max(200) }).parse(req.body);
 
@@ -354,7 +355,7 @@ router.post('/quick-description', authenticateToken, async (req: Request, res: R
 });
 
 // GET /api/research/ai-providers - Get available AI providers
-router.get('/ai-providers', authenticateToken, async (req: Request, res: Response) => {
+router.get('/ai-providers', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const providers = await listingOptimizerService.getDescriptionProviders();
     res.json(success({ providers }));

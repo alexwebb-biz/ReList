@@ -3,10 +3,11 @@
  * API endpoints for managing listings across multiple marketplaces
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { z } from 'zod';
 import { authenticateToken } from '../middleware/auth.js';
 import { success, error as sendError, paginated } from '../utils/response.js';
+import { AuthenticatedRequest } from '../types/index.js';
 import {
   getUserCrossListings,
   getInventoryCrossListings,
@@ -57,7 +58,7 @@ const bulkUpdateSchema = z.object({
 });
 
 // GET /api/cross-listings - Get all cross-listings grouped by inventory
-router.get('/', authenticateToken, async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { status } = req.query;
@@ -75,7 +76,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // GET /api/cross-listings/stats - Get cross-listing statistics
-router.get('/stats', authenticateToken, async (req: Request, res: Response) => {
+router.get('/stats', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const stats = await getCrossListingStats(userId);
@@ -87,7 +88,7 @@ router.get('/stats', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // GET /api/cross-listings/platforms - Get platform configuration
-router.get('/platforms', authenticateToken, async (_req: Request, res: Response) => {
+router.get('/platforms', authenticateToken, async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const platforms = Object.entries(PLATFORM_CONFIG).map(([key, config]) => ({
       id: key,
@@ -101,7 +102,7 @@ router.get('/platforms', authenticateToken, async (_req: Request, res: Response)
 });
 
 // GET /api/cross-listings/inventory/:inventoryId - Get cross-listings for an inventory item
-router.get('/inventory/:inventoryId', authenticateToken, async (req: Request, res: Response) => {
+router.get('/inventory/:inventoryId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { inventoryId } = req.params;
@@ -115,7 +116,7 @@ router.get('/inventory/:inventoryId', authenticateToken, async (req: Request, re
 });
 
 // POST /api/cross-listings - Create cross-listings for multiple platforms
-router.post('/', authenticateToken, async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const validatedData = createCrossListingSchema.parse(req.body);
@@ -135,7 +136,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
   } catch (err) {
     if (err instanceof z.ZodError) {
       const firstError = err.issues[0];
-      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, 400, firstError.path?.[0] as string));
+      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, firstError.path?.[0] as string));
     }
     if (err instanceof Error) {
       return res.status(400).json(sendError('CREATE_ERROR', err.message));
@@ -146,7 +147,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // POST /api/cross-listings/preview - Preview generated listing for a platform
-router.post('/preview', authenticateToken, async (req: Request, res: Response) => {
+router.post('/preview', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { inventory_id, platform } = req.body;
@@ -181,7 +182,7 @@ router.post('/preview', authenticateToken, async (req: Request, res: Response) =
 });
 
 // PATCH /api/cross-listings/:id - Update a cross-listing
-router.patch('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.patch('/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -192,7 +193,7 @@ router.patch('/:id', authenticateToken, async (req: Request, res: Response) => {
   } catch (err) {
     if (err instanceof z.ZodError) {
       const firstError = err.issues[0];
-      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, 400, firstError.path?.[0] as string));
+      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, firstError.path?.[0] as string));
     }
     if (err instanceof Error && err.message.includes('not found')) {
       return res.status(404).json(sendError('NOT_FOUND', err.message));
@@ -203,7 +204,7 @@ router.patch('/:id', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // DELETE /api/cross-listings/:id - Delete a cross-listing
-router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -220,7 +221,7 @@ router.delete('/:id', authenticateToken, async (req: Request, res: Response) => 
 });
 
 // POST /api/cross-listings/mark-sold - Mark item as sold and sync across platforms
-router.post('/mark-sold', authenticateToken, async (req: Request, res: Response) => {
+router.post('/mark-sold', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const validatedData = markSoldSchema.parse(req.body);
@@ -242,7 +243,7 @@ router.post('/mark-sold', authenticateToken, async (req: Request, res: Response)
   } catch (err) {
     if (err instanceof z.ZodError) {
       const firstError = err.issues[0];
-      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, 400, firstError.path?.[0] as string));
+      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, firstError.path?.[0] as string));
     }
     console.error('Error in POST /cross-listings/mark-sold:', err);
     res.status(500).json(sendError('SERVER_ERROR', 'Failed to mark as sold'));
@@ -250,7 +251,7 @@ router.post('/mark-sold', authenticateToken, async (req: Request, res: Response)
 });
 
 // POST /api/cross-listings/bulk-update - Bulk update listings
-router.post('/bulk-update', authenticateToken, async (req: Request, res: Response) => {
+router.post('/bulk-update', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const validatedData = bulkUpdateSchema.parse(req.body);
@@ -272,7 +273,7 @@ router.post('/bulk-update', authenticateToken, async (req: Request, res: Respons
   } catch (err) {
     if (err instanceof z.ZodError) {
       const firstError = err.issues[0];
-      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, 400, firstError.path?.[0] as string));
+      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, firstError.path?.[0] as string));
     }
     console.error('Error in POST /cross-listings/bulk-update:', err);
     res.status(500).json(sendError('SERVER_ERROR', 'Failed to bulk update'));
@@ -280,7 +281,7 @@ router.post('/bulk-update', authenticateToken, async (req: Request, res: Respons
 });
 
 // GET /api/cross-listings/:id/copy-paste - Get copy-paste ready listing
-router.get('/:id/copy-paste', authenticateToken, async (req: Request, res: Response) => {
+router.get('/:id/copy-paste', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;

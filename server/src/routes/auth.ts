@@ -40,7 +40,7 @@ router.post('/signup', async (req: Request, res: Response) => {
     sendSuccess(res, result, 201);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
       return;
     }
@@ -64,7 +64,7 @@ router.post('/login', async (req: Request, res: Response) => {
     sendSuccess(res, result);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
       return;
     }
@@ -135,7 +135,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
       return;
     }
@@ -158,7 +158,7 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
       return;
     }
@@ -181,7 +181,7 @@ router.post('/reset-password', async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
       return;
     }

@@ -17,6 +17,14 @@ export interface User {
   created_at: string;
   updated_at: string;
   last_login_at: string | null;
+  reset_token_hash: string | null;
+  reset_token_expires: string | null;
+  notification_email: boolean;
+  notification_push: boolean;
+  notification_telegram: boolean;
+  telegram_chat_id: string | null;
+  notification_discord: boolean;
+  discord_webhook_url: string | null;
 }
 
 export interface Alert {
@@ -89,6 +97,7 @@ export interface InventoryItem {
 export interface Listing {
   id: string;
   inventory_id: string;
+  user_id: string;
   platform: string;
   external_id: string | null;
   title: string;
@@ -99,7 +108,9 @@ export interface Listing {
   listed_at: string;
   sold_at: string | null;
   views_count: number;
+  notes: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Notification {

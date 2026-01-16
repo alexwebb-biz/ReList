@@ -32,7 +32,7 @@ const humanDelay = (min: number, max: number) =>
 
 // Initialize session
 const initializeSession = async () => {
-  if (sessionCache?.expiresAt > Date.now()) {
+  if (sessionCache?.expiresAt && sessionCache.expiresAt > Date.now()) {
     return sessionCache;
   }
 
@@ -238,7 +238,7 @@ const parseListings = (html: string): ScrapedItem[] => {
 };
 
 // Enhanced fetch with retry
-const fetchWithRetry = async (url: string, session: any, maxRetries = CONFIG.maxRetries): Promise<cheerio.Root | null> => {
+const fetchWithRetry = async (url: string, session: any, maxRetries = CONFIG.maxRetries): Promise<cheerio.CheerioAPI | null> => {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const proxy = getRandomProxy();

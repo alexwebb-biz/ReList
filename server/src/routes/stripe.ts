@@ -3,6 +3,7 @@ import { authenticateToken } from '../middleware/auth.js';
 import { stripe, isStripeConfigured, PLANS, getPlanByPriceId, PlanType } from '../config/stripe.js';
 import supabase from '../config/supabase.js';
 import { success, error } from '../utils/response.js';
+import { AuthenticatedRequest } from '../types/index.js';
 
 const router = Router();
 
@@ -29,7 +30,7 @@ router.get('/plans', (req: Request, res: Response) => {
 });
 
 // Create checkout session
-router.post('/create-checkout', authenticateToken, requireStripe, async (req: Request, res: Response) => {
+router.post('/create-checkout', authenticateToken, requireStripe, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { planId } = req.body;
     const userId = req.user!.id;
@@ -89,7 +90,7 @@ router.post('/create-checkout', authenticateToken, requireStripe, async (req: Re
 });
 
 // Create customer portal session
-router.post('/customer-portal', authenticateToken, requireStripe, async (req: Request, res: Response) => {
+router.post('/customer-portal', authenticateToken, requireStripe, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
 
@@ -116,7 +117,7 @@ router.post('/customer-portal', authenticateToken, requireStripe, async (req: Re
 });
 
 // Get current subscription (and sync from Stripe if needed)
-router.get('/subscription', authenticateToken, async (req: Request, res: Response) => {
+router.get('/subscription', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
 
@@ -184,7 +185,7 @@ router.get('/subscription', authenticateToken, async (req: Request, res: Respons
     res.json(success({
       plan: planType,
       status: subscription.status,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000).toISOString(),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       aiCredits: user.subscription_tier === 'free' && planType !== 'free' ? plan.aiCredits : user.ai_credits_remaining,
       features: plan.features,
@@ -196,7 +197,7 @@ router.get('/subscription', authenticateToken, async (req: Request, res: Respons
 });
 
 // Sync subscription from Stripe to database (for when webhooks aren't available)
-router.post('/sync', authenticateToken, requireStripe, async (req: Request, res: Response) => {
+router.post('/sync', authenticateToken, requireStripe, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
 

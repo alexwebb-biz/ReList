@@ -50,7 +50,7 @@ export interface SharedDeal {
     email: string;
     reputation_score: number;
     deals_shared: number;
-    successful_deals: number;
+    successful_sales: number;
   };
 }
 
@@ -59,7 +59,7 @@ export interface UserReputation {
   reputation_score: number;
   deals_shared: number;
   deals_claimed: number;
-  successful_deals: number;
+  successful_sales: number;
   total_profit_generated: number;
   total_commission_earned: number;
   badges: string[];
@@ -94,7 +94,7 @@ const BADGES = {
   FIRST_SHARE: { name: 'First Share', description: 'Shared your first deal', threshold: 1, field: 'deals_shared' },
   DEAL_FINDER: { name: 'Deal Finder', description: 'Shared 10 deals', threshold: 10, field: 'deals_shared' },
   DEAL_HUNTER: { name: 'Deal Hunter', description: 'Shared 50 deals', threshold: 50, field: 'deals_shared' },
-  TRUSTED_SOURCE: { name: 'Trusted Source', description: '10 successful deals', threshold: 10, field: 'successful_deals' },
+  TRUSTED_SOURCE: { name: 'Trusted Source', description: '10 successful deals', threshold: 10, field: 'successful_sales' },
   PROFIT_MAKER: { name: 'Profit Maker', description: 'Generated £500+ profit for community', threshold: 500, field: 'total_profit_generated' },
   TOP_EARNER: { name: 'Top Earner', description: 'Earned £100+ in commissions', threshold: 100, field: 'total_commission_earned' },
 };
@@ -125,7 +125,7 @@ export async function getUserReputation(userId: string): Promise<UserReputation>
       reputation_score: 0,
       deals_shared: 0,
       deals_claimed: 0,
-      successful_deals: 0,
+      successful_sales: 0,
       total_profit_generated: 0,
       total_commission_earned: 0,
       badges: [],
@@ -166,7 +166,7 @@ async function updateReputation(
   const updatedStats = {
     deals_shared: (current.deals_shared || 0) + (updates.deals_shared || 0),
     deals_claimed: (current.deals_claimed || 0) + (updates.deals_claimed || 0),
-    successful_deals: (current.successful_deals || 0) + (updates.successful_deals || 0),
+    successful_sales: (current.successful_sales || 0) + (updates.successful_sales || 0),
     total_profit_generated: (current.total_profit_generated || 0) + (updates.total_profit_generated || 0),
     total_commission_earned: (current.total_commission_earned || 0) + (updates.total_commission_earned || 0),
   };
@@ -324,7 +324,7 @@ export async function getDealsFeed(
         ...deal.sharer,
         reputation_score: rep.reputation_score,
         deals_shared: rep.deals_shared,
-        successful_deals: rep.successful_deals,
+        successful_sales: rep.successful_sales,
       };
     }
     return deal;
@@ -363,7 +363,7 @@ export async function getDealById(dealId: string): Promise<SharedDeal | null> {
       ...data.sharer,
       reputation_score: rep.reputation_score,
       deals_shared: rep.deals_shared,
-      successful_deals: rep.successful_deals,
+      successful_sales: rep.successful_sales,
     };
   }
 
@@ -464,7 +464,7 @@ export async function reportDealOutcome(
     // Update sharer reputation for successful sale
     await updateReputation(deal.user_id, {
       reputation_score: REP_POINTS.SUCCESSFUL_SALE,
-      successful_deals: 1,
+      successful_sales: 1,
       total_profit_generated: actualProfit,
       total_commission_earned: commission,
     });
@@ -616,7 +616,7 @@ export async function getLeaderboard(
   limit: number = 20
 ): Promise<UserReputation[]> {
   let orderColumn = 'reputation_score';
-  if (sortBy === 'deals') orderColumn = 'successful_deals';
+  if (sortBy === 'deals') orderColumn = 'successful_sales';
   if (sortBy === 'profit') orderColumn = 'total_profit_generated';
 
   const { data, error } = await supabase

@@ -1,8 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { z } from 'zod';
 import { supabase } from '../config/supabase.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { success, error as sendError, paginated } from '../utils/response.js';
+import { AuthenticatedRequest } from '../types/index.js';
 
 const router = Router();
 
@@ -31,7 +32,7 @@ const updateListingSchema = z.object({
 });
 
 // GET /api/listings - Get all listings for user
-router.get('/', authenticateToken, async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { page = '1', per_page = '20', status, inventory_id } = req.query;
@@ -78,7 +79,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // GET /api/listings/:id - Get single listing
-router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.get('/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -113,7 +114,7 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // POST /api/listings - Create new listing
-router.post('/', authenticateToken, async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
 
@@ -171,7 +172,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
   } catch (err) {
     if (err instanceof z.ZodError) {
       const firstError = err.issues[0];
-      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, 400, firstError.path?.[0] as string));
+      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, firstError.path?.[0] as string));
     }
     console.error('Error in POST /listings:', err);
     res.status(500).json(sendError('SERVER_ERROR', 'Internal server error'));
@@ -179,7 +180,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // PATCH /api/listings/:id - Update listing
-router.patch('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.patch('/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -219,7 +220,7 @@ router.patch('/:id', authenticateToken, async (req: Request, res: Response) => {
   } catch (err) {
     if (err instanceof z.ZodError) {
       const firstError = err.issues[0];
-      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, 400, firstError.path?.[0] as string));
+      return res.status(400).json(sendError('VALIDATION_ERROR', firstError.message, firstError.path?.[0] as string));
     }
     console.error('Error in PATCH /listings/:id:', err);
     res.status(500).json(sendError('SERVER_ERROR', 'Internal server error'));
@@ -227,7 +228,7 @@ router.patch('/:id', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // DELETE /api/listings/:id - Delete listing
-router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -263,7 +264,7 @@ router.delete('/:id', authenticateToken, async (req: Request, res: Response) => 
 });
 
 // GET /api/inventory/:id/listings - Get all listings for an inventory item
-router.get('/inventory/:inventoryId', authenticateToken, async (req: Request, res: Response) => {
+router.get('/inventory/:inventoryId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { inventoryId } = req.params;

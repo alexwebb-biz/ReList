@@ -1,7 +1,8 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { z } from 'zod';
 import { authenticateToken } from '../middleware/auth.js';
 import { success, error as sendError } from '../utils/response.js';
+import { AuthenticatedRequest } from '../types/index.js';
 import * as watchlistService from '../services/watchlistService.js';
 
 const router = Router();
@@ -24,7 +25,7 @@ const updateTargetPriceSchema = z.object({
 });
 
 // GET /api/watchlist - Get all watched items
-router.get('/', authenticateToken, async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const activeOnly = req.query.active !== 'false';
@@ -38,7 +39,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // GET /api/watchlist/count - Get watchlist count
-router.get('/count', authenticateToken, async (req: Request, res: Response) => {
+router.get('/count', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const count = await watchlistService.getWatchlistCount(userId);
@@ -50,7 +51,7 @@ router.get('/count', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // GET /api/watchlist/price-drops - Get items with price drops
-router.get('/price-drops', authenticateToken, async (req: Request, res: Response) => {
+router.get('/price-drops', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const items = await watchlistService.getWatchedItems(userId, true);
@@ -63,7 +64,7 @@ router.get('/price-drops', authenticateToken, async (req: Request, res: Response
 });
 
 // GET /api/watchlist/:id - Get single watched item with history
-router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.get('/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -82,7 +83,7 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // POST /api/watchlist - Add item to watchlist
-router.post('/', authenticateToken, async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const validatedData = addToWatchlistSchema.parse(req.body);
@@ -103,7 +104,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // PATCH /api/watchlist/:id/target - Update target price
-router.patch('/:id/target', authenticateToken, async (req: Request, res: Response) => {
+router.patch('/:id/target', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
@@ -122,7 +123,7 @@ router.patch('/:id/target', authenticateToken, async (req: Request, res: Respons
 });
 
 // DELETE /api/watchlist/:id - Remove from watchlist
-router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;

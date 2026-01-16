@@ -1,12 +1,13 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import supabase from '../config/supabase.js';
 import { success, error, paginated } from '../utils/response.js';
+import { AuthenticatedRequest } from '../types/index.js';
 
 const router = Router();
 
 // Get user's notifications
-router.get('/', authenticateToken, async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
     const page = parseInt(req.query.page as string) || 1;
@@ -44,7 +45,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // Get unread count
-router.get('/unread-count', authenticateToken, async (req: Request, res: Response) => {
+router.get('/unread-count', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
 
@@ -64,7 +65,7 @@ router.get('/unread-count', authenticateToken, async (req: Request, res: Respons
 });
 
 // Mark notification as read
-router.patch('/:id/read', authenticateToken, async (req: Request, res: Response) => {
+router.patch('/:id/read', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const userId = req.user!.id;
@@ -87,7 +88,7 @@ router.patch('/:id/read', authenticateToken, async (req: Request, res: Response)
 });
 
 // Mark all notifications as read
-router.post('/mark-all-read', authenticateToken, async (req: Request, res: Response) => {
+router.post('/mark-all-read', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
 
@@ -107,7 +108,7 @@ router.post('/mark-all-read', authenticateToken, async (req: Request, res: Respo
 });
 
 // Delete a notification
-router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const userId = req.user!.id;
@@ -128,7 +129,7 @@ router.delete('/:id', authenticateToken, async (req: Request, res: Response) => 
 });
 
 // Delete all notifications
-router.delete('/', authenticateToken, async (req: Request, res: Response) => {
+router.delete('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
 

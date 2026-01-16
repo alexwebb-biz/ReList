@@ -129,7 +129,7 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
     sendSuccess(res, item, 201);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
       return;
     }
@@ -170,7 +170,7 @@ router.patch('/:id', async (req: AuthenticatedRequest, res: Response) => {
     sendSuccess(res, item);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
       return;
     }
@@ -214,7 +214,7 @@ router.post('/:id/sell', async (req: AuthenticatedRequest, res: Response) => {
     sendSuccess(res, item);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       sendError(res, 'VALIDATION_ERROR', firstError.message, 400, firstError.path[0] as string);
       return;
     }
