@@ -1,9 +1,10 @@
 import { create } from 'zustand';
-import { api, InventoryItem, CreateInventoryData, MarkSoldData, InventoryStats } from '../lib/api';
+import { api, InventoryItem, CreateInventoryData, MarkSoldData, InventoryStats, ActivityLogEntry } from '../lib/api';
 
 interface InventoryState {
   items: InventoryItem[];
   stats: InventoryStats | null;
+  activityLogs: Record<string, ActivityLogEntry[]>; // keyed by inventory item ID
   isLoading: boolean;
   error: string | null;
 
@@ -14,12 +15,16 @@ interface InventoryState {
   updateItem: (id: string, data: Partial<CreateInventoryData>) => Promise<InventoryItem | null>;
   deleteItem: (id: string) => Promise<boolean>;
   markAsSold: (id: string, soldData: MarkSoldData) => Promise<InventoryItem | null>;
+  fetchActivityLogs: (inventoryId: string) => Promise<void>;
+  addNote: (inventoryId: string, content: string) => Promise<ActivityLogEntry | null>;
+  deleteActivityLog: (inventoryId: string, logId: string) => Promise<boolean>;
   clearError: () => void;
 }
 
-export const useInventoryStore = create<InventoryState>((set) => ({
+export const useInventoryStore = create<InventoryState>((set, get) => ({
   items: [],
   stats: null,
+  activityLogs: {},
   isLoading: false,
   error: null,
 
@@ -116,6 +121,8 @@ export const useInventoryStore = create<InventoryState>((set) => ({
         items: state.items.map((i) => (i.id === id ? response.data! : i)),
         isLoading: false,
       }));
+      // Refresh activity logs for this item
+      get().fetchActivityLogs(id);
       return response.data;
     }
 
@@ -124,6 +131,53 @@ export const useInventoryStore = create<InventoryState>((set) => ({
       error: response.error?.message || 'Failed to mark as sold',
     });
     return null;
+  },
+
+  fetchActivityLogs: async (inventoryId: string) => {
+    const response = await api.getActivityLogs(inventoryId);
+
+    if (response.success && response.data) {
+      set((state) => ({
+        activityLogs: {
+          ...state.activityLogs,
+          [inventoryId]: response.data!,
+        },
+      }));
+    }
+  },
+
+  addNote: async (inventoryId: string, content: string) => {
+    const response = await api.addNote(inventoryId, content);
+
+    if (response.success && response.data) {
+      set((state) => ({
+        activityLogs: {
+          ...state.activityLogs,
+          [inventoryId]: [response.data!, ...(state.activityLogs[inventoryId] || [])],
+        },
+      }));
+      return response.data;
+    }
+
+    return null;
+  },
+
+  deleteActivityLog: async (inventoryId: string, logId: string) => {
+    const response = await api.deleteActivityLog(logId);
+
+    if (response.success) {
+      set((state) => ({
+        activityLogs: {
+          ...state.activityLogs,
+          [inventoryId]: (state.activityLogs[inventoryId] || []).filter(
+            (log) => log.id !== logId
+          ),
+        },
+      }));
+      return true;
+    }
+
+    return false;
   },
 
   clearError: () => {

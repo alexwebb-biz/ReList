@@ -90,6 +90,8 @@ export interface InventoryItem {
   status: string;
   images: string[] | null;
   notes: string | null;
+  first_listed_at: string | null;
+  listing_count: number;
   created_at: string;
   updated_at: string;
 }
