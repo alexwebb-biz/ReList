@@ -803,7 +803,7 @@ export const InventoryManager: React.FC = () => {
                     <span className="block text-[10px] md:text-xs text-slate-400 dark:text-neutral-500">
                       Profit
                     </span>
-                    <span className={`font-bold text-xs md:text-base ${ ((item.status === 'sold' ? item.sold_price : item.selling_price) || 0) - (item.purchase_price (item.fees_total (item.postage_cost >= 0 'text-emerald-600 dark:text-emerald-400' 'text-red-600' }`}>
+                    <span className={`font-bold text-xs md:text-base ${ ((item.status === 'sold' ? item.sold_price : item.selling_price) || 0) - (item.purchase_price || 0) - (item.fees_total || 0) - (item.postage_cost || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600' }`}>
                       £{(
                         ((item.status === 'sold' ? item.sold_price : item.selling_price) || 0) -
                         (item.purchase_price || 0) -
