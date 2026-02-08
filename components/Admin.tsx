@@ -190,22 +190,13 @@ export default function Admin() {
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
                   <p className="text-xs text-slate-500 dark:text-neutral-400">Subscription</p>
-                  <span className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    user.subscription_tier === 'business' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' :
-                    user.subscription_tier === 'pro' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' :
-                    user.subscription_tier === 'starter' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
-                    'bg-slate-100 dark:bg-neutral-700 text-slate-800 dark:text-neutral-300'
-                  }`}>
+                  <span className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium ${ user.subscription_tier === 'business' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' : 'pro' 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' 'starter' 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' 'bg-slate-100 dark:bg-neutral-700 text-slate-800 dark:text-neutral-300' }`}>
                     {user.subscription_tier || 'free'}
                   </span>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500 dark:text-neutral-400">Status</p>
-                  <span className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    user.subscription_status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
-                    user.subscription_status === 'canceled' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' :
-                    'bg-slate-100 dark:bg-neutral-700 text-slate-800 dark:text-neutral-300'
-                  }`}>
+                  <span className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium ${ user.subscription_status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'canceled' 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' 'bg-slate-100 dark:bg-neutral-700 text-slate-800 dark:text-neutral-300' }`}>
                     {user.subscription_status || 'none'}
                   </span>
                 </div>
@@ -255,21 +246,12 @@ export default function Admin() {
                   <td className="px-6 py-4 text-sm text-slate-900 dark:text-white">{user.email}</td>
                   <td className="px-6 py-4 text-sm text-slate-900 dark:text-white">{user.full_name || '-'}</td>
                   <td className="px-6 py-4 text-sm">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      user.subscription_tier === 'business' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' :
-                      user.subscription_tier === 'pro' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' :
-                      user.subscription_tier === 'starter' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
-                      'bg-slate-100 dark:bg-neutral-700 text-slate-800 dark:text-neutral-300'
-                    }`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${ user.subscription_tier === 'business' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' : 'pro' 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' 'starter' 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' 'bg-slate-100 dark:bg-neutral-700 text-slate-800 dark:text-neutral-300' }`}>
                       {user.subscription_tier || 'free'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      user.subscription_status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
-                      user.subscription_status === 'canceled' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' :
-                      'bg-slate-100 dark:bg-neutral-700 text-slate-800 dark:text-neutral-300'
-                    }`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${ user.subscription_status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'canceled' 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' 'bg-slate-100 dark:bg-neutral-700 text-slate-800 dark:text-neutral-300' }`}>
                       {user.subscription_status || 'none'}
                     </span>
                   </td>
@@ -325,9 +307,7 @@ export default function Admin() {
                     <div key={alert.id} className="border border-slate-200 dark:border-neutral-700 rounded-lg p-4 bg-slate-50 dark:bg-neutral-800/50">
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-semibold text-lg text-slate-900 dark:text-white">{alert.name}</h3>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          alert.is_active ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-slate-100 dark:bg-neutral-700 text-slate-800 dark:text-neutral-300'
-                        }`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${ alert.is_active ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-slate-100 dark:bg-neutral-700 text-slate-800 dark:text-neutral-300' }`}>
                           {alert.is_active ? 'Active' : 'Paused'}
                         </span>
                       </div>

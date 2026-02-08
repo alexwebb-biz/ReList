@@ -359,9 +359,7 @@ export const AlertResults: React.FC = () => {
             {results.map(result => (
               <div
                 key={result.id}
-                className={`bg-white dark:bg-neutral-900/80 rounded-xl border overflow-hidden hover:shadow-md transition-all ${
-                  result.is_read ? 'border-slate-200 dark:border-white/5' : 'border-blue-200 ring-1 ring-blue-100'
-                }`}
+                className={`bg-white dark:bg-neutral-900/80 rounded-xl border overflow-hidden hover:shadow-md transition-all ${ result.is_read ? 'border-slate-200 dark:border-white/5' : 'border-blue-200 ring-1 ring-blue-100' }`}
               >
                 {/* Image */}
                 <div className="relative aspect-video bg-slate-100 dark:bg-neutral-800">

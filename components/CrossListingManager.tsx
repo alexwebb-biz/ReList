@@ -87,7 +87,7 @@ const PLATFORM_COLORS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
-  draft: { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-600 dark:text-neutral-300', icon: <Clock className="w-3 h-3" /> },
+  draft: { bg: 'bg-gray-100 dark:bg-neutral-700', text: 'text-gray-600 dark:text-neutral-300', icon: <Clock className="w-3 h-3" /> },
   active: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-600 dark:text-green-400', icon: <CheckCircle2 className="w-3 h-3" /> },
   sold: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400', icon: <DollarSign className="w-3 h-3" /> },
   ended: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-600 dark:text-orange-400', icon: <X className="w-3 h-3" /> },
@@ -450,7 +450,7 @@ export const CrossListingManager: React.FC = () => {
                 onClick={() => toggleExpanded(group.inventory_id)}
               >
                 {/* Image */}
-                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-neutral-700 rounded-lg overflow-hidden flex-shrink-0">
                   {group.inventory.images?.[0] ? (
                     <img
                       src={group.inventory.images[0]}
@@ -480,11 +480,7 @@ export const CrossListingManager: React.FC = () => {
                   {group.listings.map((listing) => (
                     <span
                       key={listing.id}
-                      className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                        listing.status === 'active'
-                          ? PLATFORM_COLORS[listing.platform] + ' text-white'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-neutral-400'
-                      }`}
+                      className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${ listing.status === 'active' ? PLATFORM_COLORS[listing.platform] + ' text-white' : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-neutral-400' }`}
                       title={`${listing.platform}: ${listing.status}`}
                     >
                       {PLATFORM_ICONS[listing.platform]} {listing.platform}
@@ -679,7 +675,7 @@ export const CrossListingManager: React.FC = () => {
                 <select
                   value={selectedInventoryId || ''}
                   onChange={(e) => setSelectedInventoryId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Select an item...</option>
                   {availableInventory.map((item) => (
@@ -706,11 +702,7 @@ export const CrossListingManager: React.FC = () => {
                           setSelectedPlatforms([...selectedPlatforms, platform.id]);
                         }
                       }}
-                      className={`p-3 rounded-lg border-2 flex items-center gap-2 transition-all ${
-                        selectedPlatforms.includes(platform.id)
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                          : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300'
-                      }`}
+                      className={`p-3 rounded-lg border-2 flex items-center gap-2 transition-all ${ selectedPlatforms.includes(platform.id) ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300' }`}
                     >
                       <span className="text-xl">{PLATFORM_ICONS[platform.id]}</span>
                       <div className="text-left">
@@ -799,7 +791,7 @@ export const CrossListingManager: React.FC = () => {
                     value={editForm.description}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -837,7 +829,7 @@ export const CrossListingManager: React.FC = () => {
                   <select
                     value={sellForm.platform}
                     onChange={(e) => setSellForm({ ...sellForm, platform: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white"
                   >
                     <option value="">Select platform...</option>
                     {sellModalItem.listings.filter((l) => l.status === 'active').map((l) => (
@@ -892,7 +884,7 @@ export const CrossListingManager: React.FC = () => {
                 </Button>
               </div>
 
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 font-mono text-sm whitespace-pre-wrap">
+              <div className="bg-gray-100 dark:bg-neutral-700 rounded-lg p-4 font-mono text-sm whitespace-pre-wrap">
                 {copyModalListing.text}
               </div>
 

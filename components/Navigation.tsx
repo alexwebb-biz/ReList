@@ -56,11 +56,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, on
   const NavItem = ({ view, icon: Icon, label }: { view: ViewState; icon: any; label: string }) => (
     <button
       onClick={() => handleNavClick(view)}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group
-        ${currentView === view
-          ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-          : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-        }`}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${currentView === view ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }`}
     >
       <Icon className={`w-5 h-5 ${currentView === view ? 'text-white' : 'text-slate-500 group-hover:text-white'}`} />
       <span className="font-medium text-sm">{label}</span>
@@ -178,9 +174,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, on
 
       {/* Mobile Drawer */}
       <div
-        className={`lg:hidden fixed top-0 left-0 h-full w-72 bg-slate-900 z-50 transform transition-transform duration-300 ease-in-out ${
-          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`lg:hidden fixed top-0 left-0 h-full w-72 bg-slate-900 z-50 transform transition-transform duration-300 ease-in-out ${ isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full' }`}
       >
         <div className="h-full flex flex-col">
           <SidebarContent />

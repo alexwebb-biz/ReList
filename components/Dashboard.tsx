@@ -121,11 +121,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
             <button
               key={range.label}
               onClick={() => handleDateRangeChange(range.value)}
-              className={`px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
-                dateRange === range.value
-                  ? 'bg-violet-600 text-white'
-                  : 'bg-white dark:bg-neutral-900 text-slate-600 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-800 border border-slate-200 dark:border-neutral-700'
-              }`}
+              className={`px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${ dateRange === range.value ? 'bg-violet-600 text-white' : 'bg-white dark:bg-neutral-900 text-slate-600 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-800 border border-slate-200 dark:border-neutral-700' }`}
             >
               {range.label}
             </button>
