@@ -781,7 +781,7 @@ export const InventoryManager: React.FC = () => {
                   </span>
                   {/* Days Listed Badge */}
                   {item.status !== 'draft' && (
-                    <span className={`inline-flex items-center gap-1 text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded font-medium ${ item.is_stale ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' : (item.days_listed || 0) > 14 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400' }`}>
+                    <span className={`inline-flex items-center gap-1 text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded font-medium ${ item.is_stale ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' : (item.days_listed || 0) > 14 ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400' }`}>
                       {item.is_stale ? <AlertTriangle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                       {item.days_listed}d
                     </span>
