@@ -31,6 +31,7 @@ import adminRoutes from './routes/admin.js';
 import crossListingRoutes from './routes/crossListing.js';
 import arbitrageRoutes from './routes/arbitrage.js';
 import dealsRoutes from './routes/deals.js';
+import activityLogRoutes from './routes/activityLogs.js';
 
 // Import services
 import { startScheduler } from './services/schedulerService.js';
@@ -122,6 +123,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/cross-listings', crossListingRoutes);
 app.use('/api/arbitrage', arbitrageRoutes);
 app.use('/api/deals', dealsRoutes);
+app.use('/api/inventory', activityLogRoutes);
 
 // Serve static files from Vite build in production
 if (process.env.NODE_ENV === 'production') {
@@ -190,6 +192,7 @@ httpServer.listen(PORT, () => {
   - Notifications: http://localhost:${PORT}/api/notifications
   - Stripe:        http://localhost:${PORT}/api/stripe
   - Telegram:      http://localhost:${PORT}/api/telegram
+  - Activity Logs: http://localhost:${PORT}/api/inventory/:id/activity-logs
   `);
 
   // Start the scheduler for background jobs
