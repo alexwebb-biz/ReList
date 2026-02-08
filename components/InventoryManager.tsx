@@ -933,7 +933,7 @@ export const InventoryManager: React.FC = () => {
                   )}
 
                   {/* Details Tab or Edit Mode */}
-                  {(isEditMode || detailTab === 'details') && (
+                  (isEditMode || detailTab === 'details') && (
                   isEditMode ? (
                     <>
                       <div>
@@ -1122,7 +1122,7 @@ export const InventoryManager: React.FC = () => {
                         </div>
                       )}
                     </>
-                  )}
+                  )
                 </div>
               </div>
             </div>
