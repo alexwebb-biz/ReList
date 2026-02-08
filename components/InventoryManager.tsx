@@ -934,7 +934,7 @@ export const InventoryManager: React.FC = () => {
 
                   {/* Details Tab or Edit Mode */}
                   {(isEditMode || detailTab === 'details') && (
-                  {isEditMode ? (
+                  isEditMode ? (
                     <>
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">Title</label>
