@@ -222,7 +222,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
               <button
                 type="button"
                 onClick={() => switchView('forgot')}
-                className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
+                className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium"
               >
                 Forgot password?
               </button>
@@ -258,7 +258,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 <button
                   type="button"
                   onClick={() => switchView('signup')}
-                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
+                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium"
                 >
                   Sign up
                 </button>
@@ -270,7 +270,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 <button
                   type="button"
                   onClick={() => switchView('login')}
-                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
+                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium"
                 >
                   Sign in
                 </button>
@@ -280,7 +280,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
               <button
                 type="button"
                 onClick={() => switchView('login')}
-                className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
+                className="text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium"
               >
                 Back to sign in
               </button>

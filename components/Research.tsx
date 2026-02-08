@@ -547,7 +547,7 @@ export const Research: React.FC = () => {
             </p>
             <button
               onClick={loadWatchlist}
-              className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 flex items-center gap-1"
+              className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 flex items-center gap-1"
             >
               <RefreshCw size={14} /> Refresh
             </button>

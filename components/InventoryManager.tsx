@@ -352,7 +352,7 @@ export const InventoryManager: React.FC = () => {
 
     if (!images || images.length === 0) {
       return (
-        <div className="aspect-square bg-slate-100 dark:bg-neutral-800 dark:bg-neutral-800 rounded-xl flex flex-col items-center justify-center text-slate-400 dark:text-neutral-500 dark:text-neutral-500">
+        <div className="aspect-square bg-slate-100 dark:bg-neutral-800 rounded-xl flex flex-col items-center justify-center text-slate-400 dark:text-neutral-500">
           <ImageIcon size={48} />
           <span className="mt-2 text-sm">No images</span>
         </div>
@@ -361,7 +361,7 @@ export const InventoryManager: React.FC = () => {
 
     return (
       <div className="space-y-2">
-        <div className="relative aspect-square bg-slate-100 dark:bg-neutral-800 dark:bg-neutral-800 rounded-xl overflow-hidden">
+        <div className="relative aspect-square bg-slate-100 dark:bg-neutral-800 rounded-xl overflow-hidden">
           <img
             src={images[currentIndex]}
             alt="Product"
@@ -470,7 +470,7 @@ export const InventoryManager: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Inventory</h2>
-          <p className="text-sm text-slate-600 dark:text-neutral-400 dark:text-neutral-400 mt-1">Track listings, costs, and profit margins.</p>
+          <p className="text-sm text-slate-600 dark:text-neutral-400 mt-1">Track listings, costs, and profit margins.</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Button
@@ -556,7 +556,7 @@ export const InventoryManager: React.FC = () => {
             {/* Image Upload Area */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="aspect-square bg-slate-50 dark:bg-neutral-800 border-2 border-dashed border-slate-300 dark:border-neutral-700 rounded-xl flex flex-col items-center justify-center text-slate-400 dark:text-neutral-500 hover:bg-slate-100 dark:hover:bg-neutral-700 dark:bg-neutral-800 cursor-pointer transition-colors group overflow-hidden"
+              className="aspect-square bg-slate-50 dark:bg-neutral-800 border-2 border-dashed border-slate-300 dark:border-neutral-700 rounded-xl flex flex-col items-center justify-center text-slate-400 dark:text-neutral-500 hover:bg-slate-100 dark:hover:bg-neutral-700 cursor-pointer transition-colors group overflow-hidden"
             >
               {uploadingImages ? (
                 <Loader2 className="w-8 h-8 animate-spin text-violet-500 dark:text-violet-400" />
@@ -1123,6 +1123,7 @@ export const InventoryManager: React.FC = () => {
                       )}
                     </>
                   )
+                  )}
                 </div>
               </div>
             </div>

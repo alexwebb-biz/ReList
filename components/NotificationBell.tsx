@@ -152,7 +152,7 @@ export const NotificationBell: React.FC = () => {
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 flex items-center gap-1"
+                  className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700 flex items-center gap-1"
                 >
                   <CheckCheck className="w-3.5 h-3.5" />
                   Mark all read
@@ -232,7 +232,7 @@ export const NotificationBell: React.FC = () => {
                   setIsOpen(false);
                   // Navigate to notifications page or alerts results
                 }}
-                className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 w-full text-center py-1"
+                className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 w-full text-center py-1"
               >
                 View all notifications
               </button>

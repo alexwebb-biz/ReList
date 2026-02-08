@@ -87,7 +87,7 @@ const PLATFORM_COLORS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
-  draft: { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-600 dark:text-gray-300', icon: <Clock className="w-3 h-3" /> },
+  draft: { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-600 dark:text-neutral-300', icon: <Clock className="w-3 h-3" /> },
   active: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-600 dark:text-green-400', icon: <CheckCircle2 className="w-3 h-3" /> },
   sold: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400', icon: <DollarSign className="w-3 h-3" /> },
   ended: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-600 dark:text-orange-400', icon: <X className="w-3 h-3" /> },
@@ -348,7 +348,7 @@ export const CrossListingManager: React.FC = () => {
             <Globe className="w-7 h-7 text-primary-500" />
             Cross-Platform Autopilot
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-neutral-400 mt-1">
             List once, sell everywhere. Auto-sync when sold.
           </p>
         </div>
@@ -384,7 +384,7 @@ export const CrossListingManager: React.FC = () => {
                 <Package className="w-5 h-5 text-primary-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Items Listed</p>
+                <p className="text-sm text-gray-600 dark:text-neutral-400">Items Listed</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.items_cross_listed}</p>
               </div>
             </div>
@@ -395,7 +395,7 @@ export const CrossListingManager: React.FC = () => {
                 <CheckCircle2 className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active Listings</p>
+                <p className="text-sm text-gray-600 dark:text-neutral-400">Active Listings</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.active_listings}</p>
               </div>
             </div>
@@ -406,7 +406,7 @@ export const CrossListingManager: React.FC = () => {
                 <Store className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Listings</p>
+                <p className="text-sm text-gray-600 dark:text-neutral-400">Total Listings</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.total_listings}</p>
               </div>
             </div>
@@ -417,7 +417,7 @@ export const CrossListingManager: React.FC = () => {
                 <Globe className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Platforms</p>
+                <p className="text-sm text-gray-600 dark:text-neutral-400">Platforms</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.platforms_used.length}</p>
               </div>
             </div>
@@ -433,7 +433,7 @@ export const CrossListingManager: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No cross-listings yet
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-gray-600 dark:text-neutral-400 mb-4">
               Start cross-posting your inventory to multiple platforms
             </p>
             <Button onClick={() => { fetchInventoryForCreate(); setShowCreateModal(true); }}>
@@ -446,7 +446,7 @@ export const CrossListingManager: React.FC = () => {
             <Card key={group.inventory_id} className="overflow-hidden">
               {/* Item Header */}
               <div
-                className="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                className="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800/50"
                 onClick={() => toggleExpanded(group.inventory_id)}
               >
                 {/* Image */}
@@ -469,7 +469,7 @@ export const CrossListingManager: React.FC = () => {
                   <h3 className="font-medium text-gray-900 dark:text-white truncate">
                     {group.inventory.title}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600 dark:text-neutral-400">
                     £{group.inventory.selling_price?.toFixed(2) || '0.00'}
                     {group.inventory.condition && ` • ${group.inventory.condition}`}
                   </p>
@@ -483,7 +483,7 @@ export const CrossListingManager: React.FC = () => {
                       className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
                         listing.status === 'active'
                           ? PLATFORM_COLORS[listing.platform] + ' text-white'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-neutral-400'
                       }`}
                       title={`${listing.platform}: ${listing.status}`}
                     >
@@ -516,11 +516,11 @@ export const CrossListingManager: React.FC = () => {
 
               {/* Expanded Listings */}
               {expandedItems.has(group.inventory_id) && (
-                <div className="border-t border-gray-200 dark:border-gray-700">
+                <div className="border-t border-gray-200 dark:border-neutral-700">
                   {group.listings.map((listing) => (
                     <div
                       key={listing.id}
-                      className="p-4 border-b last:border-b-0 border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/30"
+                      className="p-4 border-b last:border-b-0 border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-neutral-800/30"
                     >
                       <div className="flex items-start gap-4">
                         {/* Platform Icon */}
@@ -539,7 +539,7 @@ export const CrossListingManager: React.FC = () => {
                               {listing.status.charAt(0).toUpperCase() + listing.status.slice(1)}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          <p className="text-sm text-gray-600 dark:text-neutral-400 truncate">
                             {listing.title}
                           </p>
                           <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
@@ -612,8 +612,8 @@ export const CrossListingManager: React.FC = () => {
                   ))}
 
                   {/* Add to More Platforms */}
-                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  <div className="p-4 bg-gray-50 dark:bg-neutral-800/50">
+                    <p className="text-sm text-gray-600 dark:text-neutral-400 mb-2">
                       Add to more platforms:
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -665,7 +665,7 @@ export const CrossListingManager: React.FC = () => {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                 Cross-Post Item
@@ -673,7 +673,7 @@ export const CrossListingManager: React.FC = () => {
 
               {/* Select Inventory */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
                   Select Item
                 </label>
                 <select
@@ -692,7 +692,7 @@ export const CrossListingManager: React.FC = () => {
 
               {/* Select Platforms */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
                   Select Platforms
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -709,7 +709,7 @@ export const CrossListingManager: React.FC = () => {
                       className={`p-3 rounded-lg border-2 flex items-center gap-2 transition-all ${
                         selectedPlatforms.includes(platform.id)
                           ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                          : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300'
                       }`}
                     >
                       <span className="text-xl">{PLATFORM_ICONS[platform.id]}</span>
@@ -763,7 +763,7 @@ export const CrossListingManager: React.FC = () => {
       {/* Edit Modal */}
       {editingListing && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full">
+          <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-lg w-full">
             <div className="p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                 Edit {editingListing.platform} Listing
@@ -771,7 +771,7 @@ export const CrossListingManager: React.FC = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">
                     Title
                   </label>
                   <Input
@@ -781,7 +781,7 @@ export const CrossListingManager: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">
                     Price (£)
                   </label>
                   <Input
@@ -792,7 +792,7 @@ export const CrossListingManager: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">
                     Description
                   </label>
                   <textarea
@@ -820,18 +820,18 @@ export const CrossListingManager: React.FC = () => {
       {/* Sell Modal */}
       {sellModalItem && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full">
+          <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-md w-full">
             <div className="p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                 Mark as Sold
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-gray-600 dark:text-neutral-400 mb-4">
                 Other platform listings will be automatically delisted.
               </p>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">
                     Sold On
                   </label>
                   <select
@@ -849,7 +849,7 @@ export const CrossListingManager: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">
                     Sold Price (£)
                   </label>
                   <Input
@@ -881,7 +881,7 @@ export const CrossListingManager: React.FC = () => {
       {/* Copy Modal */}
       {copyModalListing && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
