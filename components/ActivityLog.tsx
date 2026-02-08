@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ActivityLogEntry } from '../lib/api';
-import { Card, Button, Textarea } from './ui/UIComponents';
-import { MessageSquare, Trash2, Clock, Tag, DollarSign, Package, Edit3, Plus } from 'lucide-react';
+import { Card, Textarea } from './ui/UIComponents';
+import { MessageSquare, Trash2, Clock, Tag, DollarSign, Package, Edit3, Plus, Loader2 } from 'lucide-react';
 
 interface ActivityLogProps {
   logs: ActivityLogEntry[];
@@ -79,15 +79,13 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
           <Clock className="w-5 h-5 text-violet-500" />
           Activity Log
         </h3>
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
           onClick={() => setIsAddingNote(!isAddingNote)}
-          className="text-sm"
+          className="text-sm text-slate-600 dark:text-neutral-400 hover:text-violet-600 dark:text-violet-400 flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors"
         >
-          <Plus className="w-4 h-4 mr-1" />
+          <Plus className="w-4 h-4" />
           Add Note
-        </Button>
+        </button>
       </div>
 
       {isAddingNote && (
@@ -101,25 +99,24 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
             disabled={submitting}
           />
           <div className="flex gap-2">
-            <Button
+            <button
               type="submit"
-              variant="primary"
-              isLoading={submitting}
-              className="text-sm px-3 py-1.5"
+              disabled={submitting}
+              className="text-sm px-3 py-1.5 bg-violet-600 text-white rounded-lg hover:bg-violet-500 disabled:opacity-50 flex items-center gap-2"
             >
+              {submitting && <Loader2 className="w-3 h-3 animate-spin" />}
               Save
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              variant="ghost"
               onClick={() => {
                 setIsAddingNote(false);
                 setNewNote('');
               }}
-              className="text-sm px-3 py-1.5"
+              className="text-sm px-3 py-1.5 text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-800 rounded-lg"
             >
               Cancel
-            </Button>
+            </button>
           </div>
         </form>
       )}

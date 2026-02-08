@@ -4,10 +4,11 @@ import { CreateInventoryData, InventoryItem, api } from '../lib/api';
 import {
   Plus, Wand2, Tag, Upload, Trash2, DollarSign, Loader2, Edit2, X,
   ChevronLeft, ChevronRight, ExternalLink, Calendar, Package, Check,
-  MoreHorizontal, CheckSquare, Square, Calculator, Image as ImageIcon
+  MoreHorizontal, CheckSquare, Square, Calculator, Image as ImageIcon, Clock, AlertTriangle
 } from 'lucide-react';
 import { generateItemDescription, estimatePrice } from '../services/geminiService';
 import { Card, Button, Badge, Input } from './ui/UIComponents';
+import { ActivityLog } from './ActivityLog';
 
 const PLATFORMS = ['eBay', 'Depop', 'Vinted', 'Facebook Marketplace', 'Gumtree', 'Shpock'];
 const CONDITIONS = ['New with tags', 'Like New', 'Good', 'Fair', 'Poor'];
@@ -27,6 +28,7 @@ export const InventoryManager: React.FC = () => {
   const {
     items,
     stats,
+    activityLogs,
     isLoading,
     error,
     fetchInventory,
@@ -35,6 +37,9 @@ export const InventoryManager: React.FC = () => {
     updateItem,
     deleteItem,
     markAsSold,
+    fetchActivityLogs,
+    addNote,
+    deleteActivityLog,
     clearError
   } = useInventoryStore();
 
@@ -48,6 +53,7 @@ export const InventoryManager: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [showProfitCalculator, setShowProfitCalculator] = useState(false);
+  const [detailTab, setDetailTab] = useState<'details' | 'activity'>('details');
 
   const [sellData, setSellData] = useState({
     sold_price: 0,
@@ -308,6 +314,9 @@ export const InventoryManager: React.FC = () => {
       images: item.images || []
     });
     setIsEditMode(false);
+    setDetailTab('details');
+    // Fetch activity logs for this item
+    fetchActivityLogs(item.id);
   };
 
   // Calculate profit for profit calculator
@@ -423,22 +432,37 @@ export const InventoryManager: React.FC = () => {
 
       {/* Stats Row */}
       {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           <Card className="hover:border-violet-500/30 dark:hover:border-violet-500/30 transition-colors">
-            <p className="text-sm text-slate-500 dark:text-neutral-500 dark:text-neutral-500 font-medium">Total Items</p>
+            <p className="text-sm text-slate-500 dark:text-neutral-500 font-medium">Total Items</p>
             <p className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mt-1">{stats.total_items}</p>
           </Card>
           <Card className="hover:border-violet-500/30 dark:hover:border-violet-500/30 transition-colors">
-            <p className="text-sm text-slate-500 dark:text-neutral-500 dark:text-neutral-500 font-medium">Listed</p>
+            <p className="text-sm text-slate-500 dark:text-neutral-500 font-medium">Listed</p>
             <p className="text-2xl md:text-3xl font-bold text-violet-600 dark:text-violet-400 mt-1">{stats.listed_count}</p>
           </Card>
           <Card className="hover:border-violet-500/30 dark:hover:border-violet-500/30 transition-colors">
-            <p className="text-sm text-slate-500 dark:text-neutral-500 dark:text-neutral-500 font-medium">Sold</p>
-            <p className="text-2xl md:text-3xl font-bold text-emerald-600 dark:text-emerald-400 dark:text-emerald-400 mt-1">{stats.sold_count}</p>
+            <p className="text-sm text-slate-500 dark:text-neutral-500 font-medium">Sold</p>
+            <p className="text-2xl md:text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{stats.sold_count}</p>
+          </Card>
+          <Card className={`hover:border-violet-500/30 dark:hover:border-violet-500/30 transition-colors ${
+            (stats.stale_items_count || 0) > 0 ? 'border-red-200 dark:border-red-500/30' : ''
+          }`}>
+            <p className="text-sm text-slate-500 dark:text-neutral-500 font-medium">Stale Items</p>
+            <p className={`text-2xl md:text-3xl font-bold mt-1 ${
+              (stats.stale_items_count || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'
+            }`}>{stats.stale_items_count || 0}</p>
+            {(stats.stale_items_count || 0) > 0 && (
+              <p className="text-xs text-red-500 dark:text-red-400 mt-1">Listed &gt;30 days</p>
+            )}
           </Card>
           <Card className="hover:border-violet-500/30 dark:hover:border-violet-500/30 transition-colors">
-            <p className="text-sm text-slate-500 dark:text-neutral-500 dark:text-neutral-500 font-medium">Total Profit</p>
-            <p className="text-2xl md:text-3xl font-bold text-emerald-600 dark:text-emerald-400 dark:text-emerald-400 mt-1">£{stats.total_profit.toFixed(2)}</p>
+            <p className="text-sm text-slate-500 dark:text-neutral-500 font-medium">Avg Days to Sell</p>
+            <p className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mt-1">{stats.avg_days_to_sell || 0}</p>
+          </Card>
+          <Card className="hover:border-violet-500/30 dark:hover:border-violet-500/30 transition-colors">
+            <p className="text-sm text-slate-500 dark:text-neutral-500 font-medium">Total Profit</p>
+            <p className="text-2xl md:text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">£{stats.total_profit.toFixed(2)}</p>
           </Card>
         </div>
       )}
@@ -767,9 +791,19 @@ export const InventoryManager: React.FC = () => {
                   <span className="text-[10px] md:text-xs font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/20 px-1.5 md:px-2 py-0.5 rounded truncate max-w-[60%]">
                     {item.purchase_platform || 'No platform'}
                   </span>
-                  <span className="text-[10px] md:text-xs text-slate-400 dark:text-neutral-500 hidden sm:block">
-                    {new Date(item.created_at).toLocaleDateString()}
-                  </span>
+                  {/* Days Listed Badge */}
+                  {item.status !== 'draft' && (
+                    <span className={`inline-flex items-center gap-1 text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded font-medium ${
+                      item.is_stale
+                        ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400'
+                        : (item.days_listed || 0) > 14
+                        ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
+                        : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400'
+                    }`}>
+                      {item.is_stale ? <AlertTriangle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                      {item.days_listed}d
+                    </span>
+                  )}
                 </div>
                 <h3 className="font-semibold text-slate-900 dark:text-white truncate mb-1 text-xs md:text-base" title={item.title}>{item.title}</h3>
                 <p className="text-[10px] md:text-sm text-slate-500 dark:text-neutral-500 truncate mb-2 md:mb-3 hidden sm:block">{item.description || 'No description'}</p>
@@ -834,6 +868,32 @@ export const InventoryManager: React.FC = () => {
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
+              {/* Tabs */}
+              {!isEditMode && (
+                <div className="flex gap-1 mb-4 bg-slate-100 dark:bg-neutral-800 p-1 rounded-lg">
+                  <button
+                    onClick={() => setDetailTab('details')}
+                    className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      detailTab === 'details'
+                        ? 'bg-white dark:bg-neutral-700 text-slate-900 dark:text-white shadow-sm'
+                        : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:text-white'
+                    }`}
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => setDetailTab('activity')}
+                    className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      detailTab === 'activity'
+                        ? 'bg-white dark:bg-neutral-700 text-slate-900 dark:text-white shadow-sm'
+                        : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:text-white'
+                    }`}
+                  >
+                    Activity Log
+                  </button>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left - Images */}
                 <div>
@@ -861,8 +921,19 @@ export const InventoryManager: React.FC = () => {
                   )}
                 </div>
 
-                {/* Right - Details */}
+                {/* Right - Details or Activity Log */}
                 <div className="space-y-4">
+                  {/* Activity Log Tab */}
+                  {!isEditMode && detailTab === 'activity' && (
+                    <ActivityLog
+                      logs={activityLogs[detailModalItem.id] || []}
+                      onAddNote={(content) => addNote(detailModalItem.id, content)}
+                      onDeleteLog={(logId) => deleteActivityLog(detailModalItem.id, logId)}
+                    />
+                  )}
+
+                  {/* Details Tab or Edit Mode */}
+                  {(isEditMode || detailTab === 'details') && (
                   {isEditMode ? (
                     <>
                       <div>
@@ -1023,6 +1094,31 @@ export const InventoryManager: React.FC = () => {
                         <div>
                           <h4 className="text-sm font-medium text-slate-500 dark:text-neutral-500 mb-1">Notes</h4>
                           <p className="text-slate-700 dark:text-neutral-300 text-sm">{detailModalItem.notes}</p>
+                        </div>
+                      )}
+
+                      {/* Days Listed Info */}
+                      {detailModalItem.status !== 'draft' && (
+                        <div className={`p-3 rounded-lg ${
+                          detailModalItem.is_stale
+                            ? 'bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20'
+                            : 'bg-slate-50 dark:bg-neutral-800'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            {detailModalItem.is_stale ? (
+                              <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                            ) : (
+                              <Clock className="w-4 h-4 text-slate-500 dark:text-neutral-400" />
+                            )}
+                            <span className={`text-sm font-medium ${
+                              detailModalItem.is_stale
+                                ? 'text-red-700 dark:text-red-400'
+                                : 'text-slate-700 dark:text-neutral-300'
+                            }`}>
+                              Listed for {detailModalItem.days_listed} days
+                              {detailModalItem.is_stale && ' — Consider lowering price or relisting'}
+                            </span>
+                          </div>
                         </div>
                       )}
                     </>
