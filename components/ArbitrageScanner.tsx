@@ -365,22 +365,14 @@ export const ArbitrageScanner: React.FC = () => {
         <div className="flex items-center gap-2 bg-gray-100 dark:bg-neutral-800 rounded-lg p-1">
           <button
             onClick={() => setViewMode('list')}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              viewMode === 'list'
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-neutral-400'
-            }`}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${ viewMode === 'list' ? 'bg-white dark:bg-neutral-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-neutral-400' }`}
           >
             <List className="w-4 h-4 inline mr-1" />
             List
           </button>
           <button
             onClick={() => setViewMode('map')}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              viewMode === 'map'
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-neutral-400'
-            }`}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${ viewMode === 'map' ? 'bg-white dark:bg-neutral-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-neutral-400' }`}
           >
             <MapIcon className="w-4 h-4 inline mr-1" />
             Map
@@ -464,7 +456,7 @@ export const ArbitrageScanner: React.FC = () => {
               <select
                 value={buyPlatform}
                 onChange={(e) => setBuyPlatform(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700"
               >
                 <option value="Vinted">Vinted</option>
                 <option value="Gumtree">Gumtree</option>
@@ -577,7 +569,7 @@ export const ArbitrageScanner: React.FC = () => {
             >
               <div className="flex items-start gap-4">
                 {/* Image */}
-                <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="w-20 h-20 bg-gray-100 dark:bg-neutral-700 rounded-lg overflow-hidden flex-shrink-0">
                   {opp.buy_image ? (
                     <img src={opp.buy_image} alt="" className="w-full h-full object-cover" />
                   ) : (

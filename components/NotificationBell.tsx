@@ -184,9 +184,7 @@ export const NotificationBell: React.FC = () => {
                 <div
                   key={notification.id}
                   onClick={() => !notification.is_read && markAsRead(notification.id)}
-                  className={`px-4 py-3 border-b border-slate-100 hover:bg-slate-50 dark:bg-neutral-900 cursor-pointer transition-colors ${
-                    !notification.is_read ? 'bg-blue-50/50' : ''
-                  }`}
+                  className={`px-4 py-3 border-b border-slate-100 hover:bg-slate-50 dark:bg-neutral-900 cursor-pointer transition-colors ${ !notification.is_read ? 'bg-blue-50/50' : '' }`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5">

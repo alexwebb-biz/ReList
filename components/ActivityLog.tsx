@@ -137,9 +137,7 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
               className="flex gap-3 p-3 rounded-xl bg-slate-50 dark:bg-neutral-800/50 group hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors"
             >
               <div
-                className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${
-                  activityColors[log.activity_type] || activityColors.note
-                }`}
+                className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${ activityColors[log.activity_type] || activityColors.note }`}
               >
                 {activityIcons[log.activity_type] || activityIcons.note}
               </div>

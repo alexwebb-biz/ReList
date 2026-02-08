@@ -370,33 +370,21 @@ export const DealMarketplace: React.FC = () => {
       <div className="flex gap-2 border-b border-slate-200 dark:border-white/5 pb-4">
         <button
           onClick={() => setActiveTab('feed')}
-          className={`px-4 py-2 rounded-xl font-medium transition-all ${
-            activeTab === 'feed'
-              ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25'
-              : 'text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5'
-          }`}
+          className={`px-4 py-2 rounded-xl font-medium transition-all ${ activeTab === 'feed' ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25' : 'text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5' }`}
         >
           <Sparkles className="w-4 h-4 inline mr-2" />
           Deal Feed
         </button>
         <button
           onClick={() => setActiveTab('my-deals')}
-          className={`px-4 py-2 rounded-xl font-medium transition-all ${
-            activeTab === 'my-deals'
-              ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25'
-              : 'text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5'
-          }`}
+          className={`px-4 py-2 rounded-xl font-medium transition-all ${ activeTab === 'my-deals' ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25' : 'text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5' }`}
         >
           <Target className="w-4 h-4 inline mr-2" />
           My Deals
         </button>
         <button
           onClick={() => setActiveTab('leaderboard')}
-          className={`px-4 py-2 rounded-xl font-medium transition-all ${
-            activeTab === 'leaderboard'
-              ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25'
-              : 'text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5'
-          }`}
+          className={`px-4 py-2 rounded-xl font-medium transition-all ${ activeTab === 'leaderboard' ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25' : 'text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5' }`}
         >
           <Trophy className="w-4 h-4 inline mr-2" />
           Leaderboard
@@ -486,21 +474,13 @@ export const DealMarketplace: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setMyDealsType('shared')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                myDealsType === 'shared'
-                  ? 'bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white'
-                  : 'text-slate-500 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5'
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${ myDealsType === 'shared' ? 'bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white' : 'text-slate-500 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5' }`}
             >
               Shared by Me
             </button>
             <button
               onClick={() => setMyDealsType('claimed')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                myDealsType === 'claimed'
-                  ? 'bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white'
-                  : 'text-slate-500 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5'
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${ myDealsType === 'claimed' ? 'bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white' : 'text-slate-500 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5' }`}
             >
               Claimed by Me
             </button>
@@ -549,12 +529,7 @@ export const DealMarketplace: React.FC = () => {
           <div className="divide-y divide-slate-100 dark:divide-white/5">
             {leaderboard.map((entry, index) => (
               <div key={entry.user_id} className="p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                  index === 0 ? 'bg-amber-500 text-white' :
-                  index === 1 ? 'bg-slate-400 text-white' :
-                  index === 2 ? 'bg-amber-700 text-white' :
-                  'bg-slate-200 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400'
-                }`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${ index === 0 ? 'bg-amber-500 text-white' : 1 'bg-slate-400 2 'bg-amber-700 'bg-slate-200 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400' }`}>
                   {index + 1}
                 </div>
 
@@ -693,22 +668,14 @@ const DealCard: React.FC<DealCardProps> = ({ deal, onVote, onClaim, formatCurren
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onVote(deal.id, 'up')}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
-                    deal.user_vote === 'up'
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-neutral-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 hover:text-emerald-600'
-                  }`}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${ deal.user_vote === 'up' ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-neutral-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 hover:text-emerald-600' }`}
                 >
                   <ThumbsUp className="w-4 h-4" />
                   <span className="text-sm font-medium">{deal.upvotes}</span>
                 </button>
                 <button
                   onClick={() => onVote(deal.id, 'down')}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
-                    deal.user_vote === 'down'
-                      ? 'bg-red-500 text-white'
-                      : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-neutral-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-600'
-                  }`}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${ deal.user_vote === 'down' ? 'bg-red-500 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-neutral-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-600' }`}
                 >
                   <ThumbsDown className="w-4 h-4" />
                   <span className="text-sm font-medium">{deal.downvotes}</span>
@@ -1098,11 +1065,7 @@ const ReportOutcomeModal: React.FC<ReportOutcomeModalProps> = ({ deal, onClose, 
             <button
               type="button"
               onClick={() => setSold(true)}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all ${
-                sold
-                  ? 'border-emerald-500 bg-emerald-500/10'
-                  : 'border-slate-200 dark:border-white/10'
-              }`}
+              className={`flex-1 p-4 rounded-xl border-2 transition-all ${ sold ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-200 dark:border-white/10' }`}
             >
               <CheckCircle2 className={`w-8 h-8 mx-auto mb-2 ${sold ? 'text-emerald-500' : 'text-slate-400'}`} />
               <div className={`font-medium ${sold ? 'text-emerald-600' : 'text-slate-500'}`}>Sold</div>
@@ -1110,11 +1073,7 @@ const ReportOutcomeModal: React.FC<ReportOutcomeModalProps> = ({ deal, onClose, 
             <button
               type="button"
               onClick={() => setSold(false)}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all ${
-                !sold
-                  ? 'border-red-500 bg-red-500/10'
-                  : 'border-slate-200 dark:border-white/10'
-              }`}
+              className={`flex-1 p-4 rounded-xl border-2 transition-all ${ !sold ? 'border-red-500 bg-red-500/10' : 'border-slate-200 dark:border-white/10' }`}
             >
               <XCircle className={`w-8 h-8 mx-auto mb-2 ${!sold ? 'text-red-500' : 'text-slate-400'}`} />
               <div className={`font-medium ${!sold ? 'text-red-600' : 'text-slate-500'}`}>Not Sold</div>

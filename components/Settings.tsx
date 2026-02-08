@@ -253,9 +253,7 @@ export const Settings: React.FC = () => {
       </div>
 
       {message && (
-        <div className={`mb-4 md:mb-6 p-3 md:p-4 rounded-lg flex items-center gap-2 text-sm md:text-base ${
-          message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
-        }`}>
+        <div className={`mb-4 md:mb-6 p-3 md:p-4 rounded-lg flex items-center gap-2 text-sm md:text-base ${ message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border-red-200' }`}>
           {message.type === 'success' && <Check size={18} />}
           {message.text}
         </div>
@@ -269,11 +267,7 @@ export const Settings: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'text-blue-600 border-blue-600'
-                    : 'text-slate-500 dark:text-neutral-500 border-transparent hover:text-slate-700 dark:text-neutral-300'
-                }`}
+                className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap ${ activeTab === tab.id ? 'text-blue-600 border-blue-600' : 'text-slate-500 dark:text-neutral-500 border-transparent hover:text-slate-700 dark:text-neutral-300' }`}
               >
                 <tab.icon size={16} className="md:w-[18px] md:h-[18px]" />
                 {tab.label}
@@ -560,11 +554,7 @@ export const Settings: React.FC = () => {
                   {plans.map((plan) => (
                     <div
                       key={plan.id}
-                      className={`p-3 md:p-4 rounded-xl border-2 transition-all ${
-                        subscription?.plan === plan.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-slate-200 dark:border-white/5 hover:border-slate-300'
-                      }`}
+                      className={`p-3 md:p-4 rounded-xl border-2 transition-all ${ subscription?.plan === plan.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200 dark:border-white/5 hover:border-slate-300' }`}
                     >
                       <h5 className="font-bold text-slate-900 dark:text-white text-sm md:text-base">{plan.name}</h5>
                       <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mt-1">

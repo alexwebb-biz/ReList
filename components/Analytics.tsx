@@ -205,11 +205,7 @@ export const Analytics: React.FC = () => {
             <button
               key={range}
               onClick={() => setDateRange(range)}
-              className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
-                dateRange === range
-                  ? 'bg-violet-600 text-white'
-                  : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
-              }`}
+              className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${ dateRange === range ? 'bg-violet-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700' }`}
             >
               {range === 'all' ? 'All Time' : range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : '90 Days'}
             </button>
@@ -371,12 +367,7 @@ export const Analytics: React.FC = () => {
                     <tr key={item.id} className="hover:bg-slate-50 dark:bg-neutral-900">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                            index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                            index === 1 ? 'bg-slate-200 text-slate-600 dark:text-neutral-400' :
-                            index === 2 ? 'bg-orange-100 text-orange-700' :
-                            'bg-slate-100 dark:bg-neutral-800 text-slate-500 dark:text-neutral-500'
-                          }`}>
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${ index === 0 ? 'bg-yellow-100 text-yellow-700' : 1 'bg-slate-200 text-slate-600 dark:text-neutral-400' 2 'bg-orange-100 text-orange-700' 'bg-slate-100 dark:bg-neutral-800 text-slate-500 dark:text-neutral-500' }`}>
                             {index + 1}
                           </span>
                           <span className="font-medium text-slate-900 dark:text-white truncate max-w-[200px]">{item.title}</span>
@@ -402,12 +393,7 @@ export const Analytics: React.FC = () => {
               {topPerformers.map((item, index) => (
                 <div key={item.id} className="bg-slate-50 dark:bg-neutral-900 rounded-lg p-3">
                   <div className="flex items-start gap-2 mb-2">
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                      index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                      index === 1 ? 'bg-slate-200 text-slate-600 dark:text-neutral-400' :
-                      index === 2 ? 'bg-orange-100 text-orange-700' :
-                      'bg-slate-100 dark:bg-neutral-800 text-slate-500 dark:text-neutral-500'
-                    }`}>
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${ index === 0 ? 'bg-yellow-100 text-yellow-700' : 1 'bg-slate-200 text-slate-600 dark:text-neutral-400' 2 'bg-orange-100 text-orange-700' 'bg-slate-100 dark:bg-neutral-800 text-slate-500 dark:text-neutral-500' }`}>
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1">
