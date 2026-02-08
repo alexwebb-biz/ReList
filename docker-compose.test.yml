@@ -9,6 +9,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.frontend
+      args:
+        - GEMINI_API_KEY=${GEMINI_API_KEY}
     container_name: relist-frontend-test
     restart: unless-stopped
     environment:
