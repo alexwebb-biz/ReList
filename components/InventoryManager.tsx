@@ -1040,7 +1040,7 @@ export const InventoryManager: React.FC = () => {
                             <span className="font-medium text-violet-700 dark:text-violet-400">
                               {detailModalItem.status === 'sold' ? 'Net Profit:' : 'Est. Profit:'}
                             </span>
-                            <span className={`font-bold ${ ((detailModalItem.status === 'sold' ? detailModalItem.sold_price : detailModalItem.selling_price) || 0) - (detailModalItem.purchase_price (detailModalItem.fees_total (detailModalItem.postage_cost >= 0 'text-emerald-600 dark:text-emerald-400' 'text-red-600' }`}>
+                            <span className={`font-bold ${ ((detailModalItem.status === 'sold' ? detailModalItem.sold_price : detailModalItem.selling_price) || 0) - (detailModalItem.purchase_price || 0) - (detailModalItem.fees_total || 0) - (detailModalItem.postage_cost || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600' }`}>
                               £{(
                                 ((detailModalItem.status === 'sold' ? detailModalItem.sold_price : detailModalItem.selling_price) || 0) -
                                 (detailModalItem.purchase_price || 0) -
