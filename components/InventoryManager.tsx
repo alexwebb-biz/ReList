@@ -810,7 +810,7 @@ export const InventoryManager: React.FC = () => {
       {/* Item Detail Modal */}
       {detailModalItem && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-neutral-800 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
             {/* Header */}
             <div className="px-4 md:px-6 py-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate">{detailModalItem.title}</h3>
@@ -1098,7 +1098,7 @@ export const InventoryManager: React.FC = () => {
       {/* Sell Modal */}
       {sellModalItem && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-neutral-800 rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-white mb-2 md:mb-4">Mark as Sold</h3>
             <p className="text-slate-500 dark:text-neutral-500 mb-4 text-sm truncate">Recording sale for: <strong>{sellModalItem.title}</strong></p>
 
@@ -1194,7 +1194,7 @@ export const InventoryManager: React.FC = () => {
       {/* Profit Calculator Modal */}
       {showProfitCalculator && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-          <div className="bg-white rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-neutral-800 rounded-t-2xl sm:rounded-xl p-4 md:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Calculator size={20} />
