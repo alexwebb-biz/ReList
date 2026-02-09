@@ -271,6 +271,22 @@ class ApiClient {
     return this.request<InventoryStats>('/inventory/stats');
   }
 
+  // Activity log endpoints
+  async getActivityLogs(inventoryId: string, limit = 50) {
+    return this.request<ActivityLogEntry[]>(`/inventory/${inventoryId}/activity-logs?limit=${limit}`);
+  }
+
+  async addNote(inventoryId: string, content: string) {
+    return this.request<ActivityLogEntry>(`/inventory/${inventoryId}/notes`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    });
+  }
+
+  async deleteActivityLog(logId: string) {
+    return this.request(`/inventory/activity-logs/${logId}`, { method: 'DELETE' });
+  }
+
   // User endpoints
   async getUserStats(days?: number) {
     const params = days ? `?days=${days}` : '';
@@ -395,8 +411,15 @@ export interface InventoryItem {
   status: string;
   images: string[] | null;
   notes: string | null;
+  first_listed_at: string | null;
+  listing_count: number;
   created_at: string;
   updated_at: string;
+  // Computed fields (added by backend)
+  days_listed?: number;
+  days_since_created?: number;
+  is_stale?: boolean;
+  profit_potential?: number | null;
 }
 
 export interface CreateInventoryData {
@@ -430,6 +453,18 @@ export interface InventoryStats {
   total_invested: number;
   total_revenue: number;
   total_profit: number;
+  stale_items_count: number;
+  avg_days_to_sell: number;
+}
+
+export interface ActivityLogEntry {
+  id: string;
+  inventory_id: string;
+  user_id: string;
+  activity_type: 'note' | 'status_change' | 'price_change' | 'listed' | 'sold' | 'relisted' | 'created';
+  content: string;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
 }
 
 export interface UserStats {
