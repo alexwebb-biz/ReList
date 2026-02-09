@@ -317,7 +317,10 @@ export const AlertsManager: React.FC = () => {
                   <button
                     key={p}
                     onClick={() => handlePlatformToggle(p)}
-                    className={`px-3 py-2.5 rounded-xl text-sm text-left transition-all duration-200 flex items-center gap-2 ${newAlert.platforms?.includes(p) ? 'bg-violet-50 dark:bg-violet-500/20 border-2 border-violet-500 dark:border-violet-400 text-violet-700 dark:text-violet-300 font-semibold shadow-sm' : 'bg-slate-50 dark:bg-neutral-800 border-slate-200 dark:border-neutral-700 text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-700'}`}
+                    className={`px-3 py-2.5 rounded-xl text-sm text-left transition-all duration-200 flex items-center gap-2
+                      ${newAlert.platforms?.includes(p)
+                        ? 'bg-violet-50 dark:bg-violet-500/20 border-2 border-violet-500 dark:border-violet-400 text-violet-700 dark:text-violet-300 font-semibold shadow-sm'
+                        : 'bg-slate-50 dark:bg-neutral-800 border-2 border-slate-200 dark:border-neutral-700 text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-neutral-700'}`}
                   >
                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${newAlert.platforms?.includes(p) ? 'bg-violet-500 dark:bg-violet-400' : 'bg-slate-300 dark:bg-neutral-600'}`} />
                     <span className="truncate">{p}</span>

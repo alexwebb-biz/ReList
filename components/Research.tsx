@@ -547,7 +547,7 @@ export const Research: React.FC = () => {
             </p>
             <button
               onClick={loadWatchlist}
-              className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 flex items-center gap-1"
+              className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 flex items-center gap-1"
             >
               <RefreshCw size={14} /> Refresh
             </button>
@@ -586,7 +586,9 @@ export const Research: React.FC = () => {
 
                     {/* Price change badge */}
                     {item.price_change !== 0 && (
-                      <span className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${ item.price_change < 0 ? 'bg-emerald-500 text-white' : 'bg-red-500 }`}>
+                      <span className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
+                        item.price_change < 0 ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
+                      }`}>
                         {item.price_change < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
                         {Math.abs(item.price_change_percent).toFixed(1)}%
                       </span>
@@ -676,7 +678,11 @@ export const Research: React.FC = () => {
                   <button
                     key={platform}
                     onClick={() => togglePlatform(platform)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${ selectedPlatforms.includes(platform) ? 'bg-violet-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700' }`}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      selectedPlatforms.includes(platform)
+                        ? 'bg-violet-600 text-white'
+                        : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
+                    }`}
                   >
                     {platform}
                   </button>
@@ -816,7 +822,11 @@ export const Research: React.FC = () => {
               <button
                 key={status}
                 onClick={() => setAgingFilter(status)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${ agingFilter === status ? 'bg-slate-800 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700' }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  agingFilter === status
+                    ? 'bg-slate-800 text-white'
+                    : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
+                }`}
               >
                 {status === '' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
               </button>
@@ -950,13 +960,17 @@ export const Research: React.FC = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setArbitrageMode(false)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${ !arbitrageMode ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700' }`}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      !arbitrageMode ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
+                    }`}
                   >
                     Same Platform
                   </button>
                   <button
                     onClick={() => setArbitrageMode(true)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${ arbitrageMode ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700' }`}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
+                      arbitrageMode ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
+                    }`}
                   >
                     <ArrowRight size={14} />
                     Cross-Platform (Vinted → eBay)
@@ -973,7 +987,11 @@ export const Research: React.FC = () => {
                       <button
                         key={platform}
                         onClick={() => toggleFlipPlatform(platform)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${ flipPlatforms.includes(platform) ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700' }`}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          flipPlatforms.includes(platform)
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
+                        }`}
                       >
                         {platform}
                       </button>
@@ -1232,19 +1250,31 @@ export const Research: React.FC = () => {
             <div className="flex gap-2 mb-4 flex-wrap">
               <button
                 onClick={() => setOptimizerMode('analyze')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${ optimizerMode === 'analyze' ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700' }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  optimizerMode === 'analyze'
+                    ? 'bg-amber-600 text-white'
+                    : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
+                }`}
               >
                 Analyze Listing
               </button>
               <button
                 onClick={() => setOptimizerMode('keywords')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${ optimizerMode === 'keywords' ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700' }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  optimizerMode === 'keywords'
+                    ? 'bg-amber-600 text-white'
+                    : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
+                }`}
               >
                 Keyword Research
               </button>
               <button
                 onClick={() => setOptimizerMode('generate')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${ optimizerMode === 'generate' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700' }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                  optimizerMode === 'generate'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
+                }`}
               >
                 <Sparkles size={14} />
                 AI Description Writer
@@ -1440,7 +1470,11 @@ export const Research: React.FC = () => {
                           <button
                             key={provider}
                             onClick={() => setAiProvider(provider === aiProvider ? '' : provider)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${ aiProvider === provider ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700' }`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                              aiProvider === provider
+                                ? 'bg-purple-600 text-white'
+                                : 'bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 hover:bg-slate-200 dark:hover:bg-neutral-700'
+                            }`}
                           >
                             {provider === 'groq' && 'Groq (Llama)'}
                             {provider === 'huggingface' && 'Hugging Face'}

@@ -281,7 +281,7 @@ export const AlertResults: React.FC = () => {
         </div>
         <button
           onClick={handleMarkAllAsRead}
-          className="text-violet-600 dark:text-violet-400 hover:text-violet-700 text-sm font-medium flex items-center gap-1 self-start sm:self-auto"
+          className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 text-sm font-medium flex items-center gap-1 self-start sm:self-auto"
         >
           <Check size={16} /> Mark all as read
         </button>
@@ -359,7 +359,9 @@ export const AlertResults: React.FC = () => {
             {results.map(result => (
               <div
                 key={result.id}
-                className={`bg-white dark:bg-neutral-900/80 rounded-xl border overflow-hidden hover:shadow-md transition-all ${ result.is_read ? 'border-slate-200 dark:border-white/5' : 'border-blue-200 ring-1 ring-blue-100' }`}
+                className={`bg-white dark:bg-neutral-900/80 rounded-xl border overflow-hidden hover:shadow-md transition-all ${
+                  result.is_read ? 'border-slate-200 dark:border-white/5' : 'border-blue-200 ring-1 ring-blue-100'
+                }`}
               >
                 {/* Image */}
                 <div className="relative aspect-video bg-slate-100 dark:bg-neutral-800">

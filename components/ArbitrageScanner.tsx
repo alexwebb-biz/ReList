@@ -356,23 +356,31 @@ export const ArbitrageScanner: React.FC = () => {
             <TrendingUp className="w-7 h-7 text-green-500" />
             Arbitrage Scanner
           </h1>
-          <p className="text-gray-600 dark:text-neutral-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             Find items to flip across platforms. Buy low, sell high.
           </p>
         </div>
 
         {/* View Toggle */}
-        <div className="flex items-center gap-2 bg-gray-100 dark:bg-neutral-800 rounded-lg p-1">
+        <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
           <button
             onClick={() => setViewMode('list')}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${ viewMode === 'list' ? 'bg-white dark:bg-neutral-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-neutral-400' }`}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'list'
+                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-400'
+            }`}
           >
             <List className="w-4 h-4 inline mr-1" />
             List
           </button>
           <button
             onClick={() => setViewMode('map')}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${ viewMode === 'map' ? 'bg-white dark:bg-neutral-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-neutral-400' }`}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'map'
+                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-400'
+            }`}
           >
             <MapIcon className="w-4 h-4 inline mr-1" />
             Map
@@ -391,7 +399,7 @@ export const ArbitrageScanner: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleMultiScan()}
               placeholder="Search for items (e.g., Nike Air Max, North Face Nuptse)"
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
           <Button
@@ -418,9 +426,9 @@ export const ArbitrageScanner: React.FC = () => {
 
         {/* Filters */}
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-neutral-700 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Min Profit (£)
               </label>
               <Input
@@ -430,7 +438,7 @@ export const ArbitrageScanner: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Min ROI (%)
               </label>
               <Input
@@ -440,7 +448,7 @@ export const ArbitrageScanner: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Max Buy Price (£)
               </label>
               <Input
@@ -450,13 +458,13 @@ export const ArbitrageScanner: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Buy Platform
               </label>
               <select
                 value={buyPlatform}
                 onChange={(e) => setBuyPlatform(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
               >
                 <option value="Vinted">Vinted</option>
                 <option value="Gumtree">Gumtree</option>
@@ -470,7 +478,7 @@ export const ArbitrageScanner: React.FC = () => {
       {/* Popular Searches */}
       {opportunities.length === 0 && !isScanning && (
         <Card className="p-4">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-neutral-300 mb-3">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Popular Searches
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -481,7 +489,7 @@ export const ArbitrageScanner: React.FC = () => {
                   setSearchQuery(ps.query);
                   handleMultiScan(ps.query);
                 }}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 rounded-full text-sm transition-colors"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-sm transition-colors"
               >
                 <span>{ps.query}</span>
                 <span className="text-green-500 font-medium">{ps.avg_roi}% ROI</span>
@@ -506,19 +514,19 @@ export const ArbitrageScanner: React.FC = () => {
       {scanStats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="p-3">
-            <p className="text-xs text-gray-500 dark:text-neutral-400">Scanned</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Scanned</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">{scanStats.listings_scanned}</p>
           </Card>
           <Card className="p-3">
-            <p className="text-xs text-gray-500 dark:text-neutral-400">Opportunities</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Opportunities</p>
             <p className="text-xl font-bold text-green-500">{scanStats.opportunities_found}</p>
           </Card>
           <Card className="p-3">
-            <p className="text-xs text-gray-500 dark:text-neutral-400">Best Profit</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Best Profit</p>
             <p className="text-xl font-bold text-green-500">£{scanStats.best_profit}</p>
           </Card>
           <Card className="p-3">
-            <p className="text-xs text-gray-500 dark:text-neutral-400">Best ROI</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Best ROI</p>
             <p className="text-xl font-bold text-green-500">{scanStats.best_roi}%</p>
           </Card>
         </div>
@@ -528,7 +536,7 @@ export const ArbitrageScanner: React.FC = () => {
       {isScanning && (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="w-12 h-12 text-primary-500 animate-spin mb-4" />
-          <p className="text-gray-600 dark:text-neutral-400">
+          <p className="text-gray-600 dark:text-gray-400">
             Scanning platforms for arbitrage opportunities...
           </p>
         </div>
@@ -539,14 +547,14 @@ export const ArbitrageScanner: React.FC = () => {
         <div className="relative">
           <div
             ref={mapRef}
-            className="w-full h-[500px] rounded-xl overflow-hidden border border-gray-200 dark:border-neutral-700"
+            className="w-full h-[500px] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700"
             style={{ zIndex: 0 }}
           />
           {opportunities.filter(o => o.coordinates).length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-neutral-800 rounded-xl">
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-xl">
               <div className="text-center">
                 <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-600 dark:text-neutral-400">
+                <p className="text-gray-600 dark:text-gray-400">
                   No opportunities with location data found
                 </p>
                 <p className="text-sm text-gray-500">
@@ -569,7 +577,7 @@ export const ArbitrageScanner: React.FC = () => {
             >
               <div className="flex items-start gap-4">
                 {/* Image */}
-                <div className="w-20 h-20 bg-gray-100 dark:bg-neutral-700 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
                   {opp.buy_image ? (
                     <img src={opp.buy_image} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -595,7 +603,7 @@ export const ArbitrageScanner: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-neutral-400">
+                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                     {opp.buy_location && (
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
@@ -630,7 +638,7 @@ export const ArbitrageScanner: React.FC = () => {
 
               {/* Expanded Details */}
               {selectedOpp?.id === opp.id && (
-                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-neutral-700">
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Buy Price</p>
@@ -705,7 +713,7 @@ export const ArbitrageScanner: React.FC = () => {
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             No opportunities found
           </h3>
-          <p className="text-gray-600 dark:text-neutral-400">
+          <p className="text-gray-600 dark:text-gray-400">
             Try adjusting your filters or searching for different items
           </p>
         </Card>

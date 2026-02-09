@@ -27,7 +27,7 @@ const activityColors: Record<string, string> = {
   listed: 'bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400',
   sold: 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400',
   relisted: 'bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400',
-  created: 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-neutral-400',
+  created: 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400',
 };
 
 const formatDate = (dateString: string): string => {
@@ -137,7 +137,9 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
               className="flex gap-3 p-3 rounded-xl bg-slate-50 dark:bg-neutral-800/50 group hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors"
             >
               <div
-                className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${ activityColors[log.activity_type] || activityColors.note }`}
+                className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${
+                  activityColors[log.activity_type] || activityColors.note
+                }`}
               >
                 {activityIcons[log.activity_type] || activityIcons.note}
               </div>

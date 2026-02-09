@@ -116,7 +116,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
           {/* Error/Success Messages */}
           {(error || message) && (
-            <div className={`p-3 rounded-lg flex items-center gap-2 text-sm ${ message?.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border-red-200' }`}>
+            <div className={`p-3 rounded-lg flex items-center gap-2 text-sm ${
+              message?.type === 'success'
+                ? 'bg-green-50 text-green-700 border border-green-200'
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{message?.text || error}</span>
             </div>
@@ -218,7 +222,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
               <button
                 type="button"
                 onClick={() => switchView('forgot')}
-                className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium"
+                className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
               >
                 Forgot password?
               </button>
@@ -254,7 +258,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 <button
                   type="button"
                   onClick={() => switchView('signup')}
-                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium"
+                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
                 >
                   Sign up
                 </button>
@@ -266,7 +270,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 <button
                   type="button"
                   onClick={() => switchView('login')}
-                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium"
+                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
                 >
                   Sign in
                 </button>
@@ -276,7 +280,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
               <button
                 type="button"
                 onClick={() => switchView('login')}
-                className="text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium"
+                className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:text-violet-400 font-medium"
               >
                 Back to sign in
               </button>
